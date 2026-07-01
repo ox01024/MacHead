@@ -104,20 +104,20 @@ We have successfully constructed, compiled, and verified **MacHead** along with 
 
 ## Code Base Layout
 
-- [Info.plist](file:///Users/waffle/project/MacHead/Info.plist): Sets `LSUIElement` to `true` and registers `AppIcon` as bundle icon file.
-- [main.swift](file:///Users/waffle/project/MacHead/main.swift): Unified entry point parsing CLI arguments or launching the SwiftUI GUI.
-- [MacHeadApp.swift](file:///Users/waffle/project/MacHead/MacHeadApp.swift): SwiftUI application entry point.
-- [AppDelegate.swift](file:///Users/waffle/project/MacHead/AppDelegate.swift): Controls status item menu dropdown, registers preference defaults (including random password generation), starts the managers, listens to CLI notifications, and handles safe exit recovery.
-- [PreferencesView.swift](file:///Users/waffle/project/MacHead/PreferencesView.swift): SwiftUI layout containing the settings toggles, password field, and accessibility notices.
-- [LaunchAtLoginHelper.swift](file:///Users/waffle/project/MacHead/LaunchAtLoginHelper.swift): Wraps `SMAppService` registration.
-- [InputDeviceManager.swift](file:///Users/waffle/project/MacHead/InputDeviceManager.swift): Listens to HID keyboards/pointers and manages the Event Tap / trackpad seizures.
-- [BatteryManager.swift](file:///Users/waffle/project/MacHead/BatteryManager.swift): Monitors battery status and capacity to override sleep assertions dynamically.
-- [MediaDeviceManager.swift](file:///Users/waffle/project/MacHead/MediaDeviceManager.swift): Interfaces CoreAudio to mute and restore default input microphone states.
-- [WebServer.swift](file:///Users/waffle/project/MacHead/WebServer.swift): Implements the TCP/HTTP REST API endpoints with HTTP Basic Authentication, HTML template, and monitors CPU/Memory load.
-- [DisplayManager.swift](file:///Users/waffle/project/MacHead/DisplayManager.swift): Handles SkyLight loading, display ID caching, and enabling/disabling the screen.
-- [HeadlessModeController.swift](file:///Users/waffle/project/MacHead/HeadlessModeController.swift): Manages sleep prevention assertions, display change callbacks, and wake-up notifications.
-- [generate_icns.sh](file:///Users/waffle/project/MacHead/generate_icns.sh): Compiles a `.png` or `.jpg` into standard macOS multi-res `.icns` format.
-- [build.sh](file:///Users/waffle/project/MacHead/build.sh): Shell compilation script.
+- [Info.plist](../Resources/Info.plist): Sets `LSUIElement` to `true` and registers `AppIcon` as bundle icon file.
+- [main.swift](../Sources/main.swift): Unified entry point parsing CLI arguments or launching the SwiftUI GUI.
+- [MacHeadApp.swift](../Sources/MacHeadApp.swift): SwiftUI application entry point.
+- [AppDelegate.swift](../Sources/AppDelegate.swift): Controls status item menu dropdown, registers preference defaults (including random password generation), starts the managers, listens to CLI notifications, and handles safe exit recovery.
+- [PreferencesView.swift](../Sources/PreferencesView.swift): SwiftUI layout containing the settings toggles, password field, and accessibility notices.
+- [LaunchAtLoginHelper.swift](../Sources/LaunchAtLoginHelper.swift): Wraps `SMAppService` registration.
+- [InputDeviceManager.swift](../Sources/InputDeviceManager.swift): Listens to HID keyboards/pointers and manages the Event Tap / trackpad seizures.
+- [BatteryManager.swift](../Sources/BatteryManager.swift): Monitors battery status and capacity to override sleep assertions dynamically.
+- [MediaDeviceManager.swift](../Sources/MediaDeviceManager.swift): Interfaces CoreAudio to mute and restore default input microphone states.
+- [WebServer.swift](../Sources/WebServer.swift): Implements the TCP/HTTP REST API endpoints with HTTP Basic Authentication, HTML template, and monitors CPU/Memory load.
+- [DisplayManager.swift](../Sources/DisplayManager.swift): Handles SkyLight loading, display ID caching, and enabling/disabling the screen.
+- [HeadlessModeController.swift](../Sources/HeadlessModeController.swift): Manages sleep prevention assertions, display change callbacks, and wake-up notifications.
+- [generate_icns.sh](../Scripts/generate_icns.sh): Compiles a `.png` or `.jpg` into standard macOS multi-res `.icns` format.
+- [build.sh](../build.sh): Shell compilation script.
 
 ---
 
