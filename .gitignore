@@ -3,3 +3,5 @@ MacHead.app/
 AppIcon.iconset/
 UserIcon.png
 AppIcon.icns
+*.zip
+*.dmg
