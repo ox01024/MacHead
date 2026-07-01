@@ -1,0 +1,60 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode SDK
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcrun --show-sdk-path
+
+      - name: Build Universal Binary
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Package Artifacts
+        run: |
+          # 1. Package ZIP
+          zip -ry MacHead-${{ github.ref_name }}.zip MacHead.app
+
+          # 2. Package DMG
+          mkdir -p dmg_temp
+          cp -R MacHead.app dmg_temp/
+          ln -s /Applications dmg_temp/Applications
+          hdiutil create -volname "MacHead" -srcfolder dmg_temp -ov -format UDZO MacHead-${{ github.ref_name }}-macos-universal.dmg
+          rm -rf dmg_temp
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            MacHead-${{ github.ref_name }}.zip
+            MacHead-${{ github.ref_name }}-macos-universal.dmg
+          draft: false
+          prerelease: false
+          name: MacHead ${{ github.ref_name }}
+          body: |
+            MacHead ${{ github.ref_name }} compiled dynamically via GitHub Actions CI pipeline.
+
+            ### Key Features:
+            - **Universal Binary**: Native support for both Apple Silicon (arm64) and Intel (x86_64) architectures.
+            - **Headless Mode**: Disables internal MacBook display dynamically via private SkyLight APIs.
+            - **Prevent Idle Sleep**: Prevent MacBook sleep in clamshell server configurations.
+            - **Battery Protection**: Automatically releases assertions and sleeps when running on low battery (under threshold).
+            - **Microphone Privacy Mute**: Automates input muting on entering headless mode.
+            - **Input Protection**: Seize built-in trackpad and hooks CGEventTap keyboard input interception to drop internal keypresses while maintaining external inputs.
+            - **Web Dashboard**: Local responsive control dashboard on port 8080 with resource graphs and randomized Basic Authentication protection.
+            - **CLI Tool**: Commands integration supporting Unix signals and Distributed IPC notifications.
