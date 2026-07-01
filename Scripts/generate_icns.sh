@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
 
-INPUT_IMAGE="UserIcon.png"
-ICONSET_DIR="AppIcon.iconset"
+INPUT_IMAGE="Resources/UserIcon.png"
+ICONSET_DIR="Resources/AppIcon.iconset"
+OUTPUT_ICNS="Resources/AppIcon.icns"
 
 echo "Creating iconset directory..."
 mkdir -p "${ICONSET_DIR}"
@@ -20,9 +21,9 @@ sips -s format png -z 512 512   "${INPUT_IMAGE}" --out "${ICONSET_DIR}/icon_512x
 sips -s format png -z 1024 1024 "${INPUT_IMAGE}" --out "${ICONSET_DIR}/icon_512x512@2x.png"
 
 echo "Compiling to AppIcon.icns via iconutil..."
-iconutil -c icns "${ICONSET_DIR}"
+iconutil -c icns "${ICONSET_DIR}" -o "${OUTPUT_ICNS}"
 
 echo "Cleaning up temp iconset directory..."
 rm -rf "${ICONSET_DIR}"
 
-echo "Success! AppIcon.icns generated."
+echo "Success! Resources/AppIcon.icns generated."

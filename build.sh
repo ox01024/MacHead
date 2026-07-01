@@ -32,24 +32,14 @@ swiftc \
   -framework IOKit \
   -framework CoreGraphics \
   -framework CoreAudio \
-  MacHeadApp.swift \
-  AppDelegate.swift \
-  DisplayManager.swift \
-  HeadlessModeController.swift \
-  LaunchAtLoginHelper.swift \
-  PreferencesView.swift \
-  InputDeviceManager.swift \
-  BatteryManager.swift \
-  MediaDeviceManager.swift \
-  main.swift \
-  WebServer.swift
+  Sources/*.swift
 
 # Copy Info.plist to the bundle
-cp Info.plist "${APP_DIR}/Contents/Info.plist"
+cp Resources/Info.plist "${APP_DIR}/Contents/Info.plist"
 
 # Copy AppIcon to resources
 mkdir -p "${APP_DIR}/Contents/Resources"
-cp AppIcon.icns "${APP_DIR}/Contents/Resources/AppIcon.icns"
+cp Resources/AppIcon.icns "${APP_DIR}/Contents/Resources/AppIcon.icns"
 
 # Automatically copy to the system Applications folder
 echo "Installing to /Applications..."
