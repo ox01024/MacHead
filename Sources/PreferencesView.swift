@@ -261,11 +261,32 @@ struct PreferencesView: View {
                                 .foregroundColor(.secondary)
                             
                             ForEach(connectedDisplays, id: \.self) { display in
-                                Label(
-                                    display.name,
-                                    systemImage: display.isBuiltIn ? "laptopcomputer" : (display.isApple ? "apple.studio.display" : "display")
-                                )
-                                .font(.body)
+                                HStack {
+                                    Label(
+                                        display.name,
+                                        systemImage: display.isBuiltIn ? "laptopcomputer" : (display.isApple ? "apple.studio.display" : "display")
+                                    )
+                                    .font(.body)
+                                    
+                                    Spacer()
+                                    
+                                    if !display.isBuiltIn {
+                                        Toggle("伪装为 Apple 显示器", isOn: Binding(
+                                            get: { DisplayManager.shared.isDisplaySpoofed(id: display.id) },
+                                            set: { newValue in
+                                                if newValue {
+                                                    DisplayManager.shared.spoofDisplay(id: display.id)
+                                                } else {
+                                                    DisplayManager.shared.restoreDisplay(id: display.id)
+                                                }
+                                                self.updateConnectedDisplays()
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        .help("伪装为 Apple Studio Display 后可解锁原生 HiDPI Retina 渲染，重新拔插显示器线缆后生效。")
+                                    }
+                                }
                             }
                             
                             if connectedDisplays.isEmpty {
