@@ -105,9 +105,6 @@ final class MediaDeviceManager {
     
     /// 无头模式退出时调用：恢复麦克风的原始状态
     func unmuteBuiltInMicrophone() {
-        let shouldMute = UserDefaults.standard.bool(forKey: "MuteMicrophoneInHeadlessMode")
-        guard shouldMute else { return }
-        
         if let original = originalMuteState {
             isMuted = original
             NSLog("MacHead: 已从缓存恢复麦克风的原始静音状态: %@", String(original))
