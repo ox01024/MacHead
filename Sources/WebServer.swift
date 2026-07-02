@@ -167,7 +167,7 @@ final class WebServer {
                     if val {
                         MediaDeviceManager.shared.muteBuiltInMicrophone()
                     } else {
-                        MediaDeviceManager.shared.unmuteBuiltInMicrophone()
+                        MediaDeviceManager.shared.forceUnmute()
                     }
                 }
                 NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
@@ -319,16 +319,75 @@ final class WebServer {
             <title>MacHead 控制面板</title>
             <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
             <style>
+                :root {
+                    --bg-gradient: radial-gradient(circle at top right, #f0f2f5, #e4e7eb);
+                    --text-color: #2e3440;
+                    --text-secondary: #5e6b7c;
+                    --card-bg: rgba(255, 255, 255, 0.7);
+                    --card-border: rgba(0, 0, 0, 0.08);
+                    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                    --card-hover-border: rgba(0, 114, 255, 0.3);
+                    --control-border: rgba(0, 0, 0, 0.05);
+                    --switch-bg: rgba(0, 0, 0, 0.1);
+                    --ring-bg: rgba(0, 0, 0, 0.05);
+                    --ring-text: #2e3440;
+                }
+
+                @media (prefers-color-scheme: dark) {
+                    :root {
+                        --bg-gradient: radial-gradient(circle at top right, #1d213a, #0c0e17);
+                        --text-color: #e5e9f0;
+                        --text-secondary: #8f9aa9;
+                        --card-bg: rgba(255, 255, 255, 0.03);
+                        --card-border: rgba(255, 255, 255, 0.08);
+                        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                        --card-hover-border: rgba(255, 255, 255, 0.15);
+                        --control-border: rgba(255, 255, 255, 0.05);
+                        --switch-bg: rgba(255, 255, 255, 0.1);
+                        --ring-bg: rgba(255, 255, 255, 0.05);
+                        --ring-text: white;
+                    }
+                }
+
+                body[data-theme="light"] {
+                    --bg-gradient: radial-gradient(circle at top right, #f0f2f5, #e4e7eb);
+                    --text-color: #2e3440;
+                    --text-secondary: #5e6b7c;
+                    --card-bg: rgba(255, 255, 255, 0.7);
+                    --card-border: rgba(0, 0, 0, 0.08);
+                    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                    --card-hover-border: rgba(0, 114, 255, 0.3);
+                    --control-border: rgba(0, 0, 0, 0.05);
+                    --switch-bg: rgba(0, 0, 0, 0.1);
+                    --ring-bg: rgba(0, 0, 0, 0.05);
+                    --ring-text: #2e3440;
+                }
+
+                body[data-theme="dark"] {
+                    --bg-gradient: radial-gradient(circle at top right, #1d213a, #0c0e17);
+                    --text-color: #e5e9f0;
+                    --text-secondary: #8f9aa9;
+                    --card-bg: rgba(255, 255, 255, 0.03);
+                    --card-border: rgba(255, 255, 255, 0.08);
+                    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                    --card-hover-border: rgba(255, 255, 255, 0.15);
+                    --control-border: rgba(255, 255, 255, 0.05);
+                    --switch-bg: rgba(255, 255, 255, 0.1);
+                    --ring-bg: rgba(255, 255, 255, 0.05);
+                    --ring-text: white;
+                }
+
                 * { box-sizing: border-box; margin: 0; padding: 0; }
                 body {
                     font-family: 'Outfit', sans-serif;
-                    background: radial-gradient(circle at top right, #1d213a, #0c0e17);
-                    color: #e5e9f0;
+                    background: var(--bg-gradient);
+                    color: var(--text-color);
                     min-height: 100vh;
                     padding: 40px 20px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
+                    transition: background 0.3s, color 0.3s;
                 }
                 .container {
                     width: 100%;
@@ -337,8 +396,9 @@ final class WebServer {
                 header {
                     display: flex;
                     align-items: center;
+                    justify-content: space-between;
                     margin-bottom: 40px;
-                    gap: 16px;
+                    width: 100%;
                 }
                 header h1 {
                     font-size: 28px;
@@ -355,17 +415,17 @@ final class WebServer {
                     margin-bottom: 20px;
                 }
                 .card {
-                    background: rgba(255, 255, 255, 0.03);
+                    background: var(--card-bg);
                     backdrop-filter: blur(20px);
                     -webkit-backdrop-filter: blur(20px);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border: 1px solid var(--card-border);
                     border-radius: 24px;
                     padding: 24px;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                    box-shadow: var(--card-shadow);
                     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 .card:hover {
-                    border-color: rgba(255, 255, 255, 0.15);
+                    border-color: var(--card-hover-border);
                     transform: translateY(-4px);
                 }
                 .card-title {
@@ -373,13 +433,13 @@ final class WebServer {
                     font-weight: 600;
                     text-transform: uppercase;
                     letter-spacing: 1px;
-                    color: #8f9aa9;
+                    color: var(--text-secondary);
                     margin-bottom: 16px;
                 }
                 .card-value {
                     font-size: 32px;
                     font-weight: 700;
-                    color: #ffffff;
+                    color: var(--ring-text);
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -389,7 +449,7 @@ final class WebServer {
                     align-items: center;
                     justify-content: space-between;
                     padding: 16px 0;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                    border-bottom: 1px solid var(--control-border);
                 }
                 .control-row:last-child {
                     border-bottom: none;
@@ -400,7 +460,7 @@ final class WebServer {
                 }
                 .control-desc {
                     font-size: 12px;
-                    color: #8f9aa9;
+                    color: var(--text-secondary);
                     margin-top: 4px;
                 }
                 .status-dot {
@@ -434,7 +494,7 @@ final class WebServer {
                     position: absolute;
                     cursor: pointer;
                     top: 0; left: 0; right: 0; bottom: 0;
-                    background-color: rgba(255, 255, 255, 0.1);
+                    background-color: var(--switch-bg);
                     transition: .3s;
                     border-radius: 34px;
                 }
@@ -471,7 +531,7 @@ final class WebServer {
                     margin-bottom: 12px;
                 }
                 .progress-ring__circle-bg {
-                    stroke: rgba(255, 255, 255, 0.05);
+                    stroke: var(--ring-bg);
                 }
                 .progress-ring__circle {
                     transition: stroke-dashoffset 0.35s;
@@ -482,20 +542,48 @@ final class WebServer {
                 .gauge-label {
                     font-size: 14px;
                     font-weight: 600;
-                    color: #8f9aa9;
+                    color: var(--text-secondary);
                 }
                 .gauge-val-text {
                     font-size: 20px;
                     font-weight: 700;
-                    color: white;
+                    fill: var(--ring-text);
+                    color: var(--ring-text);
+                }
+                
+                /* Theme Toggle Button */
+                .theme-btn {
+                    background: var(--card-bg);
+                    border: 1px solid var(--card-border);
+                    color: var(--text-color);
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 600;
+                    transition: all 0.3s;
+                    box-shadow: var(--card-shadow);
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .theme-btn:hover {
+                    border-color: var(--card-hover-border);
+                    transform: scale(1.05);
                 }
             </style>
         </head>
         <body>
             <div class="container">
                 <header>
-                    <div style="font-size:36px"></div>
-                    <h1>MacHead Remote 控制面板</h1>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <div style="font-size:36px"></div>
+                        <h1>MacHead Remote 控制面板</h1>
+                    </div>
+                    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
+                        <span id="theme-icon">🌙</span>
+                        <span id="theme-text">深色模式</span>
+                    </button>
                 </header>
                 
                 <div class="grid">
@@ -636,6 +724,38 @@ final class WebServer {
                         console.error("Failed to fetch status:", err);
                     }
                 }
+
+                // Theme Toggle Logic
+                function initTheme() {
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme) {
+                        setTheme(savedTheme);
+                    } else {
+                        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        setTheme(systemDark ? 'dark' : 'light');
+                    }
+                }
+
+                function setTheme(theme) {
+                    document.body.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                    const btnIcon = document.getElementById('theme-icon');
+                    const btnText = document.getElementById('theme-text');
+                    if (theme === 'dark') {
+                        btnIcon.innerText = '☀️';
+                        btnText.innerText = '浅色模式';
+                    } else {
+                        btnIcon.innerText = '🌙';
+                        btnText.innerText = '深色模式';
+                    }
+                }
+
+                function toggleTheme() {
+                    const currentTheme = document.body.getAttribute('data-theme') || 'light';
+                    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+                }
+
+                initTheme();
 
                 function updateUI(data) {
                     const modeDot = document.getElementById('mode-dot');

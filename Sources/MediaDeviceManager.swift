@@ -80,9 +80,9 @@ final class MediaDeviceManager {
             )
             
             if status == noErr {
-                NSLog("MacHead: 成功设置麦克风静音状态为: %@", String(newValue))
+                NSLog("MacHead: 成功设置麦克风静音状态为: \(newValue)")
             } else {
-                NSLog("MacHead: 设置麦克风静音状态失败: %d", status)
+                NSLog("MacHead: 设置麦克风静音状态失败: \(status)")
             }
         }
     }
@@ -107,12 +107,19 @@ final class MediaDeviceManager {
     func unmuteBuiltInMicrophone() {
         if let original = originalMuteState {
             isMuted = original
-            NSLog("MacHead: 已从缓存恢复麦克风的原始静音状态: %@", String(original))
+            NSLog("MacHead: 已从缓存恢复麦克风的原始静音状态: \(original)")
             originalMuteState = nil
         } else {
             // Fallback: if no cache, unmute it
             isMuted = false
             NSLog("MacHead: 无静音状态缓存，默认将麦克风恢复为解除静音状态")
         }
+    }
+    
+    /// 强制解除静音并清除缓存状态
+    func forceUnmute() {
+        originalMuteState = nil
+        isMuted = false
+        NSLog("MacHead: 强制解除麦克风静音，并清除缓存状态")
     }
 }

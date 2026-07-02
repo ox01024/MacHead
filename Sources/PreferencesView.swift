@@ -186,7 +186,7 @@ struct PreferencesView: View {
                                     if newValue {
                                         MediaDeviceManager.shared.muteBuiltInMicrophone()
                                     } else {
-                                        MediaDeviceManager.shared.unmuteBuiltInMicrophone()
+                                        MediaDeviceManager.shared.forceUnmute()
                                     }
                                     self.isMicrophoneMuted = MediaDeviceManager.shared.isMuted
                                 }
