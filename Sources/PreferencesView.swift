@@ -1,11 +1,18 @@
 import SwiftUI
 import CoreGraphics
 
+struct DisplayInfo: Hashable {
+    let id: CGDirectDisplayID
+    let name: String
+    let isBuiltIn: Bool
+    let isApple: Bool
+}
+
 struct PreferencesView: View {
     @AppStorage("AutoEnableHeadlessOnLaunch") private var autoEnableOnLaunch = true
     @AppStorage("PreventIdleSleep") private var preventIdleSleep = true
     @State private var launchAtLogin = LaunchAtLoginHelper.shared.isEnabled
-    @State private var connectedDisplays: [String] = []
+    @State private var connectedDisplays: [DisplayInfo] = []
     @State private var disableTrackpad = UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")
     @State private var enableBatteryProtection = UserDefaults.standard.bool(forKey: "EnableBatteryProtection")
     @State private var batteryThreshold = UserDefaults.standard.integer(forKey: "BatteryThreshold") == 0 ? 20 : UserDefaults.standard.integer(forKey: "BatteryThreshold")
@@ -253,9 +260,12 @@ struct PreferencesView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             
-                            ForEach(connectedDisplays, id: \.self) { name in
-                                Label(name, systemImage: name.contains("内置") ? "laptopcomputer" : "display")
-                                    .font(.body)
+                            ForEach(connectedDisplays, id: \.self) { display in
+                                Label(
+                                    display.name,
+                                    systemImage: display.isBuiltIn ? "laptopcomputer" : (display.isApple ? "apple.studio.display" : "display")
+                                )
+                                .font(.body)
                             }
                             
                             if connectedDisplays.isEmpty {
@@ -320,11 +330,16 @@ struct PreferencesView: View {
         guard CGGetOnlineDisplayList(count, &displays, &count) == .success else { return }
         
         self.connectedDisplays = displays.map { id in
-            if CGDisplayIsBuiltin(id) != 0 {
-                return "内置显示屏 (Color LCD)"
+            let isBuiltIn = CGDisplayIsBuiltin(id) != 0
+            let vendorID = CGDisplayVendorNumber(id)
+            let isApple = vendorID == 0x05AC // Apple's Vendor ID
+            let name: String
+            if isBuiltIn {
+                name = "内置显示屏 (Color LCD)"
             } else {
-                return "外接显示器 (ID: \(id))"
+                name = isApple ? "Apple 显示器 (ID: \(id))" : "外接显示器 (ID: \(id))"
             }
+            return DisplayInfo(id: id, name: name, isBuiltIn: isBuiltIn, isApple: isApple)
         }
     }
 }
