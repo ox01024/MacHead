@@ -282,8 +282,7 @@ struct PreferencesView: View {
                                                 self.updateConnectedDisplays()
                                             }
                                         ))
-                                        .toggleStyle(.switch)
-                                        .labelsHidden()
+                                        .toggleStyle(.checkbox)
                                         .help("伪装为 Apple Studio Display 后可解锁原生 HiDPI Retina 渲染，重新拔插显示器线缆后生效。")
                                     }
                                 }
