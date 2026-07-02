@@ -131,6 +131,58 @@ final class DisplayManager {
         return false
     }
     
+    /// 从 IOKit 注册表中获取显示器的物理 EDID
+    private func getPhysicalEDID(displayID: CGDirectDisplayID, originalVendor: UInt32, originalProduct: UInt32) -> Data? {
+        var edidData: Data? = nil
+        let matching = IOServiceMatching("IODisplayConnect")
+        var iterator: io_iterator_t = 0
+        
+        if IOServiceGetMatchingServices(kIOMainPortDefault, matching, &iterator) == kIOReturnSuccess {
+            while case let regEntry = IOIteratorNext(iterator), regEntry != 0 {
+                let infoRef = IODisplayCreateInfoDictionary(regEntry, IOOptionBits(kIODisplayOnlyPreferredName))
+                if let info = infoRef?.takeRetainedValue() as? [String: Any] {
+                    if let devVendor = info["DisplayVendorID"] as? UInt32,
+                       let devProduct = info["DisplayProductID"] as? UInt32,
+                       devVendor == originalVendor,
+                       devProduct == originalProduct {
+                        if let edid = info["IODisplayEDID"] as? Data {
+                            edidData = edid
+                            IOObjectRelease(regEntry)
+                            break
+                        }
+                    }
+                }
+                IOObjectRelease(regEntry)
+            }
+            IOObjectRelease(iterator)
+        }
+        return edidData
+    }
+    
+    /// 将物理 EDID 改写为 Apple Studio Display 属性（APP, 0xA03E）并更新校验和
+    private func patchEDID(originalEDID: Data) -> Data {
+        var edid = originalEDID
+        guard edid.count >= 128 else { return originalEDID }
+        
+        // 1. 厂商 ID 改为 "APP" (0x0610)
+        edid[8] = 0x06
+        edid[9] = 0x10
+        
+        // 2. 产品 ID 改为 0xA03E (Studio Display, little-endian: 0x3E, 0xA0)
+        edid[10] = 0x3E
+        edid[11] = 0xA0
+        
+        // 3. 重新计算校验和 (EDID 第 127 字节)
+        var sum: UInt32 = 0
+        for i in 0..<127 {
+            sum += UInt32(edid[i])
+        }
+        let checksum = UInt8((256 - (sum % 256)) % 256)
+        edid[127] = checksum
+        
+        return edid
+    }
+    
     /// 伪装显示器为 Apple 官方显示器
     func spoofDisplay(id: CGDirectDisplayID) {
         let vendor = CGDisplayVendorNumber(id)
@@ -143,6 +195,17 @@ final class DisplayManager {
         let folderName = String(format: "DisplayVendorID-%x", vendor)
         let fileName = String(format: "DisplayProductID-%x", product)
         
+        // 尝试提取并注入改写后的 IODisplayEDID 以强制系统加载官方图标
+        var edidXmlString = ""
+        if let physicalEDID = getPhysicalEDID(displayID: id, originalVendor: vendor, originalProduct: product) {
+            let patchedEDID = patchEDID(originalEDID: physicalEDID)
+            let base64EDID = patchedEDID.base64EncodedString()
+            edidXmlString = "\n    <key>IODisplayEDID</key>\n    <data>\n        \(base64EDID)\n    </data>"
+            NSLog("MacHead: 成功读取并改写显示器物理 EDID 校验和")
+        } else {
+            NSLog("MacHead: 提示：未获取到物理 EDID，将仅伪装设备名与分辨率缩放")
+        }
+        
         let plistContent = """
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -153,7 +216,7 @@ final class DisplayManager {
     <key>DisplayProductID</key>
     <integer>41022</integer> <!-- 0xA03E (Studio Display) -->
     <key>DisplayProductName</key>
-    <string>Apple Studio Display (Spoofed)</string>
+    <string>Apple Studio Display</string>\(edidXmlString)
 </dict>
 </plist>
 """
