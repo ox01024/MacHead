@@ -260,32 +260,12 @@ final class WebServer {
     }
     
     private func getMemoryUsage() -> Double {
-        var stats = vm_statistics64()
-        var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
-        let result = withUnsafeMutablePointer(to: &stats) {
-            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
-                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count)
-            }
+        var level: Int32 = 0
+        var size = MemoryLayout<Int32>.size
+        if sysctlbyname("kern.memorystatus_level", &level, &size, nil, 0) == 0 {
+            return Double(100 - level)
         }
-        guard result == KERN_SUCCESS else { return 0.0 }
-        
-        var physicalMemory: UInt64 = 0
-        var size = MemoryLayout<UInt64>.size
-        sysctlbyname("hw.memsize", &physicalMemory, &size, nil, 0)
-        guard physicalMemory > 0 else { return 0.0 }
-        
-        var pageSize: vm_size_t = 0
-        host_page_size(mach_host_self(), &pageSize)
-        guard pageSize > 0 else { return 0.0 }
-        
-        let free = Double(stats.free_count)
-        let inactive = Double(stats.inactive_count)
-        let speculative = Double(stats.speculative_count)
-        
-        let freeBytes = (free + inactive + speculative) * Double(pageSize)
-        let usedBytes = Double(physicalMemory) - freeBytes
-        
-        return (usedBytes / Double(physicalMemory)) * 100.0
+        return 0.0
     }
     
     private func getCPUUsage() -> Double {
@@ -631,7 +611,7 @@ final class WebServer {
                                 <circle class="progress-ring__circle" id="ram-circle" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
                                 <text x="60" y="65" text-anchor="middle" class="gauge-val-text" id="ram-text">0%</text>
                             </svg>
-                            <div class="gauge-label">内存 占用率</div>
+                            <div class="gauge-label">内存 压力</div>
                         </div>
                     </div>
                 </div>
