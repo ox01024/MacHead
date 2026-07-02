@@ -586,6 +586,36 @@ final class WebServer {
                     </button>
                 </header>
                 
+                <!-- Hardware Gauges -->
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-title">系统硬件负载</div>
+                    <div class="gauge-container">
+                        <div class="gauge-card">
+                            <svg class="progress-ring" width="120" height="120">
+                                <defs>
+                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#00f0ff" />
+                                        <stop offset="100%" stop-color="#0072ff" />
+                                    </linearGradient>
+                                </defs>
+                                <circle class="progress-ring__circle-bg" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                <circle class="progress-ring__circle" id="cpu-circle" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                <text x="60" y="65" text-anchor="middle" class="gauge-val-text" id="cpu-text">0%</text>
+                            </svg>
+                            <div class="gauge-label">CPU 占用率</div>
+                        </div>
+                        
+                        <div class="gauge-card">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring__circle-bg" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                <circle class="progress-ring__circle" id="ram-circle" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+                                <text x="60" y="65" text-anchor="middle" class="gauge-val-text" id="ram-text">0%</text>
+                            </svg>
+                            <div class="gauge-label">内存 压力</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid">
                     <!-- Mode Card -->
                     <div class="card">
@@ -670,36 +700,6 @@ final class WebServer {
                                 <input type="checkbox" id="microphone-toggle" onchange="toggleSetting('microphone')">
                                 <span class="slider"></span>
                             </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Hardware Gauges -->
-                <div class="card" style="margin-bottom: 40px;">
-                    <div class="card-title">系统硬件负载</div>
-                    <div class="gauge-container">
-                        <div class="gauge-card">
-                            <svg class="progress-ring" width="120" height="120">
-                                <defs>
-                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#00f0ff" />
-                                        <stop offset="100%" stop-color="#0072ff" />
-                                    </linearGradient>
-                                </defs>
-                                <circle class="progress-ring__circle-bg" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <circle class="progress-ring__circle" id="cpu-circle" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <text x="60" y="65" text-anchor="middle" class="gauge-val-text" id="cpu-text">0%</text>
-                            </svg>
-                            <div class="gauge-label">CPU 占用率</div>
-                        </div>
-                        
-                        <div class="gauge-card">
-                            <svg class="progress-ring" width="120" height="120">
-                                <circle class="progress-ring__circle-bg" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <circle class="progress-ring__circle" id="ram-circle" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <text x="60" y="65" text-anchor="middle" class="gauge-val-text" id="ram-text">0%</text>
-                            </svg>
-                            <div class="gauge-label">内存 压力</div>
                         </div>
                     </div>
                 </div>
