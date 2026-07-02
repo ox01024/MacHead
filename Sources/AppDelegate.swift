@@ -89,6 +89,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateMenu() {
         let menu = NSMenu()
         
+        // About item
+        let aboutItem = NSMenuItem(
+            title: "关于 MacHead",
+            action: #selector(openAboutPanel),
+            keyEquivalent: ""
+        )
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
         // Mode toggle item
         let toggleItem = NSMenuItem(
             title: "MacBook Headless 模式",
@@ -132,13 +143,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    @objc private func openAboutPanel() {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(nil)
+    }
+    
     @objc func openPreferences() {
         if preferencesWindow == nil {
             let view = PreferencesView()
             let controller = NSHostingController(rootView: view)
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 480, height: 420),
-                styleMask: [.titled, .closable, .miniaturizable],
+                contentRect: NSRect(x: 0, y: 0, width: 480, height: 380),
+                styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false
             )
