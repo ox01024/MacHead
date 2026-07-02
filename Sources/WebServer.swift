@@ -273,9 +273,13 @@ final class WebServer {
         let inactive = Double(stats.inactive_count)
         let wired = Double(stats.wire_count)
         let free = Double(stats.free_count)
+        let speculative = Double(stats.speculative_count)
+        let purgeable = Double(stats.purgeable_count)
         
-        let totalUsed = active + inactive + wired
-        let total = totalUsed + free
+        // Active and wired represent the non-reclaimable active memory footprint.
+        // Inactive, speculative, and purgeable memory act as caches and can be reclaimed by OS.
+        let totalUsed = active + wired
+        let total = active + inactive + wired + free + speculative + purgeable
         guard total > 0 else { return 0.0 }
         return (totalUsed / total) * 100.0
     }
