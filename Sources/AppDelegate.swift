@@ -83,7 +83,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let isHeadless = controller.isHeadlessModeEnabled || (autoEnable && previouslyEnabled)
         
         let imageName = isHeadless ? "macmini" : "laptopcomputer"
-        statusItem.button?.image = NSImage(systemSymbolName: imageName, accessibilityDescription: "MacHead")
+        if let image = NSImage(systemSymbolName: imageName, accessibilityDescription: "MacHead") {
+            image.isTemplate = true
+            statusItem.button?.image = image
+            statusItem.button?.title = ""
+        } else {
+            statusItem.button?.image = nil
+            statusItem.button?.title = isHeadless ? "●" : "○"
+        }
     }
     
     private func updateMenu() {
