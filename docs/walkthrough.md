@@ -169,5 +169,5 @@ All toggles respond instantly.
 
 ### GitHub Repository & Release Verification
 - **Codebase Pushed**: Successfully pushed to the remote repository `https://github.com/ox01024/MacHead.git` on the `main` branch.
-- **First Release Published**: Successfully published release **`v0.1.0`** at `https://github.com/ox01024/MacHead/releases/tag/v0.1.0` containing the compiled binary package `MacHead-v0.1.0.zip` and the standard macOS installer image **`MacHead-v0.1.0-macos-arm64.dmg`**.
+- **First Release Published**: Successfully published release **`v0.1.0`** at `https://github.com/ox01024/MacHead/releases/tag/v0.1.0` containing the compiled binary package `MacHead-v0.1.0.zip` and the standard macOS installer image **`MacHead-v0.1.0-macos-universal.dmg`**.
 

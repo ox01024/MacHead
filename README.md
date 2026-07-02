@@ -44,7 +44,7 @@
 
 ### 1. 下载 DMG 镜像安装（推荐）
 
-您可以直接前往 [GitHub Releases](https://github.com/ox01024/MacHead/releases) 页面，下载最新发布的带有 CPU 架构后缀的 `MacHead-v0.1.0-macos-arm64.dmg`。双击打开并直接拖拽应用到应用程序文件夹即可完成安装。
+您可以直接前往 [GitHub Releases](https://github.com/ox01024/MacHead/releases) 页面，下载最新发布的带有 CPU 架构后缀的 `MacHead-v0.1.0-macos-universal.dmg`。双击打开并直接拖拽应用到应用程序文件夹即可完成安装。
 
 ### 2. 本地命令行手动编译
 
