@@ -269,19 +269,23 @@ final class WebServer {
         }
         guard result == KERN_SUCCESS else { return 0.0 }
         
-        let active = Double(stats.active_count)
-        let inactive = Double(stats.inactive_count)
-        let wired = Double(stats.wire_count)
-        let free = Double(stats.free_count)
-        let speculative = Double(stats.speculative_count)
-        let purgeable = Double(stats.purgeable_count)
+        var physicalMemory: UInt64 = 0
+        var size = MemoryLayout<UInt64>.size
+        sysctlbyname("hw.memsize", &physicalMemory, &size, nil, 0)
+        guard physicalMemory > 0 else { return 0.0 }
         
-        // Active and wired represent the non-reclaimable active memory footprint.
-        // Inactive, speculative, and purgeable memory act as caches and can be reclaimed by OS.
-        let totalUsed = active + wired
-        let total = active + inactive + wired + free + speculative + purgeable
-        guard total > 0 else { return 0.0 }
-        return (totalUsed / total) * 100.0
+        var pageSize: vm_size_t = 0
+        host_page_size(mach_host_self(), &pageSize)
+        guard pageSize > 0 else { return 0.0 }
+        
+        let free = Double(stats.free_count)
+        let inactive = Double(stats.inactive_count)
+        let speculative = Double(stats.speculative_count)
+        
+        let freeBytes = (free + inactive + speculative) * Double(pageSize)
+        let usedBytes = Double(physicalMemory) - freeBytes
+        
+        return (usedBytes / Double(physicalMemory)) * 100.0
     }
     
     private func getCPUUsage() -> Double {
