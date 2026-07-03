@@ -292,6 +292,14 @@ struct PreferencesView: View {
                                 Text("未检测到显示器")
                                     .font(.body)
                                     .foregroundColor(.secondary)
+                            } else if connectedDisplays.contains(where: { !$0.isBuiltIn }) {
+                                HStack(alignment: .top, spacing: 4) {
+                                    Text("💡")
+                                    Text("提示：开启/关闭伪装后，需重新插拔显示器线缆（或重启 Mac）使系统图标生效。")
+                                }
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.top, 4)
                             }
                         }
                         .padding(.vertical, 4)
