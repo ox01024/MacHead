@@ -115,7 +115,7 @@ final class DisplayManager {
     func isDisplaySpoofed(id: CGDirectDisplayID) -> Bool {
         // 如果我们缓存了其物理原身份，表示它目前处于伪装状态
         let uuid = getDisplayUUID(id: id)
-        if let original = UserDefaults.standard.array(forKey: "OriginalDisplay-\(uuid)") as? [UInt32], original.count == 2 {
+        if let original = UserDefaults.standard.array(forKey: "OriginalDisplay-\(uuid)") as? [Int], original.count == 2 {
             let folderName = String(format: "DisplayVendorID-%x", original[0])
             let fileName = String(format: "DisplayProductID-%x", original[1])
             let path = "/Library/Displays/Contents/Resources/Overrides/\(folderName)/\(fileName)"
@@ -247,7 +247,7 @@ final class DisplayManager {
         let uuid = getDisplayUUID(id: id)
         
         // 查找备份的物理原身份
-        guard let original = UserDefaults.standard.array(forKey: "OriginalDisplay-\(uuid)") as? [UInt32], original.count == 2 else {
+        guard let original = UserDefaults.standard.array(forKey: "OriginalDisplay-\(uuid)") as? [Int], original.count == 2 else {
             NSLog("MacHead: 未找到该显示器的物理原身份备份")
             return
         }
