@@ -159,7 +159,7 @@ final class DisplayManager {
         return edidData
     }
     
-    /// 将物理 EDID 改写为 Apple Studio Display 属性（APP, 0xA03E）并更新校验和
+    /// 将物理 EDID 改写为 Apple Studio Display 属性（APP, 0xAE3E）并更新校验和
     private func patchEDID(originalEDID: Data) -> Data {
         var edid = originalEDID
         guard edid.count >= 128 else { return originalEDID }
@@ -168,9 +168,9 @@ final class DisplayManager {
         edid[8] = 0x06
         edid[9] = 0x10
         
-        // 2. 产品 ID 改为 0xA03E (Studio Display, little-endian: 0x3E, 0xA0)
+        // 2. 产品 ID 改为 0xAE3E (Studio Display, little-endian: 0x3E, 0xAE)
         edid[10] = 0x3E
-        edid[11] = 0xA0
+        edid[11] = 0xAE
         
         // 3. 重新计算校验和 (EDID 第 127 字节)
         var sum: UInt32 = 0
@@ -214,7 +214,7 @@ final class DisplayManager {
     <key>DisplayVendorID</key>
     <integer>1452</integer> <!-- 0x05AC -->
     <key>DisplayProductID</key>
-    <integer>41022</integer> <!-- 0xA03E (Studio Display) -->
+    <integer>44606</integer> <!-- 0xAE3E (Studio Display) -->
     <key>DisplayProductName</key>
     <string>Apple Studio Display</string>\(edidXmlString)
 </dict>
