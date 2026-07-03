@@ -179,13 +179,19 @@ final class DisplayManager {
     
     /// 伪装显示器为 Apple 官方显示器
     func spoofDisplay(id: CGDirectDisplayID) {
-        let vendor = CGDisplayVendorNumber(id)
-        let product = CGDisplayModelNumber(id)
+        var vendor = CGDisplayVendorNumber(id)
+        var product = CGDisplayModelNumber(id)
+        let uuid = getDisplayUUID(id: id)
+        
+        // 如果本地已缓存了该 UUID 对应的物理原身份，直接覆盖提取，绕过未插拔时的 0x05AC 安全拦截
+        if let original = UserDefaults.standard.array(forKey: "OriginalDisplay-\(uuid)") as? [Int], original.count == 2 {
+            vendor = UInt32(original[0])
+            product = UInt32(original[1])
+        }
         
         // 防止对内置屏或已经是 Apple 的屏误操作
         guard vendor != 0x05AC && CGDisplayIsBuiltin(id) == 0 else { return }
         
-        let uuid = getDisplayUUID(id: id)
         let folderName = String(format: "DisplayVendorID-%x", vendor)
         let fileName = String(format: "DisplayProductID-%x", product)
         
@@ -219,11 +225,8 @@ final class DisplayManager {
         do {
             try plistContent.write(toFile: tempPath, atomically: true, encoding: .utf8)
             
-            let script = """
-            mkdir -p /Library/Displays/Contents/Resources/Overrides/\(folderName) && \
-            cp \(tempPath) /Library/Displays/Contents/Resources/Overrides/\(folderName)/\(fileName) && \
-            rm -f \(tempPath)
-            """
+            // 使用纯扁平单行脚本，防范多行空格及换行解析失效
+            let script = "mkdir -p /Library/Displays/Contents/Resources/Overrides/\(folderName) && cp \(tempPath) /Library/Displays/Contents/Resources/Overrides/\(folderName)/\(fileName) && rm -f \(tempPath)"
             
             let success = runPrivilegedScript(script)
             if success {
@@ -256,7 +259,7 @@ final class DisplayManager {
         
         let success = runPrivilegedScript(script)
         if success {
-            UserDefaults.standard.removeObject(forKey: "OriginalDisplay-\(uuid)")
+            // 注意：不清除 UserDefaults 中的物理身份缓存，以便在未插拔时仍能重新进行勾选伪装
             NSLog("MacHead: 成功还原显示器为原始状态，请重新插拔线缆生效")
         } else {
             NSLog("MacHead: 还原显示器授权写入失败")
