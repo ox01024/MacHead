@@ -122,12 +122,6 @@ final class DisplayManager {
             return FileManager.default.fileExists(atPath: path)
         }
         
-        // 兜底检测（如果直接读取其目前的 VendorID 已经是 Apple，且非内置屏）
-        let vendor = CGDisplayVendorNumber(id)
-        if vendor == 0x05AC && CGDisplayIsBuiltin(id) == 0 {
-            return true
-        }
-        
         return false
     }
     
