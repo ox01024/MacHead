@@ -267,24 +267,6 @@ struct PreferencesView: View {
                                         systemImage: display.isBuiltIn ? "laptopcomputer" : (display.isApple ? "apple.studio.display" : "display")
                                     )
                                     .font(.body)
-                                    
-                                    Spacer()
-                                    
-                                    if !display.isBuiltIn {
-                                        Toggle("伪装为 Apple 显示器", isOn: Binding(
-                                            get: { DisplayManager.shared.isDisplaySpoofed(id: display.id) },
-                                            set: { newValue in
-                                                if newValue {
-                                                    DisplayManager.shared.spoofDisplay(id: display.id)
-                                                } else {
-                                                    DisplayManager.shared.restoreDisplay(id: display.id)
-                                                }
-                                                self.updateConnectedDisplays()
-                                            }
-                                        ))
-                                        .toggleStyle(.checkbox)
-                                        .help("伪装为 Apple Studio Display 后可解锁原生 HiDPI Retina 渲染，重新拔插显示器线缆后生效。")
-                                    }
                                 }
                             }
                             
@@ -292,14 +274,6 @@ struct PreferencesView: View {
                                 Text("未检测到显示器")
                                     .font(.body)
                                     .foregroundColor(.secondary)
-                            } else if connectedDisplays.contains(where: { !$0.isBuiltIn }) {
-                                HStack(alignment: .top, spacing: 4) {
-                                    Text("💡")
-                                    Text("提示：开启/关闭伪装后，需重新插拔显示器线缆（或重启 Mac）使系统图标生效。")
-                                }
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                                .padding(.top, 4)
                             }
                         }
                         .padding(.vertical, 4)
