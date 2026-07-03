@@ -225,17 +225,13 @@ final class DisplayManager {
             rm -f \(tempPath)
             """
             
-            let appleScript = "do shell script \"\(script)\" with administrator privileges"
-            if let scriptObject = NSAppleScript(source: appleScript) {
-                var error: NSDictionary? = nil
-                scriptObject.executeAndReturnError(&error)
-                if let err = error {
-                    NSLog("MacHead: 伪装显示器授权写入失败: %@", err)
-                } else {
-                    // 备份物理原身份
-                    UserDefaults.standard.set([vendor, product], forKey: "OriginalDisplay-\(uuid)")
-                    NSLog("MacHead: 成功伪装显示器为 Apple 显示器，请重新插拔线缆生效")
-                }
+            let success = runPrivilegedScript(script)
+            if success {
+                // 备份物理原身份
+                UserDefaults.standard.set([vendor, product], forKey: "OriginalDisplay-\(uuid)")
+                NSLog("MacHead: 成功伪装显示器为 Apple 显示器，请重新插拔线缆生效")
+            } else {
+                NSLog("MacHead: 伪装显示器授权写入失败")
             }
         } catch {
             NSLog("MacHead: 写入临时 plist 失败")
@@ -257,17 +253,37 @@ final class DisplayManager {
         
         let targetPath = "/Library/Displays/Contents/Resources/Overrides/\(folderName)/\(fileName)"
         let script = "rm -f \(targetPath)"
-        let appleScript = "do shell script \"\(script)\" with administrator privileges"
         
-        if let scriptObject = NSAppleScript(source: appleScript) {
-            var error: NSDictionary? = nil
-            scriptObject.executeAndReturnError(&error)
-            if let err = error {
-                NSLog("MacHead: 还原显示器授权写入失败: %@", err)
-            } else {
-                UserDefaults.standard.removeObject(forKey: "OriginalDisplay-\(uuid)")
-                NSLog("MacHead: 成功还原显示器为原始状态，请重新插拔线缆生效")
+        let success = runPrivilegedScript(script)
+        if success {
+            UserDefaults.standard.removeObject(forKey: "OriginalDisplay-\(uuid)")
+            NSLog("MacHead: 成功还原显示器为原始状态，请重新插拔线缆生效")
+        } else {
+            NSLog("MacHead: 还原显示器授权写入失败")
+        }
+    }
+    
+    /// 使用 Process 衍生 osascript 执行提权脚本以绕过 macOS TCC 自动化沙盒限制
+    private func runPrivilegedScript(_ script: String) -> Bool {
+        let process = Process()
+        process.launchPath = "/usr/bin/osascript"
+        process.arguments = ["-e", "do shell script \"\(script)\" with administrator privileges"]
+        
+        let pipe = Pipe()
+        process.standardError = pipe
+        process.standardOutput = pipe
+        
+        process.launch()
+        process.waitUntilExit()
+        
+        if process.terminationStatus == 0 {
+            return true
+        } else {
+            let data = pipe.fileHandleForReading.readDataToEndOfFile()
+            if let errorMsg = String(data: data, encoding: .utf8) {
+                NSLog("MacHead: 提权执行失败: %@", errorMsg)
             }
+            return false
         }
     }
 }
