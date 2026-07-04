@@ -302,7 +302,7 @@ struct PreferencesView: View {
             // Footer
             HStack(alignment: .bottom) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Version \(UpdateManager.shared.currentVersion) (Build \(UpdateManager.shared.currentBuild))")
+                    Text("Version \(UpdateManager.shared.currentVersion)")
                         .font(.footnote)
                         .foregroundColor(.secondary)
                     
