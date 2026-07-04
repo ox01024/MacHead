@@ -1,7 +1,7 @@
 {
-  "version": "0.1.9",
-  "build": 12,
+  "version": "0.1.10",
+  "build": 13,
   "pubDate": "2026-07-04",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.9-macos-universal.dmg",
-  "releaseNotes": "1. 偏好设置面板补充了“管理账号: admin”的展示，方便局域网网页控制台登录。"
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.10-macos-universal.dmg",
+  "releaseNotes": "Feature: automate release notes generation from commit logs if tag has no message"
 }
