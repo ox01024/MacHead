@@ -1,7 +1,7 @@
 {
-  "version": "0.1.2",
-  "build": 5,
+  "version": "0.1.3",
+  "build": 6,
   "pubDate": "2026-07-04",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.2-macos-universal.dmg",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.3-macos-universal.dmg",
   "releaseNotes": "1. 开启全新应用内静默下载与自动覆盖重启升级机制；\n2. 全新设计的官网版本自动感应能力上线；\n3. 将安装文件完全分流托管至 Cloudflare R2 高速存储桶。"
 }
