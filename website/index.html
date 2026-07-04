@@ -96,8 +96,8 @@
       <section id="features" class="features-section scroll-effect">
         <div class="container">
           <div class="section-header">
-            <h2 class="section-title">重写软硬件边界的底层守护</h2>
-            <p class="section-subtitle">MacHead 专为持久化合盖运行设计，用逻辑链封锁功耗与发热风险。</p>
+            <h2 class="section-title">专为 MacBook 合盖运行打造的防护守护</h2>
+            <p class="section-subtitle">MacHead 从屏幕功耗、隐私安全和电池寿命等多端出发，确保您的笔记本合盖运行时安全、省电、冷静。</p>
           </div>
           
           <div class="bento-grid">
@@ -109,8 +109,8 @@
                 </svg>
               </div>
               <div class="bento-content">
-                <h3 class="bento-title">内屏信号逻辑切断 (SkyLight Private API)</h3>
-                <p class="bento-desc">不同于第三方简单的显示镜像，MacHead 通过直接挂起并阻断 macOS 私有 SkyLight 驱动层信号，实现内屏背光的物理全熄。合盖运行时，内屏屏幕不通电、零发热，完全杜绝因排线受热加速老化甚至屏幕开胶的硬件惨剧。</p>
+                <h3 class="bento-title">内置屏幕彻底熄灭与断电保护</h3>
+                <p class="bento-desc">合盖做服务器时，MacHead 会智能熄灭内置屏幕并停止其通电。这不仅极大地节约了电量，更从根本上杜绝了因为长时间闭合屏幕而导致热量聚集、屏幕发黄甚至老化损坏的硬件悲剧。</p>
               </div>
             </div>
             
@@ -122,8 +122,8 @@
                 </svg>
               </div>
               <div class="bento-content">
-                <h3 class="bento-title">硬件防窃听隐私锁</h3>
-                <p class="bento-desc">只要笔记本进入 Headless 无头模式，MacHead 会在硬件音频控制器层面自动将系统默认麦克风输入全链路静音。即使服务器遭到网络攻破，外部程序也绝无可能通过麦克风监听物理空间的声音，实现军工级的隐私物理防护。</p>
+                <h3 class="bento-title">物理级静音防监听保护</h3>
+                <p class="bento-desc">只要笔记本进入合盖做服务器的状态，应用会自动在音频输入端将内置麦克风全链路静音。屏蔽任何潜在的声音窃听通道，为您的物理办公和生活空间提供坚实的隐私防线。</p>
               </div>
             </div>
             
@@ -135,12 +135,12 @@
                 </svg>
               </div>
               <div class="bento-content">
-                <h3 class="bento-title">电池健康与低电量断电守护</h3>
-                <p class="bento-desc">针对长期处于插电服务器环境的 MacBook，MacHead 智能劫持电量阈值。一旦拔掉充电线，在电池容量耗至安全限额（如 20%）时，它会自动清除唤醒断言并诱导系统进入深度休眠，彻底避免锂电池过度放电损坏造成的电池鼓包。</p>
+                <h3 class="bento-title">智能电池寿命守护</h3>
+                <p class="bento-desc">针对长期处于插电环境的 MacBook 服务器，MacHead 提供智能电池防护。在拔掉电线断电后，它能依据低电量安全保护阈值自动控制系统休眠，彻底避免过度放电造成的电池鼓包损坏。</p>
               </div>
             </div>
 
-            <!-- Bento Box 4: 输入设备物理隔离 -->
+            <!-- Bento Box 4: 输入设备防误触 -->
             <div class="bento-card bento-w2">
               <div class="bento-icon-box text-indigo">
                 <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -148,8 +148,8 @@
                 </svg>
               </div>
               <div class="bento-content">
-                <h3 class="bento-title">输入设备物理隔离与防误触</h3>
-                <p class="bento-desc">合盖成为服务器后，压在屏幕上的物理按键极其容易被误触。MacHead 在 IOKit 驱动捕获层直接进行 EventTap 拦截，进入无头模式时，自动独占并物理忽略内置键盘、触控板的全部输入事件；同时在检测到外接鼠标接入时可彻底禁用内置触控板。</p>
+                <h3 class="bento-title">内置键盘与触控板合盖防误触</h3>
+                <p class="bento-desc">闭合屏幕作为服务器后，屏幕压在键盘上极易产生误按或指纹乱跳。MacHead 会在进入合盖模式时自动屏蔽和忽略内置键盘、触控板的按压信号，同时保持外部连接的独立鼠标和外接键盘不受影响。</p>
               </div>
             </div>
 
@@ -161,8 +161,8 @@
                 </svg>
               </div>
               <div class="bento-content">
-                <h3 class="bento-title">局域网轻量 Web 面板</h3>
-                <p class="bento-desc">应用内置超轻量级、完全无依赖的 Swift 异步 Web 服务。您可以在同局域网的手机、电脑浏览器上远程登录它，查看实时的 CPU 负载、物理内存占比、电池容量、充电状态与插电方式，并且直接远程一键开/关 Headless 模式。</p>
+                <h3 class="bento-title">轻巧的局域网远程管理</h3>
+                <p class="bento-desc">内置无任何依赖的控制面板服务。您只需在同局域网的手机或电脑浏览器上输入网址，就能远程直观查看当前的 CPU 负载、内存占比、电池状况，并进行开关远程控制。</p>
               </div>
             </div>
 
@@ -174,8 +174,8 @@
                 </svg>
               </div>
               <div class="bento-content">
-                <h3 class="bento-title">外接屏智能双向插拔守护</h3>
-                <p class="bento-desc">为了防止屏幕彻底黑屏而遭遇“被锁死在外”的窘境，MacHead 全时段监测外接显示器的物理连接：当意外断开所有外接屏时，防黑屏保护逻辑会自动重连并亮起内屏；而再次将屏幕连回时，它能秒级自动恢复无头断电保护。</p>
+                <h3 class="bento-title">显示器智能自适应守护</h3>
+                <p class="bento-desc">自动检测外接屏幕物理插拔。当您断开所有外接屏时，MacHead 会瞬间自动亮起并连回内置屏幕，防止发生黑屏锁死的尴尬；而插回外接显示器时，它又能秒级恢复低发热合盖状态。</p>
               </div>
             </div>
           </div>
@@ -311,31 +311,31 @@
       <section id="install" class="install-section scroll-effect">
         <div class="container">
           <div class="section-header">
-            <h2 class="section-title">极其简单的安装步骤</h2>
-            <p class="section-subtitle">完全免去复杂的编译与环境变量配置，一键式部署。</p>
+            <h2 class="section-title">极其简单的上手步骤</h2>
+            <p class="section-subtitle">无需任何复杂的手动配置，开箱即用，只需三步。</p>
           </div>
           
           <div class="install-steps">
             <div class="step-card">
               <div class="step-num">01</div>
-              <h3 class="step-title">下载 Universal 架构包</h3>
-              <p class="step-desc">点击上方下载 universal .dmg 安装包，将 MacHead 拖入应用程序目录即可启动图形界面。</p>
-              <a href="/MacHead-v0.1.0-macos-universal.dmg" class="step-link" id="download-step-link">下载 DMG 文件 →</a>
+              <h3 class="step-title">下载并安装 MacHead</h3>
+              <p class="step-desc">下载双架构通用版的安装包文件，将 MacHead 的猫咪图标直接拖入您的应用程序目录中即可完成基础部署。</p>
+              <a href="/MacHead-v0.1.0-macos-universal.dmg" class="step-link" id="download-step-link">点击下载 DMG 安装包 →</a>
             </div>
             
             <div class="step-card">
               <div class="step-num">02</div>
-              <h3 class="step-title">终端命令行一键集成</h3>
-              <p class="step-desc">如果您正在使用 SSH 远程管理服务器，可以直接在终端执行以下 Shell 命令，完成 CLI 工具的极速配置与授权。</p>
+              <h3 class="step-title">一键开启 Headless 守护</h3>
+              <p class="step-desc">运行应用并点击状态栏图标即可启用。或者直接在终端中复制以下命令，快速配置命令行环境并对其进行控制管理。</p>
               <div class="code-block-container">
-                <pre><code class="language-bash">curl -fsSL https://raw.githubusercontent.com/.../install.sh | bash</code></pre>
+                <pre><code class="language-bash">curl -fsSL https://raw.githubusercontent.com/ox01024/MacHead/main/Scripts/install.sh | bash</code></pre>
               </div>
             </div>
             
             <div class="step-card">
               <div class="step-num">03</div>
-              <h3 class="step-title">配置辅助功能授权</h3>
-              <p class="step-desc">若您需要启用“无头模式下自动禁用内置键盘和触控板”以防猫猫误踩，请按软件内提示，在“系统设置 -> 辅助功能”中勾选授权 MacHead。</p>
+              <h3 class="step-title">配置系统防误触授权</h3>
+              <p class="step-desc">如果您希望合盖成为服务器后自动无视并屏蔽一切物理键盘和触控板的误触误按，请按照软件首次运行时的指引，开启系统授权即可。</p>
             </div>
           </div>
         </div>
