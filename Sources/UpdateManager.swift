@@ -243,6 +243,10 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
                     try fileManager.removeItem(atPath: targetAppPath)
                 }
                 try fileManager.copyItem(atPath: mountedAppPath, toPath: targetAppPath)
+                
+                // 递归清除新 App 的隔离属性，防止重启时触发系统 Gatekeeper “无法验证开发者” 的弹窗
+                print("OTA Install: Stripping quarantine attribute recursively...")
+                self.runShellCommand("/usr/bin/xattr", arguments: ["-cr", targetAppPath])
             } catch {
                 self.cleanupMount(mountPoint: mountPoint)
                 self.handleInstallationFailure(reason: "文件覆盖失败：\(error.localizedDescription)")

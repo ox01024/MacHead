@@ -62,9 +62,27 @@ rm "${MACOS_DIR}/${APP_NAME}_arm64" "${MACOS_DIR}/${APP_NAME}_x86_64"
 # Copy Info.plist to the bundle
 cp Resources/Info.plist "${APP_DIR}/Contents/Info.plist"
 
+# Set version and build if arguments are provided
+VERSION="1.0.0"
+BUILD="1"
+if [ ! -z "$1" ]; then
+  VERSION="$1"
+fi
+if [ ! -z "$2" ]; then
+  BUILD="$2"
+fi
+
+echo "Setting bundle version in Info.plist: Version ${VERSION} (Build ${BUILD})"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${APP_DIR}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD}" "${APP_DIR}/Contents/Info.plist"
+
 # Copy AppIcon to resources
 mkdir -p "${APP_DIR}/Contents/Resources"
 cp Resources/AppIcon.icns "${APP_DIR}/Contents/Resources/AppIcon.icns"
+
+# Apply ad-hoc signature (required for ARM64 macOS binaries and icon rendering)
+echo "Ad-hoc signing the application bundle..."
+codesign --force --deep --sign - "${APP_DIR}"
 
 # Automatically copy to the system Applications folder
 echo "Installing to /Applications..."

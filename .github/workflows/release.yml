@@ -19,8 +19,14 @@ jobs:
 
       - name: Build Application 🔧
         run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_NAME#v}
+          CURRENT_BUILD=$(python3 -c "import json; print(json.load(open('website/public/appcast.json')).get('build', 1))")
+          NEXT_BUILD=$((CURRENT_BUILD + 1))
+          echo "Compiling v${VERSION} with Build #${NEXT_BUILD}..."
+          
           chmod +x ./build.sh
-          ./build.sh
+          ./build.sh "${VERSION}" "${NEXT_BUILD}"
 
       - name: Package DMG 📦
         id: package
@@ -29,8 +35,13 @@ jobs:
           DMG_NAME="MacHead-${TAG_NAME}-macos-universal.dmg"
           echo "Packaging DMG: ${DMG_NAME}..."
           
-          # 将编译好的 MacHead.app 打包为 DMG
-          hdiutil create -fs HFS+ -srcfolder "MacHead.app" -volname "MacHead" "${DMG_NAME}"
+          # 创建临时包装文件夹，包含 App 实体以及指向系统 Applications 目录的软链接
+          mkdir -p dist-dmg
+          cp -R "MacHead.app" dist-dmg/
+          ln -s /Applications dist-dmg/Applications
+          
+          # 将打包目录整体打包生成为 DMG 映像磁盘，Finder 挂载后会呈现出 App + 文件夹的双栏拖拽快捷安装界面
+          hdiutil create -fs HFS+ -srcfolder dist-dmg -volname "MacHead" "${DMG_NAME}"
           
           echo "dmg_name=${DMG_NAME}" >> $GITHUB_OUTPUT
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
