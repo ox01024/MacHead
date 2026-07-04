@@ -1,7 +1,7 @@
 {
-  "version": "0.1.10",
-  "build": 13,
+  "version": "0.1.11",
+  "build": 14,
   "pubDate": "2026-07-04",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.10-macos-universal.dmg",
-  "releaseNotes": "Feature: automate release notes generation from commit logs if tag has no message"
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.11-macos-universal.dmg",
+  "releaseNotes": "1. Fix: correctly handle lightweight tags and fetch all tags in release workflow"
 }
