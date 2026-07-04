@@ -190,4 +190,51 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.log("MacHead Web: Native CSS View Timeline supported.");
     }
+
+    // 6. Dynamic version and download links from appcast.json
+    fetch('./appcast.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.url) {
+                const latestUrl = data.url;
+                const version = data.version;
+                
+                // Update all download button hrefs
+                const downloadIds = [
+                    'download-header-link',
+                    'download-hero-link',
+                    'download-step-link',
+                    'download-cta-link'
+                ];
+                
+                downloadIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.setAttribute('href', latestUrl);
+                    }
+                });
+                
+                // Update version badge text dynamically
+                const badge = document.querySelector('.hero-badge .badge-text');
+                if (badge) {
+                    badge.textContent = `v${version} Universal 支持 Apple Silicon / Intel`;
+                }
+                
+                // Update CTA download button text
+                const ctaBtn = document.getElementById('download-cta-link');
+                if (ctaBtn) {
+                    ctaBtn.textContent = `下载 macOS Universal DMG v${version}`;
+                }
+                
+                console.log(`MacHead Web: Dynamically updated download links to v${version}`);
+            }
+        })
+        .catch(err => {
+            console.error('MacHead Web: Failed to load appcast.json metadata:', err);
+        });
 });
