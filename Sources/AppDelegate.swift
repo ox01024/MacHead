@@ -60,14 +60,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self,
             selector: #selector(handleCLIEngage),
             name: NSNotification.Name("com.waffle.MacHead.CLI.enable"),
-            object: nil
+            object: nil,
+            suspensionBehavior: .deliverImmediately
         )
         
         DistributedNotificationCenter.default().addObserver(
             self,
             selector: #selector(handleCLIDisengage),
             name: NSNotification.Name("com.waffle.MacHead.CLI.disable"),
-            object: nil
+            object: nil,
+            suspensionBehavior: .deliverImmediately
         )
         
         // Auto-install CLI helper symlink
@@ -92,42 +94,65 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Ensure the source executable exists (so we only symlink if we are actually installed in /Applications)
         guard fileManager.fileExists(atPath: executablePath) else {
-            print("CLI Auto-Link: Source executable not found at \(executablePath). Skipping.")
+            print("CLI Auto-Link: Source executable not found at \(executablePath). Skipping auto-link.")
             return
         }
         
-        // Ensure /usr/local/bin directory exists
+        // Check if symlink already exists and points to the correct location
+        if fileManager.fileExists(atPath: symlinkPath) {
+            if let destination = try? fileManager.destinationOfSymbolicLink(atPath: symlinkPath), destination == executablePath {
+                return // Already set up correctly
+            }
+        }
+        
+        // Try creating directory and link directly (in case /usr/local/bin is user-writeable)
         let binDir = "/usr/local/bin"
+        var needsElevation = false
         if !fileManager.fileExists(atPath: binDir) {
             do {
                 try fileManager.createDirectory(atPath: binDir, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                print("CLI Auto-Link: Failed to create directory \(binDir): \(error)")
-                return
+                needsElevation = true
             }
         }
         
-        // If symlink already exists
-        if fileManager.fileExists(atPath: symlinkPath) {
-            // Check if it already points to the correct location
-            if let destination = try? fileManager.destinationOfSymbolicLink(atPath: symlinkPath), destination == executablePath {
-                return // Already set up correctly
+        if !needsElevation {
+            if fileManager.fileExists(atPath: symlinkPath) {
+                try? fileManager.removeItem(atPath: symlinkPath)
             }
-            // Remove incorrect symlink
             do {
-                try fileManager.removeItem(atPath: symlinkPath)
-            } catch {
-                print("CLI Auto-Link: Failed to remove old symlink: \(error)")
+                try fileManager.createSymbolicLink(atPath: symlinkPath, withDestinationPath: executablePath)
+                print("CLI Auto-Link: Created successfully under user privileges.")
                 return
+            } catch {
+                needsElevation = true
             }
         }
         
-        // Create symlink
-        do {
-            try fileManager.createSymbolicLink(atPath: symlinkPath, withDestinationPath: executablePath)
-            print("CLI Auto-Link: Successfully created symlink at \(symlinkPath)")
-        } catch {
-            print("CLI Auto-Link: Failed to create symlink at \(symlinkPath): \(error)")
+        if needsElevation {
+            // Prompt the user on main thread to grant permission for CLI link installation
+            DispatchQueue.main.async {
+                let alert = NSAlert()
+                alert.messageText = "安装 MacHead 命令行工具"
+                alert.informativeText = "MacHead 希望在 /usr/local/bin/machead 创建命令行工具的软链接。启用后，您可以在终端中运行 'machead' 直接管控设备守护程序。"
+                alert.alertStyle = .informational
+                alert.addButton(withTitle: "立即安装 (需密码或Touch ID)")
+                alert.addButton(withTitle: "稍后")
+                
+                let response = alert.runModal()
+                if response == .alertFirstButtonReturn {
+                    let script = "do shell script \"mkdir -p /usr/local/bin && ln -sf /Applications/MacHead.app/Contents/MacOS/MacHead /usr/local/bin/machead\" with administrator privileges"
+                    if let appleScript = NSAppleScript(source: script) {
+                        var error: NSDictionary?
+                        appleScript.executeAndReturnError(&error)
+                        if let err = error {
+                            print("CLI Auto-Link: Elevation failed: \(err)")
+                        } else {
+                            print("CLI Auto-Link: Successfully created symlink via elevation.")
+                        }
+                    }
+                }
+            }
         }
     }
     
