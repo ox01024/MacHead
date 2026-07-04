@@ -355,20 +355,22 @@ p {
 }
 
 .hero-img {
-  max-height: 470px;
+  max-height: 440px;
   width: auto;
   display: block;
   opacity: 1;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
   /* Premium 3D perspective tilt matching Stripe/Linear style */
   transform: rotateY(-8deg) rotateX(4deg) rotateZ(1deg);
-  filter: drop-shadow(-15px 20px 35px rgba(38, 37, 30, 0.12));
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+  box-shadow: -15px 20px 35px rgba(38, 37, 30, 0.08), -5px 5px 15px rgba(38, 37, 30, 0.04);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
   backface-visibility: hidden;
 }
 
 .hero-img:hover {
   transform: rotateY(-2deg) rotateX(1.5deg) rotateZ(0.2deg);
-  filter: drop-shadow(-20px 25px 45px rgba(38, 37, 30, 0.18));
+  box-shadow: -20px 25px 45px rgba(38, 37, 30, 0.14), -5px 10px 20px rgba(38, 37, 30, 0.06);
 }
 
 .visual-overlay {
