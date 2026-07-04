@@ -59,13 +59,21 @@ jobs:
         run: |
           TAG_NAME="${{ steps.package.outputs.tag_name }}"
           
-          # 强制从远程获取完整的附注标签对象
-          git fetch origin refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME} --force || true
+          # 拉取所有远程标签，确保 git describe 能够正确计算上个版本号
+          git fetch origin --tags --force || true
           
-          # 1. 尝试从附注标签的描述文字中抓取日志
-          USER_NOTES=$(git tag -l --format='%(contents)' "$TAG_NAME" | xargs)
+          # 检查标签类型 (tag 代表附注标签，commit 代表轻量标签)
+          TAG_TYPE=$(git cat-file -t "$TAG_NAME" 2>/dev/null || echo "commit")
           
-          # 2. 如果描述为空，则自动拉取上个 Tag 到当前 Tag 之间的所有 commit messages 作为日志
+          if [ "$TAG_TYPE" = "tag" ]; then
+            # 1. 附注标签：提取标签中的描述文字作为日志
+            USER_NOTES=$(git tag -l --format='%(contents)' "$TAG_NAME" | xargs)
+          else
+            # 2. 轻量标签：清空以触发下方的 Commit 日志自动抓取
+            USER_NOTES=""
+          fi
+          
+          # 3. 如果描述为空（或是轻量标签），则自动拉取上个 Tag 到当前 Tag 之间的所有 commit messages 作为日志
           if [ -z "$USER_NOTES" ]; then
             echo "No annotated tag message found. Auto-generating from git logs..."
             # 找到上一个 Tag 的名字
