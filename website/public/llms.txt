@@ -1,0 +1,35 @@
+# MacHead - MacBook Headless Mode Manager
+> MacHead is a lightweight, native, zero-dependency macOS application designed to transform any MacBook into a silent, cool, and secure headless server workstation.
+
+## Main features
+- **Logical Screen Cutoff**: Uses native macOS APIs to disable and cut power to the built-in display, preventing heat accumulation under clamshell mode and protecting the screen from degradation.
+- **Microphone Privacy Lock**: Automatically silences and disables the built-in microphone input when clamshell mode is active to secure physical space privacy.
+- **Anti-Accidental Touch**: Temporarily disables the internal keyboard and trackpad inputs when the lid is closed, while preserving external keyboard and mouse functionality.
+- **Smart Battery Guard**: Protects battery life on permanently plugged MacBooks, with user-configured low-battery thresholds to auto-sleep the system when unplugged.
+- **No-Dependency Web Dashboard**: Serves a local HTTP control panel on port 8080. Check CPU/RAM loads, battery status, and toggle modes remotely via any browser in the local network.
+- **Plug-and-Play Adaptability**: Seamlessly detects external display connections, auto-activating the headless screen cutoff when unplugged and restoring screen power immediately when reconnected.
+
+## Installation & Getting Started
+1. **Download**: Obtain the dual-architecture DMG installer from `https://headlessmac.com/`.
+2. **Move to Applications**: Drag the `MacHead.app` to your `/Applications` directory.
+3. **Run Application**: Double-click to start. A cat status bar icon will appear in the macOS menu bar.
+4. **Permissions**: Grant Accessibility permissions when prompted if you wish to enable the built-in keyboard and trackpad lock feature.
+
+## CLI Usage (machead Command Line Interface)
+MacHead includes a command line interface to manage states programmatically:
+- `machead status`: Display current execution mode (NORMAL or HEADLESS), WebServer status, Sleep Prevention state, and battery status.
+- `machead enable`: Manually activate Headless mode (cut off internal display, lock mic and inputs).
+- `machead disable`: Deactivate Headless mode and return to normal notebook operation.
+- `machead sleep prevent`: Assert power management assertions to prevent system idle sleep, ensuring the system stays awake when closed.
+
+## Key Technical Facts
+- **Architecture**: Universal binary supporting both Apple Silicon (M1/M2/M3/M4) and Intel Macs.
+- **Minimum OS**: macOS Monterey (12.0) and later.
+- **APIs Used**: Apple SkyLight API, IOKit Power Management.
+- **Privacy & Telemetry**: 100% offline. Zero telemetry, tracking, or network communication. The remote web console only runs on the local network (LAN) and does not call home.
+
+## Links & Community
+- **Official Website**: [https://headlessmac.com/](https://headlessmac.com/)
+- **Download dmg**: [Download Link](https://releases.headlessmac.com/MacHead-v0.1.0-macos-universal.dmg)
+- **Feedback & Issues**: [GitHub Issues](https://github.com/ox01024/MacHead-Feedback/issues)
+- **Community Discussions**: [GitHub Discussions](https://github.com/ox01024/MacHead-Feedback/discussions)
