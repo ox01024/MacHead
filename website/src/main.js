@@ -136,12 +136,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (webCpuVal && webRamVal) {
         setInterval(() => {
             // CPU ticks dynamically
-            const targetCpu = Math.floor(Math.random() * 12) + 3; // 3% to 14%
+            const targetCpu = Math.floor(Math.random() * 15) + 15; // 15% to 30%
             webCpuVal.textContent = `${targetCpu}%`;
+            
+            const mockCpuCircle = document.getElementById('mock-cpu-circle');
+            if (mockCpuCircle) {
+                const radius = 28;
+                const circumference = radius * 2 * Math.PI;
+                const offset = circumference - (targetCpu / 100 * circumference);
+                mockCpuCircle.style.strokeDashoffset = offset;
+            }
 
             // RAM stays relatively static
-            const targetRam = (Math.random() > 0.8) ? (Math.random() > 0.5 ? 29 : 27) : 28;
+            const targetRam = (Math.random() > 0.8) ? (Math.random() > 0.5 ? 17 : 15) : 16;
             webRamVal.textContent = `${targetRam}%`;
+            
+            const mockRamCircle = document.getElementById('mock-ram-circle');
+            if (mockRamCircle) {
+                const radius = 28;
+                const circumference = radius * 2 * Math.PI;
+                const offset = circumference - (targetRam / 100 * circumference);
+                mockRamCircle.style.strokeDashoffset = offset;
+            }
         }, 3000);
     }
 

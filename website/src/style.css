@@ -778,7 +778,7 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
+  padding: 10px 0;
   font-size: 11.5px;
   border-bottom: 1px solid var(--color-border);
 }
@@ -823,11 +823,13 @@ p {
 }
 
 input:checked + .slider-mini {
-  background-color: var(--color-text-muted);
+  background-color: var(--color-text-main);
+  border-color: var(--color-text-main);
 }
 
 input:checked + .slider-mini:before {
   transform: translateX(12px);
+  background-color: var(--color-bg);
 }
 
 /* Installation Guide */
