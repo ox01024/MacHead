@@ -45,7 +45,15 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
         guard !isChecking else { return }
         isChecking = true
         
-        let task = URLSession.shared.dataTask(with: appcastURL) { [weak self] data, response, error in
+        // 动态附加当前时间戳作为防缓存 Query 参数，强行穿透本地 URLSession 缓存与云端 CDN 边缘节点缓存
+        var components = URLComponents(url: appcastURL, resolvingAgainstBaseURL: false)
+        components?.queryItems = [URLQueryItem(name: "t", value: "\(Int(Date().timeIntervalSince1970))")]
+        guard let finalURL = components?.url else {
+            isChecking = false
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: finalURL) { [weak self] data, response, error in
             guard let self = self else { return }
             self.isChecking = false
             
