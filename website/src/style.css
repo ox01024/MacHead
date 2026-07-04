@@ -340,28 +340,39 @@ p {
 /* Hero Media Display Case */
 .hero-visual {
   position: relative;
+  perspective: 1200px;
 }
 
 .visual-wrapper {
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--color-bg-input);
-  border: 1px solid var(--color-border);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .hero-img {
-  width: 100%;
-  height: auto;
+  max-height: 470px;
+  width: auto;
   display: block;
-  opacity: 0.95;
+  opacity: 1;
+  /* Premium 3D perspective tilt matching Stripe/Linear style */
+  transform: rotateY(-8deg) rotateX(4deg) rotateZ(1deg);
+  filter: drop-shadow(-15px 20px 35px rgba(38, 37, 30, 0.12));
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+  backface-visibility: hidden;
+}
+
+.hero-img:hover {
+  transform: rotateY(-2deg) rotateX(1.5deg) rotateZ(0.2deg);
+  filter: drop-shadow(-20px 25px 45px rgba(38, 37, 30, 0.18));
 }
 
 .visual-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, transparent 60%, rgba(14, 13, 10, 0.05) 100%);
-  pointer-events: none;
+  display: none;
 }
 
 /* Features Bento Grid Section */
