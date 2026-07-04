@@ -70,6 +70,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
         
+        // Auto-install CLI helper symlink
+        setupCLISymlink()
+        
         // Auto-reconnect if headless mode was previously enabled and autoEnableOnLaunch is true
         let autoEnable = UserDefaults.standard.bool(forKey: "AutoEnableHeadlessOnLaunch")
         let previouslyEnabled = UserDefaults.standard.bool(forKey: "HeadlessModeEnabled")
@@ -79,6 +82,52 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self.updateIcon()
                 self.updateMenu()
             }
+        }
+    }
+    
+    private func setupCLISymlink() {
+        let fileManager = FileManager.default
+        let symlinkPath = "/usr/local/bin/machead"
+        let executablePath = "/Applications/MacHead.app/Contents/MacOS/MacHead"
+        
+        // Ensure the source executable exists (so we only symlink if we are actually installed in /Applications)
+        guard fileManager.fileExists(atPath: executablePath) else {
+            print("CLI Auto-Link: Source executable not found at \(executablePath). Skipping.")
+            return
+        }
+        
+        // Ensure /usr/local/bin directory exists
+        let binDir = "/usr/local/bin"
+        if !fileManager.fileExists(atPath: binDir) {
+            do {
+                try fileManager.createDirectory(atPath: binDir, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("CLI Auto-Link: Failed to create directory \(binDir): \(error)")
+                return
+            }
+        }
+        
+        // If symlink already exists
+        if fileManager.fileExists(atPath: symlinkPath) {
+            // Check if it already points to the correct location
+            if let destination = try? fileManager.destinationOfSymbolicLink(atPath: symlinkPath), destination == executablePath {
+                return // Already set up correctly
+            }
+            // Remove incorrect symlink
+            do {
+                try fileManager.removeItem(atPath: symlinkPath)
+            } catch {
+                print("CLI Auto-Link: Failed to remove old symlink: \(error)")
+                return
+            }
+        }
+        
+        // Create symlink
+        do {
+            try fileManager.createSymbolicLink(atPath: symlinkPath, withDestinationPath: executablePath)
+            print("CLI Auto-Link: Successfully created symlink at \(symlinkPath)")
+        } catch {
+            print("CLI Auto-Link: Failed to create symlink at \(symlinkPath): \(error)")
         }
     }
     

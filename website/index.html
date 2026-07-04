@@ -389,6 +389,27 @@
               <p class="step-desc">如果您希望合盖成为服务器后自动无视并屏蔽一切物理键盘和触控板的误触误按，请按照软件首次运行时的指引，开启系统授权即可。</p>
             </div>
           </div>
+
+          <!-- CLI Helper Setup Card -->
+          <div class="cli-setup-card" style="margin-top: 48px; padding: 28px; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 4px; text-align: left; max-width: 720px; margin-left: auto; margin-right: auto; box-shadow: var(--color-shadow-card);">
+            <div style="display: flex; align-items: flex-start; gap: 16px;">
+              <div style="background: var(--color-bg-input); padding: 10px; border-radius: 4px; border: 1px solid var(--color-border); color: var(--color-text-main);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="4 17 10 11 4 5"></polyline>
+                  <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+              </div>
+              <div style="flex: 1;">
+                <h4 style="font-family: var(--font-serif); font-size: 16px; font-weight: 400; color: var(--color-text-main); margin-bottom: 6px;">启用 CLI 终端控制工具 (可选)</h4>
+                <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 14px;">
+                  如果您需要通过终端命令行远程管控 MacBook 状态，可直接运行以下命令将命令挂载至您的 shell 环境变量中：
+                </p>
+                <div style="position: relative;">
+                  <pre style="background: var(--color-bg-input); padding: 12px 16px; border-radius: 4px; font-family: var(--font-mono); font-size: 12.5px; color: var(--color-text-main); border: 1px solid var(--color-border); overflow-x: auto; margin: 0; line-height: 1.4;">sudo ln -sf /Applications/MacHead.app/Contents/MacOS/MacHead /usr/local/bin/machead</pre>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -5,7 +5,7 @@ let arguments = CommandLine.arguments
 if arguments.count > 1 {
     let arg = arguments[1]
     
-    if arg == "--status" || arg == "-s" {
+    if arg == "--status" || arg == "-s" || arg == "status" {
         let defaults = UserDefaults.standard
         let isHeadless = defaults.bool(forKey: "HeadlessModeEnabled")
         
@@ -17,7 +17,7 @@ if arguments.count > 1 {
         }
         exit(0)
         
-    } else if arg == "--enable" || arg == "-e" {
+    } else if arg == "--enable" || arg == "-e" || arg == "enable" {
         print("Sending enable command to MacHead daemon...")
         DistributedNotificationCenter.default().postNotificationName(
             Notification.Name("com.waffle.MacHead.CLI.enable"),
@@ -27,7 +27,7 @@ if arguments.count > 1 {
         )
         exit(0)
         
-    } else if arg == "--disable" || arg == "-d" {
+    } else if arg == "--disable" || arg == "-d" || arg == "disable" {
         print("Sending disable command to MacHead daemon...")
         DistributedNotificationCenter.default().postNotificationName(
             Notification.Name("com.waffle.MacHead.CLI.disable"),
@@ -37,7 +37,7 @@ if arguments.count > 1 {
         )
         exit(0)
         
-    } else if arg == "--help" || arg == "-h" {
+    } else if arg == "--help" || arg == "-h" || arg == "help" {
         print("MacHead - MacBook Headless Mode Manager (CLI Client)")
         print("Usage:")
         print("  MacHead [options]")
