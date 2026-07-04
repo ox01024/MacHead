@@ -119,7 +119,7 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
         }
     }
     
-    /// 启动应用内静默下载
+    /// 启动应用内下载
     private func startDownload(metadata: UpdateMetadata) {
         guard let url = URL(string: metadata.url) else { return }
         self.activeMetadata = metadata
@@ -147,10 +147,21 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
             self.progressAlert = alert
             self.progressIndicator = indicator
             
-            let response = alert.runModal()
-            if response == .alertFirstButtonReturn {
-                print("OTA Download: User canceled the download.")
-                self.downloadTask?.cancel()
+            // 使用 beginSheetModal 挂载抽屉弹窗（非阻塞主线程，保证下载进度实时渲染）
+            if let window = NSApp.keyWindow {
+                alert.beginSheetModal(for: window) { response in
+                    if response == .alertFirstButtonReturn {
+                        print("OTA Download: User canceled the download.")
+                        self.downloadTask?.cancel()
+                    }
+                }
+            } else {
+                // 兜底降级使用模态弹窗
+                let response = alert.runModal()
+                if response == .alertFirstButtonReturn {
+                    print("OTA Download: User canceled the download.")
+                    self.downloadTask?.cancel()
+                }
             }
         }
     }
@@ -168,10 +179,16 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        // 关闭进度条 Modal 弹窗
+        // 关闭进度条弹窗
         DispatchQueue.main.async {
-            NSApp.stopModal(withCode: .alertSecondButtonReturn)
-            self.progressAlert?.window.close()
+            if let alert = self.progressAlert {
+                if let parent = alert.window.sheetParent {
+                    parent.endSheet(alert.window)
+                } else {
+                    NSApp.stopModal(withCode: .alertSecondButtonReturn)
+                    alert.window.close()
+                }
+            }
         }
         
         // 将下载完的临时文件拷贝到安全的临时存储路径
@@ -196,8 +213,14 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
             if let error = error {
                 let nsError = error as NSError
                 if nsError.domain != NSURLErrorDomain || nsError.code != NSURLErrorCancelled {
-                    NSApp.stopModal(withCode: .alertSecondButtonReturn)
-                    self.progressAlert?.window.close()
+                    if let alert = self.progressAlert {
+                        if let parent = alert.window.sheetParent {
+                            parent.endSheet(alert.window)
+                        } else {
+                            NSApp.stopModal(withCode: .alertSecondButtonReturn)
+                            alert.window.close()
+                        }
+                    }
                     self.handleInstallationFailure(reason: "网络下载失败：\(error.localizedDescription)")
                 }
             }
