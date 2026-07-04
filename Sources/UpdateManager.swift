@@ -341,16 +341,18 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
             NSApp.activate(ignoringOtherApps: true)
             let response = alert.runModal()
             if response == .alertFirstButtonReturn {
-                let appURL = URL(fileURLWithPath: "/Applications/MacHead.app")
-                let configuration = NSWorkspace.OpenConfiguration()
-                NSWorkspace.shared.openApplication(at: appURL, configuration: configuration) { _, error in
-                    if let error = error {
-                        print("Failed to relaunch application: \(error)")
-                    }
-                    DispatchQueue.main.async {
-                        NSApp.terminate(nil)
-                    }
-                }
+                let appPath = "/Applications/MacHead.app"
+                let pid = ProcessInfo.processInfo.processIdentifier
+                
+                // 启动后台守护 shell 进程，等待旧进程完全退出后再 open 启动新版本，防止 macOS 激活冲突
+                let process = Process()
+                process.launchPath = "/bin/sh"
+                process.arguments = ["-c", "while kill -0 \(pid) 2>/dev/null; do sleep 0.1; done; open \"\(appPath)\""]
+                
+                print("OTA Restart: Launching background relaunch helper for pid \(pid)...")
+                process.launch()
+                
+                NSApp.terminate(nil)
             }
         }
     }
@@ -360,7 +362,7 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
         DispatchQueue.main.async {
             let alert = NSAlert()
             alert.messageText = "MacHead 已是最新版本"
-            alert.informativeText = "您当前运行的版本是 v\(self.currentVersion) (Build \(self.currentBuild))，无需更新。"
+            alert.informativeText = "您当前运行的版本是 v\(self.currentVersion)，无需更新。"
             alert.alertStyle = .informational
             alert.addButton(withTitle: "好")
             
