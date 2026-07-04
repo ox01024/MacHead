@@ -72,7 +72,7 @@ body {
 
 /* Container */
 .container {
-  max-width: 1100px;
+  max-width: 1250px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -112,7 +112,7 @@ p {
 }
 
 .nav-container {
-  max-width: 1100px;
+  max-width: 1250px;
   margin: 0 auto;
   padding: 0 24px;
   height: 64px;
@@ -272,15 +272,15 @@ p {
 
 .hero-title {
   font-family: var(--font-serif);
-  font-size: 48px;
-  line-height: 1.15;
+  font-size: 56px;
+  line-height: 1.12;
   margin-bottom: 20px;
   font-weight: 400;
 }
 
 .hero-desc {
-  font-size: 16px;
-  line-height: 1.45;
+  font-size: 17px;
+  line-height: 1.48;
   margin-bottom: 28px;
   color: var(--color-text-muted);
   max-width: 95%;
@@ -348,8 +348,8 @@ p {
 .visual-scene {
   position: relative;
   width: 100%;
-  max-width: 520px;
-  height: 380px;
+  max-width: 590px;
+  height: 430px;
   /* Warm Slate Material Background */
   background: radial-gradient(circle at 50% 50%, #f4f3ed 0%, #dedcd3 100%);
   border: 1px solid rgba(38, 37, 30, 0.08);
@@ -539,7 +539,7 @@ p {
 }
 
 .playground-tabs-container {
-  max-width: 780px;
+  max-width: 880px;
   margin: 0 auto;
 }
 
