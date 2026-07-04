@@ -300,10 +300,21 @@ struct PreferencesView: View {
             Divider()
             
             // Footer
-            HStack {
-                Text("Version 1.0 (Build 1)")
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Version \(UpdateManager.shared.currentVersion) (Build \(UpdateManager.shared.currentBuild))")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    
+                    Button(action: {
+                        UpdateManager.shared.checkForUpdates(silent: false)
+                    }) {
+                        Text("检查更新...")
+                            .foregroundColor(.accentColor)
+                    }
+                    .buttonStyle(.plain)
                     .font(.footnote)
-                    .foregroundColor(.secondary)
+                }
                 Spacer()
                 Button("关闭") {
                     NSApp.keyWindow?.close()

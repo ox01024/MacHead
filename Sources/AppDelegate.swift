@@ -85,6 +85,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self.updateMenu()
             }
         }
+        
+        // Silent background check for updates 3 seconds after launch
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            UpdateManager.shared.checkForUpdates(silent: true)
+        }
     }
     
     private func setupCLISymlink() {
