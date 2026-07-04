@@ -25,7 +25,7 @@ if arguments.count > 1 {
             userInfo: nil,
             deliverImmediately: true
         )
-        Thread.sleep(forTimeInterval: 0.2)
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.2))
         exit(0)
         
     } else if arg == "--disable" || arg == "-d" || arg == "disable" {
@@ -36,7 +36,7 @@ if arguments.count > 1 {
             userInfo: nil,
             deliverImmediately: true
         )
-        Thread.sleep(forTimeInterval: 0.2)
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.2))
         exit(0)
         
     } else if arg == "--help" || arg == "-h" || arg == "help" {
