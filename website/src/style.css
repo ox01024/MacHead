@@ -6,10 +6,10 @@
 /* Custom Color & Font Tokens */
 :root {
   /* Warm Light Theme (Cursor Default) */
-  --color-bg: #f7f7f4;
+  --color-bg: #fbf9fa;
   --color-bg-card: #ffffff;
-  --color-bg-input: #efefe9;
-  --color-navbar-bg: rgba(247, 247, 244, 0.85);
+  --color-bg-input: #f3f1f2;
+  --color-navbar-bg: rgba(251, 249, 250, 0.85);
   
   --color-border: rgba(38, 37, 30, 0.08);
   --color-border-hover: rgba(38, 37, 30, 0.16);
