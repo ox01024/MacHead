@@ -19,7 +19,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             "BatteryThreshold": 20,
             "MuteMicrophoneInHeadlessMode": false,
             "EnableWebServer": false,
-            "DisableKeyboardAndTrackpadInHeadlessMode": false
+            "DisableKeyboardAndTrackpadInHeadlessMode": false,
+            "AutoExitHeadlessOnDisconnect": true,
+            "AutoRestoreHeadlessOnConnect": true
         ])
         
         // Generate random default WebServerPassword if not present
@@ -37,6 +39,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Start Web Server if enabled in preferences
         WebServer.shared.start()
+        
+        // Start monitoring display plug/unplug events globally
+        controller.registerDisplayCallback()
         
         // Create menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)

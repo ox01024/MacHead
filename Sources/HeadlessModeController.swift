@@ -29,9 +29,8 @@ private func displayReconfigurationCallback(
         }
     }
     
-    // 2. 如果是配置完成（不包含 beginConfigurationFlag）且处于无头模式，检查外接屏连接状态
-    if !flags.contains(.beginConfigurationFlag),
-       controller.isHeadlessModeEnabled {
+    // 2. 配置完成且监测已启动，执行显示器变动时的自动退出/恢复逻辑
+    if !flags.contains(.beginConfigurationFlag) && controller.isDisplayMonitoringStarted {
         var count: UInt32 = 0
         if CGGetOnlineDisplayList(0, nil, &count) == .success {
             var displays = [CGDirectDisplayID](repeating: 0, count: Int(count))
@@ -41,10 +40,24 @@ private func displayReconfigurationCallback(
                 NSLog("MacHead: 显示配置变更完成，当前在线外接显示器数量: %d", externalCount)
                 
                 if externalCount == 0 {
-                    // 没有外接显示器了！立即执行安全恢复，退出无头模式！
-                    NSLog("MacHead: 警告！检测到所有外接显示器已断开，启动安全防黑屏恢复...")
-                    DispatchQueue.main.async {
-                        controller.triggerSafeRecovery()
+                    if controller.isHeadlessModeEnabled {
+                        let autoExit = UserDefaults.standard.bool(forKey: "AutoExitHeadlessOnDisconnect")
+                        if autoExit {
+                            NSLog("MacHead: 检测到所有外接显示器已断开，启动安全防黑屏恢复...")
+                            DispatchQueue.main.async {
+                                controller.triggerSafeRecovery()
+                            }
+                        }
+                    }
+                } else {
+                    if !controller.isHeadlessModeEnabled {
+                        let autoRestore = UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect")
+                        if autoRestore {
+                            NSLog("MacHead: 检测到外接显示器已重新接入，自动恢复 Headless 模式...")
+                            DispatchQueue.main.async {
+                                controller.enableHeadlessMode()
+                            }
+                        }
                     }
                 }
             }
@@ -58,6 +71,7 @@ final class HeadlessModeController {
     private(set) var isHeadlessModeEnabled = false
     private var sleepAssertionID: IOPMAssertionID = 0
     private var isCallbackRegistered = false
+    var isDisplayMonitoringStarted = false
     
     private init() {}
     
@@ -75,9 +89,6 @@ final class HeadlessModeController {
         
         // 2. 评估并获取电源断言状态
         evaluatePowerAssertion()
-        
-        // 3. 注册显示器变化回调，一旦内屏意外上线就再次断开
-        registerDisplayCallback()
         
         // 4. 监听系统唤醒，确保唤醒后内屏仍被断开
         NSWorkspace.shared.notificationCenter.addObserver(
@@ -104,9 +115,6 @@ final class HeadlessModeController {
         
         // 2. 释放所有电源断言
         updateSleepAssertion(enabled: false)
-        
-        // 3. 移除显示器变化回调
-        unregisterDisplayCallback()
         
         // 4. 移除唤醒监听
         NSWorkspace.shared.notificationCenter.removeObserver(
@@ -179,19 +187,24 @@ final class HeadlessModeController {
     
     // MARK: - 显示器变化守护
     
-    private func registerDisplayCallback() {
+    func registerDisplayCallback() {
         guard !isCallbackRegistered else { return }
         let userInfo = Unmanaged.passUnretained(self).toOpaque()
         let result = CGDisplayRegisterReconfigurationCallback(displayReconfigurationCallback, userInfo)
         if result == .success {
             isCallbackRegistered = true
             NSLog("MacHead: 成功注册显示器变化回调")
+            // 延时 1 秒启动显示器插拔监测，避开 App 启动时的初始状态回调
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.isDisplayMonitoringStarted = true
+                NSLog("MacHead: 显示器插拔监测已正式启动")
+            }
         } else {
             NSLog("MacHead: 注册显示器变化回调失败: %d", result.rawValue)
         }
     }
     
-    private func unregisterDisplayCallback() {
+    func unregisterDisplayCallback() {
         guard isCallbackRegistered else { return }
         let userInfo = Unmanaged.passUnretained(self).toOpaque()
         let result = CGDisplayRemoveReconfigurationCallback(displayReconfigurationCallback, userInfo)

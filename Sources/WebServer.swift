@@ -182,6 +182,22 @@ final class WebServer {
                 NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
                 self.sendResponse(json: self.getStatusJSON(), connection: connection)
             }
+        } else if method == "POST" && path == "/api/toggle-exit-on-disconnect" {
+            DispatchQueue.main.async {
+                let key = "AutoExitHeadlessOnDisconnect"
+                let val = !UserDefaults.standard.bool(forKey: key)
+                UserDefaults.standard.set(val, forKey: key)
+                NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+                self.sendResponse(json: self.getStatusJSON(), connection: connection)
+            }
+        } else if method == "POST" && path == "/api/toggle-restore-on-connect" {
+            DispatchQueue.main.async {
+                let key = "AutoRestoreHeadlessOnConnect"
+                let val = !UserDefaults.standard.bool(forKey: key)
+                UserDefaults.standard.set(val, forKey: key)
+                NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+                self.sendResponse(json: self.getStatusJSON(), connection: connection)
+            }
         } else {
             sendResponse(statusCode: 404, statusText: "Not Found", content: "Page Not Found".data(using: .utf8)!, contentType: "text/plain", connection: connection)
         }
@@ -231,7 +247,9 @@ final class WebServer {
           "isCharging": \(BatteryManager.shared.isCharging),
           "powerState": "\(BatteryManager.shared.powerState)",
           "cpuUsage": \(cpu),
-          "memoryUsage": \(ram)
+          "memoryUsage": \(ram),
+          "autoExitHeadlessOnDisconnect": \(UserDefaults.standard.bool(forKey: "AutoExitHeadlessOnDisconnect")),
+          "autoRestoreHeadlessOnConnect": \(UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect"))
         }
         """
     }
@@ -701,6 +719,28 @@ final class WebServer {
                                 <span class="slider"></span>
                             </label>
                         </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">断开外接显示器时自动退出</div>
+                                <div class="control-desc">检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="exit-disconnect-toggle" onchange="toggleSetting('exit-disconnect')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">接入外接显示器时自动恢复</div>
+                                <div class="control-desc">有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="restore-connect-toggle" onchange="toggleSetting('restore-connect')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -776,6 +816,8 @@ final class WebServer {
                     document.getElementById('trackpad-toggle').checked = data.trackpadDisabled;
                     document.getElementById('keyboard-toggle').checked = data.keyboardAndTrackpadDisabledInHeadless;
                     document.getElementById('microphone-toggle').checked = data.microphoneMuted;
+                    document.getElementById('exit-disconnect-toggle').checked = data.autoExitHeadlessOnDisconnect;
+                    document.getElementById('restore-connect-toggle').checked = data.autoRestoreHeadlessOnConnect;
                     
                     document.getElementById('battery-capacity').innerText = `${data.batteryCapacity}%`;
                     document.getElementById('charging-indicator').style.display = data.isCharging ? 'inline' : 'none';
@@ -798,6 +840,8 @@ final class WebServer {
                         case 'trackpad': url = '/api/toggle-trackpad'; break;
                         case 'keyboard-headless': url = '/api/toggle-keyboard-headless'; break;
                         case 'microphone': url = '/api/toggle-microphone'; break;
+                        case 'exit-disconnect': url = '/api/toggle-exit-on-disconnect'; break;
+                        case 'restore-connect': url = '/api/toggle-restore-on-connect'; break;
                     }
                     
                     try {

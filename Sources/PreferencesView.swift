@@ -11,6 +11,8 @@ struct DisplayInfo: Hashable {
 struct PreferencesView: View {
     @AppStorage("AutoEnableHeadlessOnLaunch") private var autoEnableOnLaunch = true
     @AppStorage("PreventIdleSleep") private var preventIdleSleep = true
+    @AppStorage("AutoExitHeadlessOnDisconnect") private var autoExitOnDisconnect = true
+    @AppStorage("AutoRestoreHeadlessOnConnect") private var autoRestoreOnConnect = true
     @State private var launchAtLogin = LaunchAtLoginHelper.shared.isEnabled
     @State private var connectedDisplays: [DisplayInfo] = []
     @State private var disableTrackpad = UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")
@@ -249,6 +251,17 @@ struct PreferencesView: View {
                             }
                             .padding(.vertical, 4)
                         }
+                    }
+                    .padding(.vertical, 10)
+                    
+                    Divider()
+                    
+                    Section(header: Text("显示器与 Headless 守护").font(.headline)) {
+                        Toggle("无外接显示器时自动退出 Headless 模式 (防黑屏)", isOn: $autoExitOnDisconnect)
+                            .help("当检测到所有外接显示器断开时，自动退出 Headless 模式并重新开启内屏，防止设备彻底黑屏锁定。")
+                        
+                        Toggle("接入外接显示器时自动恢复 Headless 模式", isOn: $autoRestoreOnConnect)
+                            .help("当有外接显示器重新接入时，若当前未处于无头模式，则自动恢复切断内屏并启用 Headless 模式。")
                     }
                     .padding(.vertical, 10)
                     
