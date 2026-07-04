@@ -335,238 +335,269 @@ final class WebServer {
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>MacHead 控制面板</title>
-            <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
             <style>
                 :root {
-                    --bg-gradient: radial-gradient(circle at top right, #f0f2f5, #e4e7eb);
-                    --text-color: #2e3440;
-                    --text-secondary: #5e6b7c;
-                    --card-bg: rgba(255, 255, 255, 0.7);
-                    --card-border: rgba(0, 0, 0, 0.08);
-                    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-                    --card-hover-border: rgba(0, 114, 255, 0.3);
-                    --control-border: rgba(0, 0, 0, 0.05);
-                    --switch-bg: rgba(0, 0, 0, 0.1);
-                    --ring-bg: rgba(0, 0, 0, 0.05);
-                    --ring-text: #2e3440;
+                    /* Warm Light Theme */
+                    --bg-color: #fbf9fa;
+                    --text-color: #26251e;
+                    --text-muted: rgba(38, 37, 30, 0.55);
+                    --card-bg: #ffffff;
+                    --card-border: rgba(38, 37, 30, 0.08);
+                    --card-border-hover: rgba(38, 37, 30, 0.16);
+                    --card-shadow: 0 8px 30px rgba(38, 37, 30, 0.03);
+                    --input-bg: #f3f1f2;
+                    --toggle-dot-active: #fbf9fa;
+                    
+                    /* Fonts */
+                    --font-serif: 'EB Garamond', Georgia, serif;
+                    --font-sans: 'Inter', system-ui, sans-serif;
                 }
 
                 @media (prefers-color-scheme: dark) {
                     :root {
-                        --bg-gradient: radial-gradient(circle at top right, #1d213a, #0c0e17);
-                        --text-color: #e5e9f0;
-                        --text-secondary: #8f9aa9;
-                        --card-bg: rgba(255, 255, 255, 0.03);
-                        --card-border: rgba(255, 255, 255, 0.08);
-                        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-                        --card-hover-border: rgba(255, 255, 255, 0.15);
-                        --control-border: rgba(255, 255, 255, 0.05);
-                        --switch-bg: rgba(255, 255, 255, 0.1);
-                        --ring-bg: rgba(255, 255, 255, 0.05);
-                        --ring-text: white;
+                        /* Warm Dark Theme */
+                        --bg-color: #14120b;
+                        --text-color: #edecec;
+                        --text-muted: rgba(237, 236, 236, 0.55);
+                        --card-bg: #1c1b14;
+                        --card-border: rgba(237, 236, 236, 0.08);
+                        --card-border-hover: rgba(237, 236, 236, 0.16);
+                        --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+                        --input-bg: #0b0a05;
+                        --toggle-dot-active: #14120b;
                     }
                 }
 
                 body[data-theme="light"] {
-                    --bg-gradient: radial-gradient(circle at top right, #f0f2f5, #e4e7eb);
-                    --text-color: #2e3440;
-                    --text-secondary: #5e6b7c;
-                    --card-bg: rgba(255, 255, 255, 0.7);
-                    --card-border: rgba(0, 0, 0, 0.08);
-                    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-                    --card-hover-border: rgba(0, 114, 255, 0.3);
-                    --control-border: rgba(0, 0, 0, 0.05);
-                    --switch-bg: rgba(0, 0, 0, 0.1);
-                    --ring-bg: rgba(0, 0, 0, 0.05);
-                    --ring-text: #2e3440;
+                    --bg-color: #fbf9fa;
+                    --text-color: #26251e;
+                    --text-muted: rgba(38, 37, 30, 0.55);
+                    --card-bg: #ffffff;
+                    --card-border: rgba(38, 37, 30, 0.08);
+                    --card-border-hover: rgba(38, 37, 30, 0.16);
+                    --card-shadow: 0 8px 30px rgba(38, 37, 30, 0.03);
+                    --input-bg: #f3f1f2;
+                    --toggle-dot-active: #fbf9fa;
                 }
 
                 body[data-theme="dark"] {
-                    --bg-gradient: radial-gradient(circle at top right, #1d213a, #0c0e17);
-                    --text-color: #e5e9f0;
-                    --text-secondary: #8f9aa9;
-                    --card-bg: rgba(255, 255, 255, 0.03);
-                    --card-border: rgba(255, 255, 255, 0.08);
-                    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-                    --card-hover-border: rgba(255, 255, 255, 0.15);
-                    --control-border: rgba(255, 255, 255, 0.05);
-                    --switch-bg: rgba(255, 255, 255, 0.1);
-                    --ring-bg: rgba(255, 255, 255, 0.05);
-                    --ring-text: white;
+                    --bg-color: #14120b;
+                    --text-color: #edecec;
+                    --text-muted: rgba(237, 236, 236, 0.55);
+                    --card-bg: #1c1b14;
+                    --card-border: rgba(237, 236, 236, 0.08);
+                    --card-border-hover: rgba(237, 236, 236, 0.16);
+                    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+                    --input-bg: #0b0a05;
+                    --toggle-dot-active: #14120b;
                 }
 
                 * { box-sizing: border-box; margin: 0; padding: 0; }
+                
                 body {
-                    font-family: 'Outfit', sans-serif;
-                    background: var(--bg-gradient);
+                    font-family: var(--font-sans);
+                    background-color: var(--bg-color);
                     color: var(--text-color);
                     min-height: 100vh;
-                    padding: 40px 20px;
+                    padding: 60px 24px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    transition: background 0.3s, color 0.3s;
+                    transition: background-color 0.3s, color 0.3s;
                 }
+                
                 .container {
                     width: 100%;
-                    max-width: 900px;
+                    max-width: 800px;
                 }
+                
                 header {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     margin-bottom: 40px;
                     width: 100%;
+                    border-bottom: 1px solid var(--card-border);
+                    padding-bottom: 16px;
                 }
+                
                 header h1 {
-                    font-size: 28px;
-                    font-weight: 700;
-                    letter-spacing: -0.5px;
-                    background: linear-gradient(135deg, #00f0ff, #0072ff);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
+                    font-family: var(--font-serif);
+                    font-size: 26px;
+                    font-weight: 400;
+                    color: var(--text-color);
                 }
+                
                 .grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                     gap: 20px;
                     margin-bottom: 20px;
                 }
+                
                 .card {
                     background: var(--card-bg);
-                    backdrop-filter: blur(20px);
-                    -webkit-backdrop-filter: blur(20px);
                     border: 1px solid var(--card-border);
-                    border-radius: 24px;
+                    border-radius: 4px;
                     padding: 24px;
                     box-shadow: var(--card-shadow);
-                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    transition: border-color 0.15s ease, transform 0.15s ease;
                 }
+                
                 .card:hover {
-                    border-color: var(--card-hover-border);
-                    transform: translateY(-4px);
+                    border-color: var(--card-border-hover);
                 }
+                
                 .card-title {
-                    font-size: 14px;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                    color: var(--text-secondary);
+                    font-family: var(--font-serif);
+                    font-size: 16px;
+                    font-weight: 400;
+                    color: var(--text-color);
                     margin-bottom: 16px;
                 }
+                
                 .card-value {
-                    font-size: 32px;
-                    font-weight: 700;
-                    color: var(--ring-text);
+                    font-family: var(--font-sans);
+                    font-size: 28px;
+                    font-weight: 500;
+                    color: var(--text-color);
                     display: flex;
                     align-items: center;
                     gap: 8px;
                 }
+                
                 .control-row {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     padding: 16px 0;
-                    border-bottom: 1px solid var(--control-border);
+                    border-bottom: 1px solid var(--card-border);
                 }
+                
                 .control-row:last-child {
                     border-bottom: none;
                 }
+                
                 .control-label {
-                    font-weight: 600;
-                    font-size: 16px;
+                    font-weight: 500;
+                    font-size: 14.5px;
                 }
+                
                 .control-desc {
                     font-size: 12px;
-                    color: var(--text-secondary);
+                    color: var(--text-muted);
                     margin-top: 4px;
                 }
+                
                 .status-dot {
-                    width: 10px;
-                    height: 10px;
+                    width: 8px;
+                    height: 8px;
                     border-radius: 50%;
                     display: inline-block;
                 }
+                
                 .status-dot.active {
-                    background-color: #00e676;
-                    box-shadow: 0 0 12px #00e676;
-                }
-                .status-dot.inactive {
-                    background-color: #ff5252;
-                    box-shadow: 0 0 12px #ff5252;
+                    background-color: #42b883;
                 }
                 
-                /* Toggle Switch */
+                .status-dot.inactive {
+                    background-color: #ff5252;
+                }
+                
+                /* Minimal Switch Slider */
                 .switch {
                     position: relative;
                     display: inline-block;
-                    width: 48px;
-                    height: 28px;
+                    width: 32px;
+                    height: 18px;
                 }
+                
                 .switch input {
                     opacity: 0;
                     width: 0;
                     height: 0;
                 }
+                
                 .slider {
                     position: absolute;
                     cursor: pointer;
                     top: 0; left: 0; right: 0; bottom: 0;
-                    background-color: var(--switch-bg);
-                    transition: .3s;
-                    border-radius: 34px;
+                    background-color: var(--input-bg);
+                    border: 1px solid var(--card-border);
+                    transition: .15s;
+                    border-radius: 18px;
                 }
+                
                 .slider:before {
                     position: absolute;
                     content: "";
-                    height: 20px;
-                    width: 20px;
-                    left: 4px;
-                    bottom: 4px;
-                    background-color: white;
-                    transition: .3s;
+                    height: 10px;
+                    width: 10px;
+                    left: 3px;
+                    bottom: 3px;
+                    background-color: var(--text-color);
+                    transition: .15s;
                     border-radius: 50%;
                 }
+                
                 input:checked + .slider {
-                    background-image: linear-gradient(135deg, #00f0ff, #0072ff);
-                }
-                input:checked + .slider:before {
-                    transform: translateX(20px);
+                    background-color: var(--text-color);
+                    border-color: var(--text-color);
                 }
                 
-                /* Gauges */
+                input:checked + .slider:before {
+                    transform: translateX(14px);
+                    background-color: var(--toggle-dot-active);
+                }
+                
+                /* Gauges container */
                 .gauge-container {
                     display: flex;
                     justify-content: space-around;
                     gap: 20px;
                 }
+                
                 .gauge-card {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                 }
+                
                 .progress-ring {
                     margin-bottom: 12px;
                 }
+                
                 .progress-ring__circle-bg {
-                    stroke: var(--ring-bg);
+                    stroke: var(--input-bg);
                 }
+                
                 .progress-ring__circle {
                     transition: stroke-dashoffset 0.35s;
                     transform: rotate(-90deg);
                     transform-origin: 50% 50%;
-                    stroke: url(#gradient);
                 }
+                
+                #cpu-circle {
+                    stroke: #42b883; /* Green gauge */
+                }
+                
+                #ram-circle {
+                    stroke: #e0a96d; /* Yellow gauge */
+                }
+                
                 .gauge-label {
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: var(--text-secondary);
+                    font-size: 13px;
+                    color: var(--text-muted);
                 }
+                
                 .gauge-val-text {
-                    font-size: 20px;
-                    font-weight: 700;
-                    fill: var(--ring-text);
-                    color: var(--ring-text);
+                    font-family: var(--font-sans);
+                    font-size: 18px;
+                    font-weight: 500;
+                    fill: var(--text-color);
                 }
                 
                 /* Theme Toggle Button */
@@ -574,29 +605,29 @@ final class WebServer {
                     background: var(--card-bg);
                     border: 1px solid var(--card-border);
                     color: var(--text-color);
-                    padding: 8px 16px;
-                    border-radius: 20px;
+                    padding: 6px 14px;
+                    border-radius: 4px;
                     cursor: pointer;
-                    font-size: 14px;
-                    font-weight: 600;
-                    transition: all 0.3s;
-                    box-shadow: var(--card-shadow);
+                    font-size: 12px;
+                    font-weight: 500;
+                    transition: all 0.15s;
                     display: flex;
                     align-items: center;
                     gap: 6px;
                 }
+                
                 .theme-btn:hover {
-                    border-color: var(--card-hover-border);
-                    transform: scale(1.05);
+                    border-color: var(--card-border-hover);
+                    background: var(--input-bg);
                 }
             </style>
         </head>
         <body>
             <div class="container">
                 <header>
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div style="font-size:36px"></div>
-                        <h1>MacHead Remote 控制面板</h1>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px; font-family: var(--font-serif);"></span>
+                        <h1>MacHead 远程控制台</h1>
                     </div>
                     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
                         <span id="theme-icon">🌙</span>
@@ -610,26 +641,20 @@ final class WebServer {
                     <div class="gauge-container">
                         <div class="gauge-card">
                             <svg class="progress-ring" width="120" height="120">
-                                <defs>
-                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#00f0ff" />
-                                        <stop offset="100%" stop-color="#0072ff" />
-                                    </linearGradient>
-                                </defs>
-                                <circle class="progress-ring__circle-bg" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <circle class="progress-ring__circle" id="cpu-circle" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <text x="60" y="65" text-anchor="middle" class="gauge-val-text" id="cpu-text">0%</text>
+                                <circle class="progress-ring__circle-bg" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
+                                <circle class="progress-ring__circle" id="cpu-circle" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
+                                <text x="60" y="66" text-anchor="middle" class="gauge-val-text" id="cpu-text">0%</text>
                             </svg>
                             <div class="gauge-label">CPU 占用率</div>
                         </div>
                         
                         <div class="gauge-card">
                             <svg class="progress-ring" width="120" height="120">
-                                <circle class="progress-ring__circle-bg" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <circle class="progress-ring__circle" id="ram-circle" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
-                                <text x="60" y="65" text-anchor="middle" class="gauge-val-text" id="ram-text">0%</text>
+                                <circle class="progress-ring__circle-bg" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
+                                <circle class="progress-ring__circle" id="ram-circle" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
+                                <text x="60" y="66" text-anchor="middle" class="gauge-val-text" id="ram-text">0%</text>
                             </svg>
-                            <div class="gauge-label">内存 压力</div>
+                            <div class="gauge-label">内存压力</div>
                         </div>
                     </div>
                 </div>
@@ -637,24 +662,24 @@ final class WebServer {
                 <div class="grid">
                     <!-- Mode Card -->
                     <div class="card">
-                        <div class="card-title">系统状态</div>
+                        <div class="card-title">系统运行状态</div>
                         <div class="card-value" id="mode-text">
                             <span class="status-dot" id="mode-dot"></span>
-                            <span id="mode-label">正在连接...</span>
+                            <span id="mode-label" style="font-size: 20px; font-weight: 500; margin-left: 6px;">正在连接...</span>
                         </div>
-                        <div style="margin-top:12px; font-size:13px; color:#8f9aa9;">
-                            工作站模式决定内置显示器和供电断言是否锁死。
+                        <div style="margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height: 1.4;">
+                            工作站模式决定内置显示器和供电唤醒断言是否锁死。
                         </div>
                     </div>
                     
                     <!-- Battery Card -->
                     <div class="card">
-                        <div class="card-title">电池与电源</div>
+                        <div class="card-title">电池与电源保护</div>
                         <div class="card-value">
                             <span id="battery-capacity">--%</span>
-                            <span id="charging-indicator" style="font-size:20px; color:#ffd60a; display:none;">⚡️</span>
+                            <span id="charging-indicator" style="font-size:18px; color:#e0a96d; display:none; margin-left: 8px;">⚡️</span>
                         </div>
-                        <div style="margin-top:12px; font-size:13px; color:#8f9aa9;" id="power-source-text">
+                        <div style="margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height: 1.4;" id="power-source-text">
                             正在查询电源状态...
                         </div>
                     </div>
@@ -663,12 +688,12 @@ final class WebServer {
                 <div class="grid">
                     <!-- Controls Card -->
                     <div class="card" style="grid-column: span 2;">
-                        <div class="card-title">设备控制</div>
+                        <div class="card-title">设备远程控制</div>
                         
                         <div class="control-row">
                             <div>
                                 <div class="control-label">MacBook Headless 模式</div>
-                                <div class="control-desc">切断内置屏幕以模拟独立 Mac Studio 行为。</div>
+                                <div class="control-desc">关闭内置屏幕以模拟独立 Mac Studio 行为。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="headless-toggle" onchange="toggleSetting('headless')">
