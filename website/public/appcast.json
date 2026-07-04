@@ -2,6 +2,6 @@
   "version": "1.1.0",
   "build": 2,
   "pubDate": "2026-07-04",
-  "url": "https://download.machead.com/releases/MacHead-v1.1.0-macos-universal.dmg",
+  "url": "http://localhost:5173/MacHead-v0.1.0-macos-universal.dmg",
   "releaseNotes": "1. 升级了局域网 Web 控制台到最新 Cursor 极简人文设计风格；\n2. 解决了终端 CLI 工具跨进程通知时序 Bug；\n3. 优化了全局容器排版显示比例。"
 }
