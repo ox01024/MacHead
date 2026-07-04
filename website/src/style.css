@@ -471,7 +471,7 @@ p {
   display: grid !important;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 28px;
-  align-items: center;
+  align-items: start;
 }
 
 .bento-split-left {
