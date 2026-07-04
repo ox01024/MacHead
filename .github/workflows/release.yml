@@ -48,6 +48,9 @@ jobs:
         run: |
           TAG_NAME="${{ steps.package.outputs.tag_name }}"
           
+          # 强制从远程获取完整的附注标签对象，防止 actions/checkout 只拉取 commit 导致日志被替换为 commit message
+          git fetch origin refs/tags/${TAG_NAME}:refs/tags/${TAG_NAME} --force
+          
           # 提取 Git Tag 描述作为用户升级日志 (User-facing Notes)
           USER_NOTES=$(git tag -l --format='%(contents)' "$TAG_NAME")
           if [ -z "$USER_NOTES" ]; then
