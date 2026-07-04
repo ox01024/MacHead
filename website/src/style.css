@@ -413,6 +413,42 @@ p {
   grid-column: span 2;
 }
 
+/* Split Bento Card styling */
+.bento-split {
+  display: grid !important;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.bento-split-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bento-split-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.bento-screenshot-wrapper {
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  background: var(--color-bg-input);
+}
+
+.bento-screenshot {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .bento-icon-box {
   width: 36px;
   height: 36px;
@@ -971,6 +1007,10 @@ input:checked + .slider-mini:before {
   }
   .bento-w2 {
     grid-column: span 1;
+  }
+  .bento-split {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
   }
   
   .install-steps {
