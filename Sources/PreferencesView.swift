@@ -225,6 +225,16 @@ struct PreferencesView: View {
                         
                         if enableWebServer {
                             HStack {
+                                Text("管理账号:")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Text("admin")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                            .padding(.vertical, 2)
+                            
+                            HStack {
                                 Text("管理密码:")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
@@ -238,7 +248,7 @@ struct PreferencesView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 150)
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 2)
                             
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("本地局域网访问地址:")
