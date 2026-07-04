@@ -1,4 +1,4 @@
-name: Release Build
+name: Build and Release OTA
 
 on:
   push:
@@ -9,52 +9,97 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  release:
     runs-on: macos-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取完整 Git 历史以生成 Technical Release Notes
 
-      - name: Setup Xcode SDK
+      - name: Build Application 🔧
         run: |
-          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-          xcrun --show-sdk-path
-
-      - name: Build Universal Binary
-        run: |
-          chmod +x build.sh
+          chmod +x ./build.sh
           ./build.sh
 
-      - name: Package Artifacts
+      - name: Package DMG 📦
+        id: package
         run: |
-          # 1. Package ZIP
-          zip -ry MacHead-${{ github.ref_name }}.zip MacHead.app
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          DMG_NAME="MacHead-${TAG_NAME}-macos-universal.dmg"
+          echo "Packaging DMG: ${DMG_NAME}..."
+          
+          # 将编译好的 MacHead.app 打包为 DMG
+          hdiutil create -fs HFS+ -srcfolder "MacHead.app" -volname "MacHead" "${DMG_NAME}"
+          
+          echo "dmg_name=${DMG_NAME}" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
-          # 2. Package DMG
-          mkdir -p dmg_temp
-          cp -R MacHead.app dmg_temp/
-          ln -s /Applications dmg_temp/Applications
-          hdiutil create -volname "MacHead" -srcfolder dmg_temp -ov -format UDZO MacHead-${{ github.ref_name }}-macos-universal.dmg
-          rm -rf dmg_temp
+      - name: Upload DMG to Cloudflare R2 🚀
+        run: |
+          npm install -g wrangler
+          wrangler r2 object put "headlessmac-releases/${{ steps.package.outputs.dmg_name }}" --file="${{ steps.package.outputs.dmg_name }}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Create Release
+      - name: Update appcast.json (User Release Notes) 📝
+        id: appcast
+        run: |
+          TAG_NAME="${{ steps.package.outputs.tag_name }}"
+          
+          # 提取 Git Tag 描述作为用户升级日志 (User-facing Notes)
+          USER_NOTES=$(git tag -l --format='%(contents)' "$TAG_NAME")
+          if [ -z "$USER_NOTES" ]; then
+            USER_NOTES="优化了系统运行效率，修复了部分已知问题。"
+          fi
+          
+          PUB_DATE=$(date +%Y-%m-%d)
+          
+          # 将提取的信息传递给 Python 脚本进行安全的 JSON 重写
+          export TAG_NAME USER_NOTES PUB_DATE
+          python3 -c "
+          import json
+          import os
+          
+          tag = os.environ['TAG_NAME']
+          version = tag.lstrip('v')
+          notes = os.environ['USER_NOTES']
+          pub_date = os.environ['PUB_DATE']
+          
+          appcast_path = 'website/public/appcast.json'
+          with open(appcast_path, 'r') as f:
+              data = json.load(f)
+              
+          current_build = int(data.get('build', 1))
+          
+          data['version'] = version
+          data['build'] = current_build + 1
+          data['pubDate'] = pub_date
+          data['url'] = f'https://releases.headlessmac.com/MacHead-{tag}-macos-universal.dmg'
+          data['releaseNotes'] = notes
+          
+          with open(appcast_path, 'w') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+          "
+          echo "Successfully updated appcast.json"
+
+      - name: Commit and Push appcast.json 💾
+        run: |
+          TAG_NAME="${{ steps.package.outputs.tag_name }}"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add website/public/appcast.json
+          git commit -m "chore(release): update appcast.json for ${TAG_NAME} [skip ci]"
+          git push origin HEAD:main
+
+      - name: Create GitHub Release (Technical Release Notes) 🎁
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            MacHead-${{ github.ref_name }}.zip
-            MacHead-${{ github.ref_name }}-macos-universal.dmg
-          draft: false
-          prerelease: false
-          name: MacHead ${{ github.ref_name }}
+          files: ${{ steps.package.outputs.dmg_name }}
+          generate_release_notes: true # 自动根据 commit 历史生成 Technical 技术日志
           body: |
-            MacHead ${{ github.ref_name }} compiled dynamically via GitHub Actions CI pipeline.
-
-            ### Key Features:
-            - **Universal Binary**: Native support for both Apple Silicon (arm64) and Intel (x86_64) architectures.
-            - **Headless Mode**: Disables internal MacBook display dynamically via private SkyLight APIs.
-            - **Prevent Idle Sleep**: Prevent MacBook sleep in clamshell server configurations.
-            - **Battery Protection**: Automatically releases assertions and sleeps when running on low battery (under threshold).
-            - **Microphone Privacy Mute**: Automates input muting on entering headless mode.
-            - **Input Protection**: Seize built-in trackpad and hooks CGEventTap keyboard input interception to drop internal keypresses while maintaining external inputs.
-            - **Web Dashboard**: Local responsive control dashboard on port 8080 with resource graphs and randomized Basic Authentication protection.
-            - **CLI Tool**: Commands integration supporting Unix signals and Distributed IPC notifications.
+            ## MacHead ${{ steps.package.outputs.tag_name }}
+            
+            技术变更细节请查看下方自动生成的提交日志。
+            User-facing release notes are served via OTA update channel.

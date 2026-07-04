@@ -13,7 +13,7 @@ final class UpdateManager: NSObject, URLSessionDownloadDelegate {
     static let shared = UpdateManager()
     
     // Cloudflare R2 或是自定义子域名的 appcast.json 地址
-    private let appcastURL = URL(string: "http://localhost:5173/appcast.json")!
+    private let appcastURL = URL(string: "https://headlessmac.com/appcast.json")!
     
     private var isChecking = false
     private var activeMetadata: UpdateMetadata?
