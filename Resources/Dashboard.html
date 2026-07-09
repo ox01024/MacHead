@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>MacHead 控制面板</title>
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                :root {
+                    /* Warm Light Theme */
+                    --bg-color: #fbf9fa;
+                    --text-color: #26251e;
+                    --text-muted: rgba(38, 37, 30, 0.55);
+                    --card-bg: #ffffff;
+                    --card-border: rgba(38, 37, 30, 0.08);
+                    --card-border-hover: rgba(38, 37, 30, 0.16);
+                    --card-shadow: 0 8px 30px rgba(38, 37, 30, 0.03);
+                    --input-bg: #f3f1f2;
+                    --toggle-dot-active: #fbf9fa;
+                    --progress-bg: #f3f1f2;
+                    --brand-color: #007aff;
+                    
+                    /* Fonts */
+                    --font-serif: 'EB Garamond', Georgia, serif;
+                    --font-sans: 'Inter', system-ui, sans-serif;
+                }
+
+                @media (prefers-color-scheme: dark) {
+                    :root {
+                        /* Warm Dark Theme */
+                        --bg-color: #14120b;
+                        --text-color: #edecec;
+                        --text-muted: rgba(237, 236, 236, 0.55);
+                        --card-bg: #1c1b14;
+                        --card-border: rgba(237, 236, 236, 0.08);
+                        --card-border-hover: rgba(237, 236, 236, 0.16);
+                        --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+                        --input-bg: #0b0a05;
+                        --toggle-dot-active: #14120b;
+                        --progress-bg: #0b0a05;
+                    }
+                }
+
+                body[data-theme="light"] {
+                    --bg-color: #fbf9fa;
+                    --text-color: #26251e;
+                    --text-muted: rgba(38, 37, 30, 0.55);
+                    --card-bg: #ffffff;
+                    --card-border: rgba(38, 37, 30, 0.08);
+                    --card-border-hover: rgba(38, 37, 30, 0.16);
+                    --card-shadow: 0 8px 30px rgba(38, 37, 30, 0.03);
+                    --input-bg: #f3f1f2;
+                    --toggle-dot-active: #fbf9fa;
+                    --progress-bg: #f3f1f2;
+                }
+
+                body[data-theme="dark"] {
+                    --bg-color: #14120b;
+                    --text-color: #edecec;
+                    --text-muted: rgba(237, 236, 236, 0.55);
+                    --card-bg: #1c1b14;
+                    --card-border: rgba(237, 236, 236, 0.08);
+                    --card-border-hover: rgba(237, 236, 236, 0.16);
+                    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+                    --input-bg: #0b0a05;
+                    --toggle-dot-active: #14120b;
+                    --progress-bg: #0b0a05;
+                }
+
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                
+                body {
+                    font-family: var(--font-sans);
+                    background-color: var(--bg-color);
+                    color: var(--text-color);
+                    min-height: 100vh;
+                    padding: 40px 20px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    transition: background-color 0.3s, color 0.3s;
+                }
+                
+                .container {
+                    width: 100%;
+                    max-width: 1000px;
+                }
+                
+                header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 24px;
+                    width: 100%;
+                    border-bottom: 1px solid var(--card-border);
+                    padding-bottom: 16px;
+                }
+                
+                header h1 {
+                    font-family: var(--font-serif);
+                    font-size: 26px;
+                    font-weight: 400;
+                    color: var(--text-color);
+                }
+
+                /* Alert Banners */
+                .alert-container {
+                    width: 100%;
+                    margin-bottom: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .alert {
+                    padding: 14px 18px;
+                    border-radius: 6px;
+                    font-size: 13.5px;
+                    line-height: 1.5;
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 12px;
+                    border: 1px solid transparent;
+                    animation: fadeIn 0.3s ease;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-8px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                .alert.warning {
+                    background-color: rgba(224, 169, 109, 0.12);
+                    border-color: rgba(224, 169, 109, 0.3);
+                    color: var(--text-color);
+                }
+
+                .alert.danger {
+                    background-color: rgba(255, 82, 82, 0.12);
+                    border-color: rgba(255, 82, 82, 0.3);
+                    color: var(--text-color);
+                }
+
+                .alert-icon {
+                    font-size: 16px;
+                    flex-shrink: 0;
+                }
+
+                .alert-content {
+                    flex-grow: 1;
+                }
+                
+                .grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                    gap: 20px;
+                    margin-bottom: 20px;
+                }
+                
+                .card {
+                    background: var(--card-bg);
+                    border: 1px solid var(--card-border);
+                    border-radius: 6px;
+                    padding: 20px;
+                    box-shadow: var(--card-shadow);
+                    transition: border-color 0.15s ease, transform 0.15s ease;
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                .card:hover {
+                    border-color: var(--card-border-hover);
+                }
+                
+                .card-title {
+                    font-family: var(--font-serif);
+                    font-size: 16px;
+                    font-weight: 400;
+                    color: var(--text-color);
+                    margin-bottom: 8px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .card-subtitle {
+                    font-size: 11.5px;
+                    color: var(--text-muted);
+                    margin-bottom: 12px;
+                }
+
+                .peak-label {
+                    font-family: var(--font-sans);
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    user-select: none;
+                }
+
+                .peak-label:hover {
+                    color: var(--text-color);
+                }
+                
+                .card-value {
+                    font-family: var(--font-sans);
+                    font-size: 26px;
+                    font-weight: 500;
+                    color: var(--text-color);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 8px;
+                }
+
+                .card-subtitle {
+                    font-size: 11.5px;
+                    color: var(--text-muted);
+                    margin-top: -4px;
+                    margin-bottom: 6px;
+                    font-weight: 500;
+                }
+                
+                .control-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 16px 0;
+                    border-bottom: 1px solid var(--card-border);
+                }
+                
+                .control-row:last-child {
+                    border-bottom: none;
+                }
+                
+                .control-label {
+                    font-weight: 500;
+                    font-size: 14.5px;
+                }
+                
+                .control-desc {
+                    font-size: 12px;
+                    color: var(--text-muted);
+                    margin-top: 4px;
+                }
+                
+                .status-dot {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    display: inline-block;
+                }
+
+                .status-dot.active, .status-dot.nominal {
+                    background-color: #42b883;
+                    box-shadow: 0 0 8px rgba(66, 184, 131, 0.4);
+                }
+                
+                .status-dot.inactive, .status-dot.critical {
+                    background-color: #ff5252;
+                    box-shadow: 0 0 8px rgba(255, 82, 82, 0.4);
+                }
+
+                .status-dot.fair {
+                    background-color: #e0a96d;
+                    box-shadow: 0 0 8px rgba(224, 169, 109, 0.4);
+                }
+
+                .status-dot.serious {
+                    background-color: #ff9500;
+                    box-shadow: 0 0 8px rgba(255, 149, 0, 0.4);
+                }
+
+                /* Pulse Dot Animation */
+                .pulse-dot {
+                    width: 6px;
+                    height: 6px;
+                    background-color: #42b883;
+                    border-radius: 50%;
+                    display: inline-block;
+                    position: relative;
+                }
+
+                .pulse-dot::after {
+                    content: '';
+                    width: 100%;
+                    height: 100%;
+                    background-color: #42b883;
+                    border-radius: 50%;
+                    position: absolute;
+                    top: 0; left: 0;
+                    animation: pulse 2.5s infinite;
+                    opacity: 0.5;
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 0.5; }
+                    100% { transform: scale(3.5); opacity: 0; }
+                }
+                
+                /* Minimal Switch Slider */
+                .switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 32px;
+                    height: 18px;
+                    flex-shrink: 0;
+                }
+                
+                .switch input {
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+                
+                .slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    background-color: var(--input-bg);
+                    border: 1px solid var(--card-border);
+                    transition: .15s;
+                    border-radius: 18px;
+                }
+                
+                .slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 10px;
+                    width: 10px;
+                    left: 3px;
+                    bottom: 3px;
+                    background-color: var(--text-color);
+                    transition: .15s;
+                    border-radius: 50%;
+                }
+                
+                input:checked + .slider {
+                    background-color: var(--text-color);
+                    border-color: var(--text-color);
+                }
+                
+                input:checked + .slider:before {
+                    transform: translateX(14px);
+                    background-color: var(--toggle-dot-active);
+                }
+
+                /* Horizontal Progress Bars */
+                .progress-bar-container {
+                    width: 100%;
+                    height: 6px;
+                    background-color: var(--progress-bg);
+                    border-radius: 3px;
+                    overflow: hidden;
+                    margin-top: 8px;
+                    border: 1px solid var(--card-border);
+                }
+
+                .progress-bar {
+                    height: 100%;
+                    width: 0%;
+                    border-radius: 3px;
+                    transition: width 0.4s ease, background-color 0.4s ease;
+                }
+
+                .progress-bar.green {
+                    background: linear-gradient(90deg, #42b883, #38ef7d);
+                }
+
+                .progress-bar.yellow {
+                    background: linear-gradient(90deg, #f1a94e, #f1d44e);
+                }
+
+                .progress-bar.red {
+                    background: linear-gradient(90deg, #ff5252, #f857a6);
+                    animation: pulse-red 2s infinite;
+                }
+
+                @keyframes pulse-red {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.7; }
+                }
+
+                /* Sparkline chart SVG design */
+                .sparkline-container {
+                    width: 100%;
+                    height: 45px;
+                    margin-top: 12px;
+                    margin-bottom: 2px;
+                    opacity: 0.85;
+                    position: relative;
+                    overflow: visible;
+                }
+
+                .hover-crosshair {
+                    display: none;
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    width: 1px;
+                    border-left: 1px dashed var(--text-muted);
+                    pointer-events: none;
+                    opacity: 0.6;
+                }
+
+                .hover-dot {
+                    display: none;
+                    position: absolute;
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    pointer-events: none;
+                    transform: translate(-50%, -50%);
+                    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+                }
+
+                .hover-tooltip {
+                    display: none;
+                    position: absolute;
+                    top: -45px;
+                    transform: translateX(-50%);
+                    background: rgba(30, 30, 35, 0.95);
+                    border: 1px solid rgba(255, 255, 255, 0.15);
+                    border-radius: 4px;
+                    padding: 6px 10px;
+                    font-size: 10px;
+                    pointer-events: none;
+                    white-space: nowrap;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                    z-index: 100;
+                    color: #ffffff;
+                    line-height: 1.4;
+                    text-align: left;
+                }
+                
+                .hover-tooltip .tooltip-time {
+                    font-size: 8.5px;
+                    color: rgba(255, 255, 255, 0.6);
+                    font-weight: bold;
+                    border-bottom: 1px solid rgba(255,255,255,0.15);
+                    margin-bottom: 3px;
+                    padding-bottom: 3px;
+                }
+
+                .sparkline-path {
+                    fill: none;
+                    stroke-width: 1.5;
+                    stroke-linecap: round;
+                    stroke-linejoin: round;
+                    transition: d 0.3s ease;
+                }
+
+                .sparkline-fill {
+                    stroke: none;
+                    transition: d 0.3s ease;
+                }
+                
+                /* Theme Toggle Button */
+                .theme-btn {
+                    background: var(--card-bg);
+                    border: 1px solid var(--card-border);
+                    color: var(--text-color);
+                    padding: 6px 14px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 500;
+                    transition: all 0.15s;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                
+                .theme-btn:hover {
+                    border-color: var(--card-border-hover);
+                    background: var(--input-bg);
+                }
+
+                .meta-table {
+                    width: 100%;
+                    font-size: 12.5px;
+                    border-collapse: collapse;
+                }
+
+                .meta-table td {
+                    padding: 6px 0;
+                    border-bottom: 1px solid rgba(237, 236, 236, 0.03);
+                }
+
+                .meta-table tr:last-child td {
+                    border-bottom: none;
+                }
+
+                .meta-table td.label {
+                    color: var(--text-muted);
+                }
+
+                .meta-table td.val {
+                    text-align: right;
+                    font-weight: 500;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <header>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 24px; font-family: var(--font-serif);"></span>
+                        <h1>MacHead 远程控制台</h1>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
+                            <span id="theme-icon-container" style="display: flex; align-items: center;"></span>
+                            <span id="theme-text">深色模式</span>
+                        </button>
+                        <a href="/logout" style="text-decoration: none;">
+                            <button class="theme-btn">
+                                <span style="display: flex; align-items: center;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                                </span>
+                                <span>退出登录</span>
+                            </button>
+                        </a>
+                    </div>
+                </header>
+
+                <!-- Warning Alerts Container -->
+                <div class="alert-container" id="alert-box">
+                    <!-- Alerts dynamically inserted here -->
+                </div>
+                
+                <div class="grid">
+                    <!-- CPU Card -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span>CPU 占用率</span>
+                            <span class="peak-label" id="cpu-peak" title="双击重置" ondblclick="resetPeak('cpu')">峰值: 0%</span>
+                        </div>
+                        <div class="card-value" id="cpu-text">0%</div>
+                        <div class="card-subtitle" id="cpu-temp-text">温度: -- °C</div>
+                        <div class="sparkline-container">
+                            <svg width="100%" height="100%" viewBox="0 0 160 45" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="cpu-grad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#42b883" stop-opacity="0.3"></stop>
+                                        <stop offset="100%" stop-color="#42b883" stop-opacity="0.0"></stop>
+                                    </linearGradient>
+                                </defs>
+                                <path id="cpu-spark-fill" class="sparkline-fill" fill="url(#cpu-grad)"></path>
+                                <path id="cpu-spark-line" class="sparkline-path" stroke="#42b883"></path>
+                            </svg>
+                            <div class="hover-crosshair"></div>
+                            <div class="hover-dot" style="background:#42b883;"></div>
+                            <div class="hover-tooltip">
+                                <div class="tooltip-time">--</div>
+                                <div class="tooltip-value">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- RAM Card -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span>内存占用</span>
+                            <span class="peak-label" id="ram-peak" title="双击重置" ondblclick="resetPeak('ram')">峰值: 0%</span>
+                        </div>
+                        <div class="card-value" id="ram-text">0%</div>
+                        <div class="card-subtitle" id="ram-details-text">已用: -- GB / -- GB</div>
+                        <div class="sparkline-container">
+                            <svg width="100%" height="100%" viewBox="0 0 160 45" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="ram-grad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#e0a96d" stop-opacity="0.3"></stop>
+                                        <stop offset="100%" stop-color="#e0a96d" stop-opacity="0.0"></stop>
+                                    </linearGradient>
+                                </defs>
+                                <path id="ram-spark-fill" class="sparkline-fill" fill="url(#ram-grad)"></path>
+                                <path id="ram-spark-line" class="sparkline-path" stroke="#e0a96d"></path>
+                            </svg>
+                            <div class="hover-crosshair"></div>
+                            <div class="hover-dot" style="background:#e0a96d;"></div>
+                            <div class="hover-tooltip">
+                                <div class="tooltip-time">--</div>
+                                <div class="tooltip-value">--</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GPU Card -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span>GPU 占用率</span>
+                            <span class="peak-label" id="gpu-peak" title="双击重置" ondblclick="resetPeak('gpu')">峰值: 0%</span>
+                        </div>
+                        <div class="card-value" id="gpu-text">0%</div>
+                        <div class="card-subtitle" id="gpu-vram-text">显存: -- GB / -- GB</div>
+                        <div class="sparkline-container">
+                            <svg width="100%" height="100%" viewBox="0 0 160 45" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="gpu-grad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#af52de" stop-opacity="0.3"></stop>
+                                        <stop offset="100%" stop-color="#af52de" stop-opacity="0.0"></stop>
+                                    </linearGradient>
+                                </defs>
+                                <path id="gpu-spark-fill" class="sparkline-fill" fill="url(#gpu-grad)"></path>
+                                <path id="gpu-spark-line" class="sparkline-path" stroke="#af52de"></path>
+                            </svg>
+                            <div class="hover-crosshair"></div>
+                            <div class="hover-dot" style="background:#af52de;"></div>
+                            <div class="hover-tooltip">
+                                <div class="tooltip-time">--</div>
+                                <div class="tooltip-value">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <!-- Network Card -->
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <div class="card-title">
+                            <span>实时网络吞吐量</span>
+                            <div style="display:flex; gap:12px;">
+                                <span class="peak-label" id="rx-peak" title="双击重置下载峰值" ondblclick="resetPeak('rx')">↓ 峰值: 0 B/s</span>
+                                <span class="peak-label" id="tx-peak" title="双击重置上传峰值" ondblclick="resetPeak('tx')">↑ 峰值: 0 B/s</span>
+                            </div>
+                        </div>
+                        <div class="card-value" style="font-size:22px; justify-content:space-between; width:100%; margin-top:4px;">
+                            <span id="net-rx-val" style="color:#42b883;">↓ 0 B/s</span>
+                            <span id="net-tx-val" style="color:#007aff;">↑ 0 B/s</span>
+                        </div>
+                        <div class="sparkline-container" style="height:55px;">
+                            <svg width="100%" height="100%" viewBox="0 0 320 55" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="rx-grad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#42b883" stop-opacity="0.15"></stop>
+                                        <stop offset="100%" stop-color="#42b883" stop-opacity="0.0"></stop>
+                                    </linearGradient>
+                                    <linearGradient id="tx-grad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#007aff" stop-opacity="0.15"></stop>
+                                        <stop offset="100%" stop-color="#007aff" stop-opacity="0.0"></stop>
+                                    </linearGradient>
+                                </defs>
+                                <path id="rx-spark-fill" class="sparkline-fill" fill="url(#rx-grad)"></path>
+                                <path id="rx-spark-line" class="sparkline-path" stroke="#42b883"></path>
+                                <path id="tx-spark-fill" class="sparkline-fill" fill="url(#tx-grad)"></path>
+                                <path id="tx-spark-line" class="sparkline-path" stroke="#007aff"></path>
+                            </svg>
+                            <div class="hover-crosshair"></div>
+                            <div class="hover-dot rx-dot" style="background:#42b883;"></div>
+                            <div class="hover-dot tx-dot" style="background:#007aff;"></div>
+                            <div class="hover-tooltip">
+                                <div class="tooltip-time">--</div>
+                                <div class="tooltip-value">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <!-- SSD Card -->
+                    <div class="card">
+                        <div class="card-title">SSD 磁盘空间</div>
+                        <div class="card-value" id="disk-text" style="font-size:24px;">-- GB / -- GB</div>
+                        <div class="card-subtitle" id="disk-subtitle">剩余: -- GB</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar green" id="disk-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- System Info / Thermal Card -->
+                    <div class="card">
+                        <div class="card-title">温控与元数据</div>
+                        <table class="meta-table" style="margin-top:4px;">
+                            <tr>
+                                <td class="label">运行时间 (Uptime)</td>
+                                <td class="val" style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                                    <span class="pulse-dot"></span>
+                                    <span id="uptime-text">正在查询...</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">系统热阻压力</td>
+                                <td class="val" style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                                    <span class="status-dot" id="thermal-dot"></span>
+                                    <span id="thermal-text">正在查询...</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">电池实时温度</td>
+                                <td class="val" id="battery-temp-text">正在查询...</td>
+                            </tr>
+                            <tr>
+                                <td class="label">合盖与外接屏</td>
+                                <td class="val" id="lid-state-text">💻 合盖 (Clamshell)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <!-- Mode Status Card -->
+                    <div class="card">
+                        <div class="card-title">系统运行状态</div>
+                        <div class="card-value" id="mode-text">
+                            <span class="status-dot" id="mode-dot"></span>
+                            <span id="mode-label" style="font-size: 20px; font-weight: 500; margin-left: 6px;">正在连接...</span>
+                        </div>
+                        <div style="margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height: 1.4;">
+                            工作站模式决定内置显示器和供电唤醒断言是否锁死。
+                        </div>
+                    </div>
+                    
+                    <!-- Battery Health Card -->
+                    <div class="card">
+                        <div class="card-title">电池与电源状态</div>
+                        <table class="meta-table" style="margin-top:4px;">
+                            <tr>
+                                <td class="label">剩余电量 / 充电</td>
+                                <td class="val">
+                                    <span id="battery-capacity">--%</span>
+                                    <span id="charging-indicator" style="font-size:15px; color:#e0a96d; display:none; margin-left: 4px;">⚡️</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">电池健康度</td>
+                                <td class="val" id="battery-health">--%</td>
+                            </tr>
+                            <tr>
+                                <td class="label">电池循环次数</td>
+                                <td class="val" id="battery-cycles">-- 次</td>
+                            </tr>
+                            <tr>
+                                <td class="label">当前供电来源</td>
+                                <td class="val" id="power-source-text">正在查询...</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="grid">
+                    <!-- Controls Card -->
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <div class="card-title">设备远程控制</div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">MacBook Headless 模式</div>
+                                <div class="control-desc">关闭内置屏幕以模拟独立 Mac Studio 行为。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="headless-toggle" onchange="toggleSetting('headless')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">防止空闲睡眠</div>
+                                <div class="control-desc">保持系统常亮，合盖不休眠。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="sleep-toggle" onchange="toggleSetting('sleep')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">禁用内置触控板</div>
+                                <div class="control-desc">检测到外接鼠标时，自动关闭触控板输入以防误触。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="trackpad-toggle" onchange="toggleSetting('trackpad')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">无头模式下禁用键盘和触控板</div>
+                                <div class="control-desc">进入无头模式后，自动屏蔽内置键盘按键与内置触控板输入以防误触。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="keyboard-toggle" onchange="toggleSetting('keyboard-headless')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">静音内置麦克风</div>
+                                <div class="control-desc">保护物理隐私，进入无头模式时静音系统麦克风。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="microphone-toggle" onchange="toggleSetting('microphone')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">断开外接显示器时自动退出</div>
+                                <div class="control-desc">检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="exit-disconnect-toggle" onchange="toggleSetting('exit-disconnect')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="control-row">
+                            <div>
+                                <div class="control-label">接入外接显示器时自动恢复</div>
+                                <div class="control-desc">有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="restore-connect-toggle" onchange="toggleSetting('restore-connect')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+            </div>
+            
+            
+            
+            <script>
+                // History data arrays for sparklines
+                const historyLimit = 40;
+                const cpuHistory = [];
+                const ramHistory = [];
+                const gpuHistory = [];
+                const rxHistory = [];
+                const txHistory = [];
+
+                // Unified snapshot history for cross-chart hover inspection
+                const snapshotHistory = [];
+
+                // Peak tracking variables
+                const peaks = {
+                    cpu: 0,
+                    ram: 0,
+                    gpu: 0,
+                    rx: 0,
+                    tx: 0
+                };
+
+                // Initialize peaks from localStorage to persist
+                if (localStorage.getItem('peaks')) {
+                    try {
+                        const savedPeaks = JSON.parse(localStorage.getItem('peaks'));
+                        Object.assign(peaks, savedPeaks);
+                    } catch (e) {}
+                }
+
+                function savePeaks() {
+                    localStorage.setItem('peaks', JSON.stringify(peaks));
+                }
+
+                function resetPeak(metric) {
+                    peaks[metric] = 0;
+                    savePeaks();
+                    updatePeakUI(metric);
+                }
+
+                function updatePeakUI(metric) {
+                    const el = document.getElementById(metric + '-peak');
+                    if (!el) return;
+                    
+                    if (metric === 'cpu' || metric === 'ram' || metric === 'gpu') {
+                        el.innerText = '峰值: ' + Math.round(peaks[metric]) + '%';
+                    } else if (metric === 'rx') {
+                        el.innerText = '↓ 峰值: ' + formatSpeed(peaks[metric]);
+                    } else if (metric === 'tx') {
+                        el.innerText = '↑ 峰值: ' + formatSpeed(peaks[metric]);
+                    }
+                }
+
+                function formatSpeed(bytesPerSec) {
+                    if (bytesPerSec === undefined || isNaN(bytesPerSec)) return "0 B/s";
+                    if (bytesPerSec < 1024) return Math.round(bytesPerSec) + " B/s";
+                    const kb = bytesPerSec / 1024;
+                    if (kb < 1024) return kb.toFixed(1) + " KB/s";
+                    const mb = kb / 1024;
+                    return mb.toFixed(1) + " MB/s";
+                }
+
+                 function drawSparkline(svgLineId, svgFillId, data, maxVal) {
+                    const lineEl = document.getElementById(svgLineId);
+                    const fillEl = document.getElementById(svgFillId);
+                    if (!lineEl || data.length < 2) return;
+
+                    const width = 160;
+                    const height = 45;
+                    const pointsCount = data.length;
+                    const stepX = width / (pointsCount - 1 || 1);
+                    
+                    let pathD = '';
+                    let fillD = '';
+
+                    for (let i = 0; i < pointsCount; i++) {
+                        const val = data[i];
+                        const x = i * stepX;
+                        const y = height - (val / (maxVal || 100)) * (height - 4) - 2;
+                        
+                        if (i === 0) {
+                            pathD += 'M ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                            fillD += 'M ' + x.toFixed(1) + ' ' + height + ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                        } else {
+                            pathD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                            fillD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                        }
+                    }
+
+                    fillD += ' L ' + ((pointsCount - 1) * stepX).toFixed(1) + ' ' + height + ' Z';
+
+                    lineEl.setAttribute('d', pathD);
+                    if (fillEl) fillEl.setAttribute('d', fillD);
+                }
+
+                function drawDoubleSparkline(svgRxLineId, svgRxFillId, svgTxLineId, svgTxFillId, rxData, txData) {
+                    const maxVal = Math.max(...rxData, ...txData, 102400); // Floor scale at 100 KB/s
+                    const rxLineEl = document.getElementById(svgRxLineId);
+                    const rxFillEl = document.getElementById(svgRxFillId);
+                    const txLineEl = document.getElementById(svgTxLineId);
+                    const txFillEl = document.getElementById(svgTxFillId);
+
+                    const width = 320;
+                    const height = 55;
+                    
+                    const drawSingle = (lineEl, fillEl, data) => {
+                        if (!lineEl || data.length < 2) return;
+                        const stepX = width / (data.length - 1 || 1);
+                        let pathD = '';
+                        let fillD = '';
+                        for (let i = 0; i < data.length; i++) {
+                            const val = data[i];
+                            const x = i * stepX;
+                            const y = height - (val / maxVal) * (height - 6) - 3;
+                            if (i === 0) {
+                                pathD += 'M ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                                fillD += 'M ' + x.toFixed(1) + ' ' + height + ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                            } else {
+                                pathD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                                fillD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                            }
+                        }
+                        fillD += ' L ' + ((data.length - 1) * stepX).toFixed(1) + ' ' + height + ' Z';
+                        lineEl.setAttribute('d', pathD);
+                        if (fillEl) fillEl.setAttribute('d', fillD);
+                    };
+
+                    drawSingle(rxLineEl, rxFillEl, rxData);
+                    drawSingle(txLineEl, txFillEl, txData);
+                }
+
+                async function fetchStatus() {
+                    try {
+                        const response = await fetch('/api/status');
+                        const data = await response.json();
+                        updateUI(data);
+                    } catch (err) {
+                        console.error("Failed to fetch status:", err);
+                    }
+                }
+
+                // Theme Toggle Logic
+                function initTheme() {
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme) {
+                        setTheme(savedTheme);
+                    } else {
+                        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        setTheme(systemDark ? 'dark' : 'light');
+                    }
+                }
+
+                const sunSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+                const moonSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+
+                function setTheme(theme) {
+                    document.body.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                    const btnIcon = document.getElementById('theme-icon-container');
+                    const btnText = document.getElementById('theme-text');
+                    if (theme === 'dark') {
+                        btnIcon.innerHTML = sunSVG;
+                        btnText.innerText = '浅色模式';
+                    } else {
+                        btnIcon.innerHTML = moonSVG;
+                        btnText.innerText = '深色模式';
+                    }
+                }
+
+                function toggleTheme() {
+                    const currentTheme = document.body.getAttribute('data-theme') || 'light';
+                    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+                }
+
+                initTheme();
+
+                function updateUI(data) {
+                    const modeDot = document.getElementById('mode-dot');
+                    const modeLabel = document.getElementById('mode-label');
+                    const headlessToggle = document.getElementById('headless-toggle');
+                    
+                    if (data.headlessModeEnabled) {
+                        modeDot.className = "status-dot active";
+                        modeLabel.innerText = "MacBook Headless 激活";
+                        headlessToggle.checked = true;
+                    } else {
+                        modeDot.className = "status-dot inactive";
+                        modeLabel.innerText = "Normal 模式 (显示正常)";
+                        headlessToggle.checked = false;
+                    }
+                    
+                    document.getElementById('sleep-toggle').checked = data.preventIdleSleep;
+                    document.getElementById('trackpad-toggle').checked = data.trackpadDisabled;
+                    document.getElementById('keyboard-toggle').checked = data.keyboardAndTrackpadDisabledInHeadless;
+                    document.getElementById('microphone-toggle').checked = data.microphoneMuted;
+                    document.getElementById('exit-disconnect-toggle').checked = data.autoExitHeadlessOnDisconnect;
+                    document.getElementById('restore-connect-toggle').checked = data.autoRestoreHeadlessOnConnect;
+                    
+                    // Power Source
+                    document.getElementById('battery-capacity').innerText = data.batteryCapacity + '%';
+                    document.getElementById('charging-indicator').style.display = data.isCharging ? 'inline' : 'none';
+                    document.getElementById('power-source-text').innerText = 
+                        data.powerState === "AC Power" ? "🔌 外接电源 (AC)" : "🔋 电池供电 (未接电源)";
+                    
+                    // Battery registry info
+                    document.getElementById('battery-health').innerText = data.batteryHealth.toFixed(1) + '%';
+                    document.getElementById('battery-cycles').innerText = data.batteryCycleCount + ' 次';
+                    document.getElementById('battery-temp-text').innerText = data.batteryTemp.toFixed(1) + ' °C';
+
+                    // Uptime & Thermal
+                    document.getElementById('uptime-text').innerText = data.uptime;
+                    
+                    const thermalDot = document.getElementById('thermal-dot');
+                    const thermalText = document.getElementById('thermal-text');
+                    let thermalStr = '';
+                    let dotClass = 'status-dot';
+                    switch (data.thermalState) {
+                        case 'Nominal':
+                            thermalStr = '正常 (Nominal)';
+                            dotClass += ' nominal';
+                            break;
+                        case 'Fair':
+                            thermalStr = '轻度压力 (Fair)';
+                            dotClass += ' fair';
+                            break;
+                        case 'Serious':
+                            thermalStr = '严重压力 (Serious)';
+                            dotClass += ' serious';
+                            break;
+                        case 'Critical':
+                            thermalStr = '紧急过热 (Critical)';
+                            dotClass += ' critical';
+                            break;
+                        default:
+                            thermalStr = data.thermalState;
+                            dotClass += ' active';
+                    }
+                    if (thermalDot) thermalDot.className = dotClass;
+                    if (thermalText) thermalText.innerText = thermalStr;
+
+                    // CPU / RAM / GPU values
+                    const cpuVal = Math.round(data.cpuUsage);
+                    const ramVal = Math.round(data.memoryUsage);
+                    const gpuVal = Math.round(data.gpuUsage);
+                    document.getElementById('cpu-text').textContent = cpuVal + '%';
+                    document.getElementById('ram-text').textContent = ramVal + '%';
+                    document.getElementById('gpu-text').textContent = gpuVal + '%';
+
+                    document.getElementById('cpu-temp-text').textContent = '温度: ' + data.cpuTemp.toFixed(1) + ' °C';
+                    document.getElementById('ram-details-text').textContent = '已用: ' + data.ramUsedGB.toFixed(2) + ' GB / ' + data.ramTotalGB.toFixed(1) + ' GB';
+                    document.getElementById('gpu-vram-text').textContent = '显存: ' + data.vramUsedGB.toFixed(2) + ' GB / ' + data.vramAllocatedGB.toFixed(2) + ' GB';
+
+                    // Add history points
+                    cpuHistory.push(cpuVal);
+                    if (cpuHistory.length > historyLimit) cpuHistory.shift();
+                    ramHistory.push(ramVal);
+                    if (ramHistory.length > historyLimit) ramHistory.shift();
+                    gpuHistory.push(gpuVal);
+                    if (gpuHistory.length > historyLimit) gpuHistory.shift();
+
+                    // Record unified snapshot for cross-chart hover
+                    snapshotHistory.push({
+                        time: new Date(),
+                        cpu: cpuVal,
+                        cpuTemp: data.cpuTemp,
+                        ram: ramVal,
+                        ramUsedGB: data.ramUsedGB,
+                        ramTotalGB: data.ramTotalGB,
+                        gpu: gpuVal,
+                        vramUsedGB: data.vramUsedGB,
+                        vramAllocatedGB: data.vramAllocatedGB,
+                        rx: data.rxSpeed,
+                        tx: data.txSpeed,
+                        diskPercent: data.diskPercent,
+                        batteryCapacity: data.batteryCapacity,
+                        thermalState: data.thermalState
+                    });
+                    if (snapshotHistory.length > historyLimit) snapshotHistory.shift();
+                    
+                    // Draw CPU / RAM / GPU sparklines
+                    drawSparkline('cpu-spark-line', 'cpu-spark-fill', cpuHistory, 100);
+                    drawSparkline('ram-spark-line', 'ram-spark-fill', ramHistory, 100);
+                    drawSparkline('gpu-spark-line', 'gpu-spark-fill', gpuHistory, 100);
+
+                    // Update peaks
+                    if (cpuVal > peaks.cpu) { peaks.cpu = cpuVal; savePeaks(); }
+                    if (ramVal > peaks.ram) { peaks.ram = ramVal; savePeaks(); }
+                    if (gpuVal > peaks.gpu) { peaks.gpu = gpuVal; savePeaks(); }
+                    updatePeakUI('cpu');
+                    updatePeakUI('ram');
+                    updatePeakUI('gpu');
+
+                    // Network values
+                    document.getElementById('net-rx-val').innerText = '↓ ' + formatSpeed(data.rxSpeed);
+                    document.getElementById('net-tx-val').innerText = '↑ ' + formatSpeed(data.txSpeed);
+
+                    rxHistory.push(data.rxSpeed);
+                    if (rxHistory.length > historyLimit) rxHistory.shift();
+                    txHistory.push(data.txSpeed);
+                    if (txHistory.length > historyLimit) txHistory.shift();
+
+                    drawDoubleSparkline('rx-spark-line', 'rx-spark-fill', 'tx-spark-line', 'tx-spark-fill', rxHistory, txHistory);
+
+                    if (data.rxSpeed > peaks.rx) { peaks.rx = data.rxSpeed; savePeaks(); }
+                    if (data.txSpeed > peaks.tx) { peaks.tx = data.txSpeed; savePeaks(); }
+                    updatePeakUI('rx');
+                    updatePeakUI('tx');
+
+                    // Disk SSD space
+                    const diskUsed = data.diskUsedGB.toFixed(1);
+                    const diskTotal = data.diskTotalGB.toFixed(1);
+                    const diskFree = (data.diskTotalGB - data.diskUsedGB).toFixed(1);
+                    document.getElementById('disk-text').innerText = diskUsed + ' GB / ' + diskTotal + ' GB';
+                    document.getElementById('disk-subtitle').innerText = '剩余空间: ' + diskFree + ' GB (' + data.diskPercent.toFixed(1) + '% 已用)';
+                    
+                    const diskBar = document.getElementById('disk-bar');
+                    diskBar.style.width = data.diskPercent + '%';
+                    
+                    // Set Disk progress bar color
+                    diskBar.className = 'progress-bar';
+                    if (data.diskPercent < 80) {
+                        diskBar.classList.add('green');
+                    } else if (data.diskPercent < 90) {
+                        diskBar.classList.add('yellow');
+                    } else {
+                        diskBar.classList.add('red');
+                    }
+
+                    // Lid & Clamshell state
+                    document.getElementById('lid-state-text').innerText = data.headlessModeEnabled ? '💻 已关闭内屏 (Headless)' : '💻 屏幕开启 (Normal)';
+
+                    // Process Diagnostic Alerts
+                    updateAlerts(data);
+                }
+
+                function updateAlerts(data) {
+                    const alertBox = document.getElementById('alert-box');
+                    alertBox.innerHTML = ''; // Clear current alerts
+
+                    const alerts = [];
+
+                    // 1. Disk Full Alert
+                    if (data.diskPercent >= 90) {
+                        alerts.push({
+                            type: 'danger',
+                            icon: '🚨',
+                            text: '<b>磁盘容量告急：</b>系统主存储已占用 ' + data.diskPercent.toFixed(1) + '%，请立即清理 Docker 缓存或系统日志以防写入锁定！'
+                        });
+                    } else if (data.diskPercent >= 80) {
+                        alerts.push({
+                            type: 'warning',
+                            icon: '⚠️',
+                            text: '<b>磁盘容量紧张：</b>存储占用达 ' + data.diskPercent.toFixed(1) + '%，建议检查磁盘占用。'
+                        });
+                    }
+
+                    // 2. Battery Heat/Safety Alert
+                    if (data.batteryTemp >= 48) {
+                        alerts.push({
+                            type: 'danger',
+                            icon: '🔥',
+                            text: '<b>电池温度过高（' + data.batteryTemp.toFixed(1) + ' °C）：</b>检测到电池面临严重高热风险。请开盖以散发积热，避免电池老化与鼓包！'
+                        });
+                    } else if (data.batteryTemp >= 42) {
+                        alerts.push({
+                            type: 'warning',
+                            icon: '⚠️',
+                            text: '<b>电池温度偏高（' + data.batteryTemp.toFixed(1) + ' °C）：</b>合盖工作站可能空气流通受阻，请确保散热风口畅通。'
+                        });
+                    }
+
+                    // 3. Power outage warning
+                    if (data.powerState !== "AC Power") {
+                        alerts.push({
+                            type: 'warning',
+                            icon: '🔌',
+                            text: '<b>外接电源断开：</b>MacBook 正在通过电池供电运行（剩余 ' + data.batteryCapacity + '%）。若电量低于低电量保护阈值，防睡眠 assertion 将自动撤销并允许休眠。'
+                        });
+                    }
+
+                    // 4. Battery Wear alert
+                    if (data.batteryHealth < 80) {
+                        alerts.push({
+                            type: 'warning',
+                            icon: '🔋',
+                            text: '<b>电池建议检修：</b>最大容量已劣化至 ' + data.batteryHealth.toFixed(1) + '%（低于 80%），长期 7×24 小时插电运行请关注电池安全。'
+                        });
+                    }
+
+                    // Insert alerts into DOM
+                    alerts.forEach(alert => {
+                        const div = document.createElement('div');
+                        div.className = 'alert ' + alert.type;
+                        div.innerHTML = `
+                            <span class="alert-icon">${alert.icon}</span>
+                            <div class="alert-content">${alert.text}</div>
+                        `;
+                        alertBox.appendChild(div);
+                    });
+                }
+
+                async function toggleSetting(type) {
+                    let url = '';
+                    switch(type) {
+                        case 'headless': url = '/api/toggle-headless'; break;
+                        case 'sleep': url = '/api/toggle-sleep'; break;
+                        case 'trackpad': url = '/api/toggle-trackpad'; break;
+                        case 'keyboard-headless': url = '/api/toggle-keyboard-headless'; break;
+                        case 'microphone': url = '/api/toggle-microphone'; break;
+                        case 'exit-disconnect': url = '/api/toggle-exit-on-disconnect'; break;
+                        case 'restore-connect': url = '/api/toggle-restore-on-connect'; break;
+                    }
+                    
+                    try {
+                        const response = await fetch(url, { method: 'POST' });
+                        const data = await response.json();
+                        updateUI(data);
+                    } catch (err) {
+                        console.error(`Failed to toggle ${type}:`, err);
+                    }
+                }
+
+                // ═══════════════════════════════════════════════════════════
+                // Sparkline Hover-to-Inspect System
+                // Hovering on any sparkline shows a crosshair + tooltip with
+                // ALL system metrics at that historical point in time.
+                // ═══════════════════════════════════════════════════════════
+
+                function setupSparklineHover(container, chartType) {
+                    container.addEventListener('mousemove', function(e) {
+                        if (snapshotHistory.length < 2) return;
+                        const rect = container.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const w = rect.width;
+                        const ratio = Math.max(0, Math.min(1, x / w));
+                        const idx = Math.round(ratio * (snapshotHistory.length - 1));
+                        const snap = snapshotHistory[idx];
+                        if (!snap) return;
+
+                        const crosshair = container.querySelector('.hover-crosshair');
+                        const tooltip = container.querySelector('.hover-tooltip');
+
+                        // Position crosshair
+                        if (crosshair) {
+                            crosshair.style.display = 'block';
+                            crosshair.style.left = (ratio * 100) + '%';
+                        }
+
+                        // Position dot(s)
+                        if (chartType === 'net') {
+                            const rxDot = container.querySelector('.rx-dot');
+                            const txDot = container.querySelector('.tx-dot');
+                            const maxNet = Math.max(...rxHistory, ...txHistory, 102400);
+                            if (rxDot) {
+                                const ryPct = 100 - ((snap.rx || 0) / maxNet) * 90 - 4;
+                                rxDot.style.display = 'block';
+                                rxDot.style.left = (ratio * 100) + '%';
+                                rxDot.style.top = ryPct + '%';
+                            }
+                            if (txDot) {
+                                const tyPct = 100 - ((snap.tx || 0) / maxNet) * 90 - 4;
+                                txDot.style.display = 'block';
+                                txDot.style.left = (ratio * 100) + '%';
+                                txDot.style.top = tyPct + '%';
+                            }
+                        } else {
+                            const dot = container.querySelector('.hover-dot');
+                            if (dot) {
+                                let val = 0;
+                                if (chartType === 'cpu') val = snap.cpu;
+                                else if (chartType === 'ram') val = snap.ram;
+                                else if (chartType === 'gpu') val = snap.gpu;
+                                const yPct = 100 - (val / 100) * 90 - 4;
+                                dot.style.display = 'block';
+                                dot.style.left = (ratio * 100) + '%';
+                                dot.style.top = yPct + '%';
+                            }
+                        }
+
+                        // Build rich tooltip content
+                        if (tooltip) {
+                            const timeStr = snap.time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            const timeDiv = tooltip.querySelector('.tooltip-time');
+                            const valDiv = tooltip.querySelector('.tooltip-value');
+                            if (timeDiv) timeDiv.textContent = timeStr;
+                            if (valDiv) {
+                                const cpuTempStr = snap.cpuTemp != null ? snap.cpuTemp.toFixed(1) + '°C' : '--°C';
+                                const ramGBStr = snap.ramUsedGB != null ? snap.ramUsedGB.toFixed(1) + ' / ' + snap.ramTotalGB.toFixed(0) + ' GB' : '-- GB';
+                                const vramGBStr = snap.vramUsedGB != null ? snap.vramUsedGB.toFixed(1) + ' / ' + snap.vramAllocatedGB.toFixed(1) + ' GB' : '-- GB';
+                                
+                                valDiv.innerHTML =
+                                    '<span style="color:#42b883;">CPU</span> ' + snap.cpu + '% · ' + cpuTempStr + '<br>' +
+                                    '<span style="color:#e0a96d;">RAM</span> ' + snap.ram + '% · ' + ramGBStr + '<br>' +
+                                    '<span style="color:#af52de;">GPU</span> ' + snap.gpu + '% · ' + vramGBStr + '<br>' +
+                                    '<span style="color:#42b883;">↓</span> ' + formatSpeed(snap.rx) + ' <span style="color:#007aff;">↑</span> ' + formatSpeed(snap.tx);
+                            }
+
+                            tooltip.style.display = 'block';
+                            tooltip.style.left = (ratio * 100) + '%';
+
+                            // Keep tooltip within viewport
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            if (tooltipRect.right > window.innerWidth - 8) {
+                                tooltip.style.transform = 'translateX(-100%)';
+                            } else if (tooltipRect.left < 8) {
+                                tooltip.style.transform = 'translateX(0)';
+                            } else {
+                                tooltip.style.transform = 'translateX(-50%)';
+                            }
+                        }
+                    });
+
+                    container.addEventListener('mouseleave', function() {
+                        const crosshair = container.querySelector('.hover-crosshair');
+                        const tooltip = container.querySelector('.hover-tooltip');
+                        const dots = container.querySelectorAll('.hover-dot');
+                        if (crosshair) crosshair.style.display = 'none';
+                        if (tooltip) tooltip.style.display = 'none';
+                        dots.forEach(d => d.style.display = 'none');
+                    });
+                }
+
+                // Attach hover to all sparkline containers
+                (function initHover() {
+                    const cards = document.querySelectorAll('.card');
+                    cards.forEach(card => {
+                        const container = card.querySelector('.sparkline-container');
+                        if (!container) return;
+                        const titleEl = card.querySelector('.card-title span');
+                        const title = titleEl ? titleEl.textContent : '';
+                        let chartType = 'cpu';
+                        if (title.includes('内存')) chartType = 'ram';
+                        else if (title.includes('GPU')) chartType = 'gpu';
+                        else if (title.includes('网络')) chartType = 'net';
+                        setupSparklineHover(container, chartType);
+                    });
+                })();
+
+                fetchStatus();
+                // Prime peaks UI immediately
+                updatePeakUI('cpu');
+                updatePeakUI('ram');
+                updatePeakUI('gpu');
+                updatePeakUI('rx');
+                updatePeakUI('tx');
+                
+                setInterval(fetchStatus, 3000);
+            </script>
+        </body>
+        </html>

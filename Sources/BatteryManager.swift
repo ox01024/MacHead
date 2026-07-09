@@ -1,5 +1,6 @@
 import Foundation
 import IOKit.ps
+import IOKit
 
 private func batteryChangedCallback(context: UnsafeMutableRawPointer?) {
     guard let context = context else { return }
@@ -16,6 +17,9 @@ final class BatteryManager {
     private(set) var isCharging: Bool = false
     private(set) var powerState: String = "AC Power"
     private(set) var isBatteryProtectionActive: Bool = false
+    private(set) var batteryHealth: Double = 100.0
+    private(set) var cycleCount: Int = 0
+    private(set) var batteryTemperature: Double = 0.0
     
     private init() {}
     
@@ -61,6 +65,40 @@ final class BatteryManager {
         }
     }
     
+    func updateBatteryRegistryInfo() {
+        let entry = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
+        guard entry != 0 else { return }
+        defer { IOObjectRelease(entry) }
+        
+        var props: Unmanaged<CFMutableDictionary>?
+        guard IORegistryEntryCreateCFProperties(entry, &props, kCFAllocatorDefault, 0) == kIOReturnSuccess,
+              let dict = props?.takeRetainedValue() as? [String: Any] else {
+            return
+        }
+        
+        if let cycle = dict["CycleCount"] as? Int {
+            self.cycleCount = cycle
+        }
+        
+        if let tempRaw = dict["Temperature"] as? Int {
+            // Temperature in AppleSmartBattery is in centikelvin. Convert to Celsius.
+            // Formula: (tempRaw / 10.0) - 273.15
+            self.batteryTemperature = (Double(tempRaw) / 10.0) - 273.15
+        }
+        
+        if let rawMax = dict["AppleRawMaxCapacity"] as? Int, let design = dict["DesignCapacity"] as? Int, design > 0 {
+            self.batteryHealth = (Double(rawMax) / Double(design)) * 100.0
+        } else if let rawMax = dict["AppleRawMaxCapacity"] as? Int, let rawDesign = dict["AppleRawDesignCapacity"] as? Int, rawDesign > 0 {
+            self.batteryHealth = (Double(rawMax) / Double(rawDesign)) * 100.0
+        } else if let max = dict["MaxCapacity"] as? Int, let design = dict["DesignCapacity"] as? Int, design > 0 {
+            if max <= 100 {
+                self.batteryHealth = Double(max)
+            } else {
+                self.batteryHealth = (Double(max) / Double(design)) * 100.0
+            }
+        }
+    }
+    
     private func updateBatteryInfo() {
         guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
               let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef] else {
@@ -80,5 +118,7 @@ final class BatteryManager {
                 break
             }
         }
+        
+        updateBatteryRegistryInfo()
     }
 }

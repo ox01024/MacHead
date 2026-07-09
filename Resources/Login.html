@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacHead - 登录</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Warm Light Theme */
+            --bg-color: #fbf9fa;
+            --text-color: #26251e;
+            --text-muted: rgba(38, 37, 30, 0.55);
+            --card-bg: #ffffff;
+            --card-border: rgba(38, 37, 30, 0.08);
+            --card-shadow: 0 8px 30px rgba(38, 37, 30, 0.03);
+            --input-bg: #f3f1f2;
+            --brand-color: #007aff;
+            --font-serif: 'EB Garamond', Georgia, serif;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Warm Dark Theme */
+                --bg-color: #14120b;
+                --text-color: #edecec;
+                --text-muted: rgba(237, 236, 236, 0.55);
+                --card-bg: #1c1b14;
+                --card-border: rgba(237, 236, 236, 0.08);
+                --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+                --input-bg: #0b0a05;
+            }
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-sans);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 40px;
+            font-family: var(--font-serif);
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.5px;
+        }
+
+        p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin: 0 0 28px 0;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            box-sizing: border-box;
+            background: var(--input-bg);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 15px;
+            color: var(--text-color);
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        input[type="password"]:focus {
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .error-msg {
+            color: #ff453a;
+            font-size: 13px;
+            margin-bottom: 20px;
+            background: rgba(255, 69, 58, 0.1);
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 69, 58, 0.2);
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <span class="logo"></span>
+        <h1>MacHead 远程控制台</h1>
+        <p>请输入安全密码以进入面板</p>
+        
+        <!-- ERROR_PLACEHOLDER -->
+        
+        <form method="POST" action="/login">
+            <div class="form-group">
+                <label for="password">控制台密码</label>
+                <input type="password" id="password" name="password" placeholder="请输入密码" autofocus required>
+            </div>
+            <button type="submit" class="btn">登录</button>
+        </form>
+    </div>
+</body>
+</html>
