@@ -76,25 +76,33 @@ final class BatteryManager {
             return
         }
         
-        if let cycle = dict["CycleCount"] as? Int {
+        if let cycleNum = dict["CycleCount"] as? NSNumber {
+            self.cycleCount = cycleNum.intValue
+        } else if let cycle = dict["CycleCount"] as? Int {
             self.cycleCount = cycle
         }
         
-        if let tempRaw = dict["Temperature"] as? Int {
-            // Temperature in AppleSmartBattery is in centikelvin. Convert to Celsius.
-            // Formula: (tempRaw / 10.0) - 273.15
+        if let tempNum = dict["Temperature"] as? NSNumber {
+            let tempRaw = tempNum.doubleValue
+            self.batteryTemperature = (tempRaw / 10.0) - 273.15
+        } else if let tempRaw = dict["Temperature"] as? Int {
             self.batteryTemperature = (Double(tempRaw) / 10.0) - 273.15
         }
         
-        if let rawMax = dict["AppleRawMaxCapacity"] as? Int, let design = dict["DesignCapacity"] as? Int, design > 0 {
-            self.batteryHealth = (Double(rawMax) / Double(design)) * 100.0
-        } else if let rawMax = dict["AppleRawMaxCapacity"] as? Int, let rawDesign = dict["AppleRawDesignCapacity"] as? Int, rawDesign > 0 {
-            self.batteryHealth = (Double(rawMax) / Double(rawDesign)) * 100.0
-        } else if let max = dict["MaxCapacity"] as? Int, let design = dict["DesignCapacity"] as? Int, design > 0 {
+        let rawMaxNum = dict["AppleRawMaxCapacity"] as? NSNumber ?? (dict["AppleRawMaxCapacity"] as? Int as NSNumber?)
+        let designNum = dict["DesignCapacity"] as? NSNumber ?? (dict["DesignCapacity"] as? Int as NSNumber?)
+        let rawDesignNum = dict["AppleRawDesignCapacity"] as? NSNumber ?? (dict["AppleRawDesignCapacity"] as? Int as NSNumber?)
+        let maxNum = dict["MaxCapacity"] as? NSNumber ?? (dict["MaxCapacity"] as? Int as NSNumber?)
+        
+        if let rawMax = rawMaxNum?.doubleValue, let design = designNum?.doubleValue, design > 0 {
+            self.batteryHealth = (rawMax / design) * 100.0
+        } else if let rawMax = rawMaxNum?.doubleValue, let rawDesign = rawDesignNum?.doubleValue, rawDesign > 0 {
+            self.batteryHealth = (rawMax / rawDesign) * 100.0
+        } else if let max = maxNum?.doubleValue, let design = designNum?.doubleValue, design > 0 {
             if max <= 100 {
-                self.batteryHealth = Double(max)
+                self.batteryHealth = max
             } else {
-                self.batteryHealth = (Double(max) / Double(design)) * 100.0
+                self.batteryHealth = (max / design) * 100.0
             }
         }
     }
