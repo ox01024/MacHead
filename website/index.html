@@ -210,8 +210,8 @@
                   </svg>
                 </div>
                 <div class="bento-content">
-                  <h3 class="bento-title">轻巧的局域网远程管理</h3>
-                  <p class="bento-desc">内置无任何依赖的控制面板服务。您只需在同局域网的手机或电脑浏览器上输入网址，就能远程直观查看当前的 CPU 负载、内存占比、电池状况，并直接远程一键进行模式开关与参数调节。</p>
+                  <h3 class="bento-title">安全的局域网远程管理控制台</h3>
+                  <p class="bento-desc">内置免配置控制台服务，现已全面升级**安全 Cookie 会话隔离鉴权**。在同局域网的手机或电脑浏览器上输入网址，通过精美的毛玻璃登录页输入密码即可安全访问，远程实时监控 CPU 物理核心温度、真实 RAM 分配、GPU 显存负载与网速曲线，并进行各项合盖模式的开关与调节。</p>
                 </div>
               </div>
               <div class="bento-split-right">
@@ -319,6 +319,7 @@
                             <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-cpu-val">28%</text>
                           </svg>
                           <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">CPU 占用率</div>
+                          <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-cpu-temp">温度: -- °C</div>
                         </div>
                         
                         <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center;">
@@ -327,7 +328,18 @@
                             <circle class="progress-ring__circle" id="mock-ram-circle" stroke="#e0a96d" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 147.7; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
                             <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-ram-val">16%</text>
                           </svg>
-                          <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">内存压力</div>
+                          <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">内存占用</div>
+                          <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-ram-details">已用: -- GB / -- GB</div>
+                        </div>
+
+                        <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center;">
+                          <svg class="progress-ring" width="80" height="80" style="margin-bottom: 6px;">
+                            <circle class="progress-ring__circle-bg" stroke-width="4" stroke="var(--color-bg-input)" fill="transparent" r="28" cx="40" cy="40"/>
+                            <circle class="progress-ring__circle" id="mock-gpu-circle" stroke="#af52de" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 175.9; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
+                            <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-gpu-val">0%</text>
+                          </svg>
+                          <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">GPU 占用率</div>
+                          <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-gpu-vram">显存: -- GB / -- GB</div>
                         </div>
                       </div>
                     </div>

@@ -129,35 +129,174 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 4. Live web mockup stats gauges ticking simulation
+    // 4. Live web mockup stats ticking simulation with Sparklines
     const webCpuVal = document.getElementById('web-cpu-val');
     const webRamVal = document.getElementById('web-ram-val');
+    const webGpuVal = document.getElementById('web-gpu-val');
+    
+    if (webCpuVal && webRamVal && webGpuVal) {
+        const historyLimit = 30;
+        const mockCpuHistory = Array.from({length: historyLimit}, () => Math.floor(Math.random() * 10) + 15);
+        const mockRamHistory = Array.from({length: historyLimit}, () => 16);
+        const mockGpuHistory = Array.from({length: historyLimit}, () => Math.floor(Math.random() * 5) + 5);
+        const mockRxHistory = Array.from({length: historyLimit}, () => Math.floor(Math.random() * 20480) + 40960); // ~40-60 KB/s
+        const mockTxHistory = Array.from({length: historyLimit}, () => Math.floor(Math.random() * 4096) + 2048); // ~2-6 KB/s
 
-    if (webCpuVal && webRamVal) {
+        let cpuPeak = 28;
+        let ramPeak = 16;
+        let gpuPeak = 10;
+        let rxPeak = 124 * 1024;
+
+        function formatSpeed(bytesPerSec) {
+            if (bytesPerSec < 1024) return Math.round(bytesPerSec) + " B/s";
+            const kb = bytesPerSec / 1024;
+            if (kb < 1024) return kb.toFixed(1) + " KB/s";
+            const mb = kb / 1024;
+            return mb.toFixed(1) + " MB/s";
+        }
+
+        function drawMockSparkline(lineId, fillId, data, maxVal, width = 160, height = 30) {
+            const lineEl = document.getElementById(lineId);
+            const fillEl = document.getElementById(fillId);
+            if (!lineEl || data.length < 2) return;
+
+            const stepX = width / (data.length - 1 || 1);
+            let pathD = '';
+            let fillD = '';
+
+            for (let i = 0; i < data.length; i++) {
+                const val = data[i];
+                const x = i * stepX;
+                const y = height - (val / maxVal) * (height - 4) - 2;
+                
+                if (i === 0) {
+                    pathD += 'M ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                    fillD += 'M ' + x.toFixed(1) + ' ' + height + ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                } else {
+                    pathD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                    fillD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                }
+            }
+            fillD += ' L ' + ((data.length - 1) * stepX).toFixed(1) + ' ' + height + ' Z';
+            lineEl.setAttribute('d', pathD);
+            if (fillEl) fillEl.setAttribute('d', fillD);
+        }
+
+        function drawMockDoubleSparkline(rxLineId, rxFillId, txLineId, txFillId, rxData, txData) {
+            const maxVal = Math.max(...rxData, ...txData, 102400);
+            const width = 320;
+            const height = 35;
+            
+            const drawSingle = (lineEl, fillEl, data) => {
+                if (!lineEl || data.length < 2) return;
+                const stepX = width / (data.length - 1 || 1);
+                let pathD = '';
+                let fillD = '';
+                for (let i = 0; i < data.length; i++) {
+                    const val = data[i];
+                    const x = i * stepX;
+                    const y = height - (val / maxVal) * (height - 4) - 2;
+                    if (i === 0) {
+                        pathD += 'M ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                        fillD += 'M ' + x.toFixed(1) + ' ' + height + ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                    } else {
+                        pathD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                        fillD += ' L ' + x.toFixed(1) + ' ' + y.toFixed(1);
+                    }
+                }
+                fillD += ' L ' + ((data.length - 1) * stepX).toFixed(1) + ' ' + height + ' Z';
+                lineEl.setAttribute('d', pathD);
+                if (fillEl) fillEl.setAttribute('d', fillD);
+            };
+
+            drawSingle(document.getElementById(rxLineId), document.getElementById(rxFillId), rxData);
+            drawSingle(document.getElementById(txLineId), document.getElementById(txFillId), txData);
+        }
+
+        // Initial draw
+        drawMockSparkline('web-cpu-spark-line', 'web-cpu-spark-fill', mockCpuHistory, 100);
+        drawMockSparkline('web-ram-spark-line', 'web-ram-spark-fill', mockRamHistory, 100);
+        drawMockSparkline('web-gpu-spark-line', 'web-gpu-spark-fill', mockGpuHistory, 100);
+        drawMockDoubleSparkline('web-rx-spark-line', 'web-rx-spark-fill', 'web-tx-spark-line', 'web-tx-spark-fill', mockRxHistory, mockTxHistory);
+
         setInterval(() => {
-            // CPU ticks dynamically
-            const targetCpu = Math.floor(Math.random() * 15) + 15; // 15% to 30%
-            webCpuVal.textContent = `${targetCpu}%`;
+            // CPU ticks
+            const currentCpu = Math.floor(Math.random() * 15) + 15; // 15% to 30%
+            webCpuVal.textContent = `${currentCpu}%`;
+            mockCpuHistory.push(currentCpu);
+            if (mockCpuHistory.length > historyLimit) mockCpuHistory.shift();
+            drawMockSparkline('web-cpu-spark-line', 'web-cpu-spark-fill', mockCpuHistory, 100);
+            if (currentCpu > cpuPeak) {
+                cpuPeak = currentCpu;
+                document.getElementById('web-cpu-peak').textContent = `峰值: ${cpuPeak}%`;
+            }
+            const cpuCircle = document.getElementById('mock-cpu-circle');
+            if (cpuCircle) {
+                cpuCircle.style.strokeDashoffset = 175.9 - (currentCpu / 100) * 175.9;
+            }
+            const mockCpuTemp = (48.0 + (Math.random() * 2.0 - 1.0)).toFixed(1);
+            const cpuTempEl = document.getElementById('web-cpu-temp');
+            if (cpuTempEl) cpuTempEl.textContent = `温度: ${mockCpuTemp} °C`;
+
+            // RAM ticks
+            const currentRam = (Math.random() > 0.8) ? (Math.random() > 0.5 ? 17 : 15) : 16;
+            webRamVal.textContent = `${currentRam}%`;
+            mockRamHistory.push(currentRam);
+            if (mockRamHistory.length > historyLimit) mockRamHistory.shift();
+            drawMockSparkline('web-ram-spark-line', 'web-ram-spark-fill', mockRamHistory, 100);
+            if (currentRam > ramPeak) {
+                ramPeak = currentRam;
+                document.getElementById('web-ram-peak').textContent = `峰值: ${ramPeak}%`;
+            }
+            const ramCircle = document.getElementById('mock-ram-circle');
+            if (ramCircle) {
+                ramCircle.style.strokeDashoffset = 175.9 - (currentRam / 100) * 175.9;
+            }
+            const mockRamUsed = (24.8 + (Math.random() * 0.4 - 0.2)).toFixed(2);
+            const ramDetailsEl = document.getElementById('web-ram-details');
+            if (ramDetailsEl) ramDetailsEl.textContent = `已用: ${mockRamUsed} GB / 32.0 GB`;
+
+            // GPU ticks
+            const currentGpu = Math.floor(Math.random() * 8) + 4; // 4% to 12%
+            webGpuVal.textContent = `${currentGpu}%`;
+            mockGpuHistory.push(currentGpu);
+            if (mockGpuHistory.length > historyLimit) mockGpuHistory.shift();
+            drawMockSparkline('web-gpu-spark-line', 'web-gpu-spark-fill', mockGpuHistory, 100);
+            if (currentGpu > gpuPeak) {
+                gpuPeak = currentGpu;
+                document.getElementById('web-gpu-peak').textContent = `峰值: ${gpuPeak}%`;
+            }
+            const gpuCircle = document.getElementById('mock-gpu-circle');
+            if (gpuCircle) {
+                gpuCircle.style.strokeDashoffset = 175.9 - (currentGpu / 100) * 175.9;
+            }
+            const mockVramUsed = (0.82 + (Math.random() * 0.1 - 0.05)).toFixed(2);
+            const gpuVramEl = document.getElementById('web-gpu-vram');
+            if (gpuVramEl) gpuVramEl.textContent = `显存: ${mockVramUsed} GB / 16.0 GB`;
+
+            // Network ticks
+            const rxSpeed = Math.floor(Math.random() * 50 * 1024) + 50 * 1024; // 50-100 KB/s
+            const txSpeed = Math.floor(Math.random() * 10 * 1024) + 2 * 1024;  // 2-12 KB/s
+            document.getElementById('web-net-rx').textContent = '↓ ' + formatSpeed(rxSpeed);
+            document.getElementById('web-net-tx').textContent = '↑ ' + formatSpeed(txSpeed);
+
+            mockRxHistory.push(rxSpeed);
+            if (mockRxHistory.length > historyLimit) mockRxHistory.shift();
+            mockTxHistory.push(txSpeed);
+            if (mockTxHistory.length > historyLimit) mockTxHistory.shift();
+            drawMockDoubleSparkline('web-rx-spark-line', 'web-rx-spark-fill', 'web-tx-spark-line', 'web-tx-spark-fill', mockRxHistory, mockTxHistory);
             
-            const mockCpuCircle = document.getElementById('mock-cpu-circle');
-            if (mockCpuCircle) {
-                const radius = 28;
-                const circumference = radius * 2 * Math.PI;
-                const offset = circumference - (targetCpu / 100 * circumference);
-                mockCpuCircle.style.strokeDashoffset = offset;
+            if (rxSpeed > rxPeak) {
+                rxPeak = rxSpeed;
+                document.getElementById('web-rx-peak').textContent = `↓ 峰值: ${formatSpeed(rxPeak)}`;
             }
 
-            // RAM stays relatively static
-            const targetRam = (Math.random() > 0.8) ? (Math.random() > 0.5 ? 17 : 15) : 16;
-            webRamVal.textContent = `${targetRam}%`;
-            
-            const mockRamCircle = document.getElementById('mock-ram-circle');
-            if (mockRamCircle) {
-                const radius = 28;
-                const circumference = radius * 2 * Math.PI;
-                const offset = circumference - (targetRam / 100 * circumference);
-                mockRamCircle.style.strokeDashoffset = offset;
-            }
+            // Battery temp ticks
+            const baseTemp = 36.5;
+            const drift = (Math.random() * 0.4) - 0.2; // -0.2 to +0.2
+            const currentTemp = (baseTemp + drift).toFixed(1);
+            const tempEl = document.getElementById('web-battery-temp');
+            if (tempEl) tempEl.textContent = `${currentTemp} °C`;
         }, 3000);
     }
 

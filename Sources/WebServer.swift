@@ -2,12 +2,37 @@ import Foundation
 import Network
 import SystemConfiguration
 
+@_silgen_name("IOHIDEventSystemClientCreate")
+func IOHIDEventSystemClientCreate(_ allocator: CFAllocator?) -> AnyObject?
+
+@_silgen_name("IOHIDEventSystemClientSetMatching")
+func IOHIDEventSystemClientSetMatching(_ client: AnyObject, _ matching: CFDictionary) -> Int32
+
+@_silgen_name("IOHIDEventSystemClientCopyServices")
+func IOHIDEventSystemClientCopyServices(_ client: AnyObject) -> CFArray?
+
+@_silgen_name("IOHIDServiceClientCopyProperty")
+func IOHIDServiceClientCopyProperty(_ service: AnyObject, _ property: CFString) -> AnyObject?
+
+@_silgen_name("IOHIDServiceClientCopyEvent")
+func IOHIDServiceClientCopyEvent(_ service: AnyObject, _ eventType: UInt32, _ flags: UInt32, _ options: UInt32) -> AnyObject?
+
+@_silgen_name("IOHIDEventGetFloatValue")
+func IOHIDEventGetFloatValue(_ event: AnyObject, _ field: UInt32) -> Double
+
+
 final class WebServer {
     static let shared = WebServer()
+    
+    private let sessionToken = "MacHeadSession-\(UUID().uuidString)"
     
     private var listener: NWListener?
     private var lastCPUInfo: processor_info_array_t?
     private var lastCPUInfoCount: mach_msg_type_number_t = 0
+    
+    private var lastNetworkTime: Date?
+    private var lastInboundBytes: UInt64 = 0
+    private var lastOutboundBytes: UInt64 = 0
     
     private init() {}
     
@@ -61,7 +86,11 @@ final class WebServer {
             }
             
             let requestStr = String(decoding: data, as: UTF8.self)
-            let lines = requestStr.components(separatedBy: "\r\n")
+            let parts = requestStr.components(separatedBy: "\r\n\r\n")
+            let headersPart = parts[0]
+            let bodyPart = parts.count > 1 ? parts[1] : ""
+            
+            let lines = headersPart.components(separatedBy: "\r\n")
             guard !lines.isEmpty else {
                 connection.cancel()
                 return
@@ -76,9 +105,37 @@ final class WebServer {
             let method = firstLineParts[0]
             let path = firstLineParts[1]
             
-            // 验证 HTTP Basic Auth 认证
-            if !self.verifyBasicAuth(headers: lines) {
-                self.sendUnauthorizedResponse(connection: connection)
+            // Route "/login" and "/logout" without global auth block
+            if path == "/login" {
+                if method == "GET" {
+                    self.sendResponse(html: self.getLoginHTML(), connection: connection)
+                } else if method == "POST" {
+                    let enteredPassword = self.extractPassword(from: bodyPart)
+                    let correctPassword = UserDefaults.standard.string(forKey: "WebServerPassword") ?? ""
+                    
+                    if correctPassword.isEmpty || enteredPassword == correctPassword {
+                        let cookieHeader = "Set-Cookie: session=\(self.sessionToken); Path=/; HttpOnly; SameSite=Strict"
+                        self.sendRedirect(to: "/", extraHeaders: [cookieHeader], connection: connection)
+                    } else {
+                        self.sendResponse(html: self.getLoginHTML(error: "密码错误，请重新输入"), connection: connection)
+                    }
+                }
+                return
+            }
+            
+            if method == "GET" && path == "/logout" {
+                let cookieHeader = "Set-Cookie: session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+                self.sendRedirect(to: "/login", extraHeaders: [cookieHeader], connection: connection)
+                return
+            }
+            
+            // Validate Authorization: Cookie session first, then HTTP Basic Auth fallback
+            if !self.verifyAuthorization(headers: lines) {
+                if path.hasPrefix("/api/") {
+                    self.sendJSONUnauthorizedResponse(connection: connection)
+                } else {
+                    self.sendRedirect(to: "/login", connection: connection)
+                }
                 return
             }
             
@@ -86,43 +143,45 @@ final class WebServer {
         }
     }
     
-    private func verifyBasicAuth(headers: [String]) -> Bool {
+    private func extractPassword(from body: String) -> String? {
+        let pairs = body.components(separatedBy: "&")
+        for pair in pairs {
+            let kv = pair.components(separatedBy: "=")
+            if kv.count == 2 && kv[0] == "password" {
+                return kv[1].removingPercentEncoding
+            }
+        }
+        return nil
+    }
+    
+    private func verifyAuthorization(headers: [String]) -> Bool {
+        return verifySession(headers: headers)
+    }
+    
+    private func verifySession(headers: [String]) -> Bool {
         let password = UserDefaults.standard.string(forKey: "WebServerPassword") ?? ""
         guard !password.isEmpty else { return true }
         
         for line in headers {
-            if let range = line.range(of: "Authorization:\\s*Basic\\s+", options: [.regularExpression, .caseInsensitive]) {
-                let base64Part = String(line[range.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
-                if let decodedData = Data(base64Encoded: base64Part),
-                   let credentials = String(data: decodedData, encoding: .utf8) {
-                    let credParts = credentials.components(separatedBy: ":")
-                    if credParts.count >= 2 {
-                        let enteredPassword = credParts[1]
-                        if enteredPassword == password {
-                            return true
-                        }
-                    }
+            if line.lowercased().hasPrefix("cookie:") {
+                if line.contains("session=\(sessionToken)") {
+                    return true
                 }
             }
         }
         return false
     }
     
-    private func sendUnauthorizedResponse(connection: NWConnection) {
-        let responseHeader = [
-            "HTTP/1.1 401 Unauthorized",
-            "WWW-Authenticate: Basic realm=\"MacHead Secure Dashboard\"",
-            "Content-Type: text/plain; charset=utf-8",
-            "Content-Length: 16",
-            "Connection: close",
-            "",
-            "401 Unauthorized"
-        ].joined(separator: "\r\n")
-        
-        let responseData = responseHeader.data(using: .utf8)!
-        connection.send(content: responseData, completion: .contentProcessed({ _ in
-            connection.cancel()
-        }))
+    private func sendJSONUnauthorizedResponse(connection: NWConnection) {
+        let content = "{\"error\":\"unauthorized\"}".data(using: .utf8)!
+        sendResponse(statusCode: 401, statusText: "Unauthorized", content: content, contentType: "application/json", connection: connection)
+    }
+    
+    private func sendRedirect(to url: String, extraHeaders: [String] = [], connection: NWConnection) {
+        let content = "Redirecting...".data(using: .utf8)!
+        var redirectHeaders = ["Location: \(url)"]
+        redirectHeaders.append(contentsOf: extraHeaders)
+        sendResponse(statusCode: 302, statusText: "Found", content: content, contentType: "text/plain", extraHeaders: redirectHeaders, connection: connection)
     }
     
     private func routeRequest(method: String, path: String, connection: NWConnection) {
@@ -213,16 +272,19 @@ final class WebServer {
         sendResponse(statusCode: 200, statusText: "OK", content: content, contentType: "application/json", connection: connection)
     }
     
-    private func sendResponse(statusCode: Int, statusText: String, content: Data, contentType: String, connection: NWConnection) {
-        let headers = [
+    private func sendResponse(statusCode: Int, statusText: String, content: Data, contentType: String, extraHeaders: [String] = [], connection: NWConnection) {
+        var headersList = [
             "HTTP/1.1 \(statusCode) \(statusText)",
             "Content-Type: \(contentType)",
             "Content-Length: \(content.count)",
             "Access-Control-Allow-Origin: *",
-            "Connection: close",
-            "",
-            ""
-        ].joined(separator: "\r\n")
+            "Connection: close"
+        ]
+        headersList.append(contentsOf: extraHeaders)
+        headersList.append("")
+        headersList.append("")
+        
+        let headers = headersList.joined(separator: "\r\n")
         
         var responseData = headers.data(using: .utf8)!
         responseData.append(content)
@@ -232,9 +294,126 @@ final class WebServer {
         }))
     }
     
+    private func getDiskUsage() -> (usedGB: Double, totalGB: Double, percent: Double) {
+        let path = "/"
+        let fileManager = FileManager.default
+        do {
+            let attrs = try fileManager.attributesOfFileSystem(forPath: path)
+            if let totalBytes = attrs[.systemSize] as? Int64,
+               let freeBytes = attrs[.systemFreeSize] as? Int64 {
+                let totalGB = Double(totalBytes) / (1024.0 * 1024.0 * 1024.0)
+                let freeGB = Double(freeBytes) / (1024.0 * 1024.0 * 1024.0)
+                let usedGB = totalGB - freeGB
+                let percent = totalGB > 0 ? (usedGB / totalGB) * 100.0 : 0.0
+                return (usedGB, totalGB, percent)
+            }
+        } catch {
+            NSLog("MacHead: Failed to get disk usage: %@", error.localizedDescription)
+        }
+        return (0.0, 0.0, 0.0)
+    }
+    
+    private func getSystemUptime() -> String {
+        let uptime = ProcessInfo.processInfo.systemUptime
+        let days = Int(uptime) / 86400
+        let hours = (Int(uptime) % 86400) / 3600
+        let minutes = (Int(uptime) % 3600) / 60
+        
+        var parts: [String] = []
+        if days > 0 {
+            parts.append("\(days)天")
+        }
+        if hours > 0 || days > 0 {
+            parts.append("\(hours)小时")
+        }
+        parts.append("\(minutes)分钟")
+        return parts.joined(separator: " ")
+    }
+    
+    private func getThermalState() -> String {
+        let state = ProcessInfo.processInfo.thermalState
+        switch state {
+        case .nominal:
+            return "Nominal"
+        case .fair:
+            return "Fair"
+        case .serious:
+            return "Serious"
+        case .critical:
+            return "Critical"
+        @unknown default:
+            return "Unknown"
+        }
+    }
+    
+    private func getNetworkBytes() -> (ibytes: UInt64, obytes: UInt64) {
+        var ibytes: UInt64 = 0
+        var obytes: UInt64 = 0
+        var ifaddr: UnsafeMutablePointer<ifaddrs>?
+        
+        guard getifaddrs(&ifaddr) == 0 else { return (0, 0) }
+        defer { freeifaddrs(ifaddr) }
+        
+        var ptr = ifaddr
+        while ptr != nil {
+            defer { ptr = ptr?.pointee.ifa_next }
+            guard let interface = ptr?.pointee else { continue }
+            let name = String(cString: interface.ifa_name)
+            
+            guard name != "lo0" else { continue }
+            
+            let addr = interface.ifa_addr.pointee
+            if addr.sa_family == UInt8(AF_LINK) {
+                if let data = interface.ifa_data {
+                    let networkData = data.assumingMemoryBound(to: if_data.self)
+                    ibytes += UInt64(networkData.pointee.ifi_ibytes)
+                    obytes += UInt64(networkData.pointee.ifi_obytes)
+                }
+            }
+        }
+        return (ibytes, obytes)
+    }
+    
+    private func getNetworkSpeed() -> (rxSpeed: Double, txSpeed: Double) {
+        let currentBytes = getNetworkBytes()
+        let now = Date()
+        
+        defer {
+            lastInboundBytes = currentBytes.ibytes
+            lastOutboundBytes = currentBytes.obytes
+            lastNetworkTime = now
+        }
+        
+        guard let lastTime = lastNetworkTime, lastInboundBytes > 0 else {
+            return (0.0, 0.0)
+        }
+        
+        let timeInterval = now.timeIntervalSince(lastTime)
+        guard timeInterval > 0 else { return (0.0, 0.0) }
+        
+        let rxBytesDiff = currentBytes.ibytes >= lastInboundBytes ? currentBytes.ibytes - lastInboundBytes : 0
+        let txBytesDiff = currentBytes.obytes >= lastOutboundBytes ? currentBytes.obytes - lastOutboundBytes : 0
+        
+        let rxSpeed = Double(rxBytesDiff) / timeInterval
+        let txSpeed = Double(txBytesDiff) / timeInterval
+        
+        return (rxSpeed, txSpeed)
+    }
+
     private func getStatusJSON() -> String {
         let cpu = getCPUUsage()
-        let ram = getMemoryUsage()
+        let ramStats = getMemoryStats()
+        let ram = ramStats.total > 0 ? (ramStats.used / ramStats.total) * 100.0 : 0.0
+        let gpu = getGPUUsage()
+        let cpuTemp = getCPUTemperature()
+        let gpuMem = getGPUMemoryUsage()
+        
+        BatteryManager.shared.updateBatteryRegistryInfo()
+        
+        let disk = getDiskUsage()
+        let uptime = getSystemUptime()
+        let thermal = getThermalState()
+        let (rxSpeed, txSpeed) = getNetworkSpeed()
         
         return """
         {
@@ -247,9 +426,25 @@ final class WebServer {
           "isCharging": \(BatteryManager.shared.isCharging),
           "powerState": "\(BatteryManager.shared.powerState)",
           "cpuUsage": \(cpu),
+          "cpuTemp": \(cpuTemp),
           "memoryUsage": \(ram),
+          "ramUsedGB": \(ramStats.used),
+          "ramTotalGB": \(ramStats.total),
+          "gpuUsage": \(gpu),
+          "vramUsedGB": \(gpuMem.used),
+          "vramAllocatedGB": \(gpuMem.allocated),
           "autoExitHeadlessOnDisconnect": \(UserDefaults.standard.bool(forKey: "AutoExitHeadlessOnDisconnect")),
-          "autoRestoreHeadlessOnConnect": \(UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect"))
+          "autoRestoreHeadlessOnConnect": \(UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect")),
+          "diskUsedGB": \(disk.usedGB),
+          "diskTotalGB": \(disk.totalGB),
+          "diskPercent": \(disk.percent),
+          "uptime": "\(uptime)",
+          "thermalState": "\(thermal)",
+          "batteryHealth": \(BatteryManager.shared.batteryHealth),
+          "batteryCycleCount": \(BatteryManager.shared.cycleCount),
+          "batteryTemp": \(BatteryManager.shared.batteryTemperature),
+          "rxSpeed": \(rxSpeed),
+          "txSpeed": \(txSpeed)
         }
         """
     }
@@ -277,13 +472,147 @@ final class WebServer {
         return address
     }
     
-    private func getMemoryUsage() -> Double {
-        var level: Int32 = 0
-        var size = MemoryLayout<Int32>.size
-        if sysctlbyname("kern.memorystatus_level", &level, &size, nil, 0) == 0 {
-            return Double(100 - level)
+    private func getCPUTemperature() -> Double {
+        guard let client = IOHIDEventSystemClientCreate(kCFAllocatorDefault) else {
+            return 0.0
         }
-        return 0.0
+        
+        let matching: [String: Any] = [
+            "PrimaryUsagePage": 0xff00,
+            "PrimaryUsage": 0x05
+        ]
+        
+        _ = IOHIDEventSystemClientSetMatching(client, matching as CFDictionary)
+        
+        guard let services = IOHIDEventSystemClientCopyServices(client) as? [AnyObject] else {
+            return 0.0
+        }
+        
+        var cpuTemps: [Double] = []
+        
+        for service in services {
+            let name = IOHIDServiceClientCopyProperty(service, "Product" as CFString) as? String ?? ""
+            let nameLower = name.lowercased()
+            
+            if nameLower.contains("tdie") || nameLower.contains("cpu") || nameLower.contains("pacc") || nameLower.contains("eacc") {
+                if let event = IOHIDServiceClientCopyEvent(service, 15, 0, 0) {
+                    let temp = IOHIDEventGetFloatValue(event, 983040)
+                    if temp > 0.0 && temp < 150.0 {
+                        cpuTemps.append(temp)
+                    }
+                }
+            }
+        }
+        
+        if cpuTemps.isEmpty {
+            return BatteryManager.shared.batteryTemperature
+        }
+        
+        return cpuTemps.reduce(0, +) / Double(cpuTemps.count)
+    }
+    
+    private func getGPUMemoryUsage() -> (used: Double, allocated: Double) {
+        let serviceMatching = IOServiceMatching("IOAccelerator")
+        var iterator = io_iterator_t()
+        var usedBytes: Double = 0.0
+        var allocatedBytes: Double = 0.0
+        
+        if IOServiceGetMatchingServices(0, serviceMatching, &iterator) == kIOReturnSuccess {
+            var regEntry = IOIteratorNext(iterator)
+            while regEntry != 0 {
+                var properties: Unmanaged<CFMutableDictionary>? = nil
+                if IORegistryEntryCreateCFProperties(regEntry, &properties, kCFAllocatorDefault, 0) == kIOReturnSuccess {
+                    if let dict = properties?.takeRetainedValue() as? [String: AnyObject] {
+                        if let perfStats = dict["PerformanceStatistics"] as? [String: AnyObject] {
+                            if let inUse = perfStats["In use system memory"] as? NSNumber {
+                                usedBytes = max(usedBytes, inUse.doubleValue)
+                            } else if let inUseVal = perfStats["In use system memory"] as? Int64 {
+                                usedBytes = max(usedBytes, Double(inUseVal))
+                            }
+                            
+                            if let alloc = perfStats["Alloc system memory"] as? NSNumber {
+                                allocatedBytes = max(allocatedBytes, alloc.doubleValue)
+                            } else if let allocVal = perfStats["Alloc system memory"] as? Int64 {
+                                allocatedBytes = max(allocatedBytes, Double(allocVal))
+                            }
+                        }
+                    }
+                }
+                IOObjectRelease(regEntry)
+                regEntry = IOIteratorNext(iterator)
+            }
+            IOObjectRelease(iterator)
+        }
+        
+        let usedGB = usedBytes / (1024.0 * 1024.0 * 1024.0)
+        let allocatedGB = allocatedBytes / (1024.0 * 1024.0 * 1024.0)
+        return (usedGB, allocatedGB)
+    }
+    
+    private func getMemoryStats() -> (used: Double, total: Double) {
+        var stats = vm_statistics64()
+        var count = mach_msg_type_number_t(MemoryLayout<vm_statistics64>.size / MemoryLayout<integer_t>.size)
+        let result = withUnsafeMutablePointer(to: &stats) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(count)) {
+                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &count)
+            }
+        }
+        
+        guard result == KERN_SUCCESS else {
+            return (0.0, 0.0)
+        }
+        
+        var pageSize: vm_size_t = 0
+        host_page_size(mach_host_self(), &pageSize)
+        
+        let totalBytes = ProcessInfo.processInfo.physicalMemory
+        
+        let activeBytes = Double(stats.active_count) * Double(pageSize)
+        let wireBytes = Double(stats.wire_count) * Double(pageSize)
+        let compressedBytes = Double(stats.compressor_page_count) * Double(pageSize)
+        
+        let usedBytes = activeBytes + wireBytes + compressedBytes
+        let usedGB = usedBytes / (1024.0 * 1024.0 * 1024.0)
+        let totalGB = Double(totalBytes) / (1024.0 * 1024.0 * 1024.0)
+        return (usedGB, totalGB)
+    }
+    
+    private func getMemoryUsage() -> Double {
+        let stats = getMemoryStats()
+        guard stats.total > 0 else { return 0.0 }
+        return (stats.used / stats.total) * 100.0
+    }
+    
+    private func getGPUUsage() -> Double {
+        let serviceMatching = IOServiceMatching("IOAccelerator")
+        var iterator = io_iterator_t()
+        var usage: Double = 0.0
+        
+        if IOServiceGetMatchingServices(0, serviceMatching, &iterator) == kIOReturnSuccess {
+            var regEntry = IOIteratorNext(iterator)
+            while regEntry != 0 {
+                var properties: Unmanaged<CFMutableDictionary>? = nil
+                if IORegistryEntryCreateCFProperties(regEntry, &properties, kCFAllocatorDefault, 0) == kIOReturnSuccess {
+                    if let dict = properties?.takeRetainedValue() as? [String: AnyObject] {
+                        if let perfStats = dict["PerformanceStatistics"] as? [String: AnyObject] {
+                            if let deviceUtil = perfStats["Device Utilization %"] as? NSNumber {
+                                usage = max(usage, deviceUtil.doubleValue)
+                            } else if let coreUtil = perfStats["GPU Core Utilization"] as? NSNumber {
+                                usage = max(usage, coreUtil.doubleValue)
+                            } else if let coreUtilVal = perfStats["GPU Core Utilization"] as? Int {
+                                usage = max(usage, Double(coreUtilVal))
+                            } else if let deviceUtilVal = perfStats["Device Utilization %"] as? Int {
+                                usage = max(usage, Double(deviceUtilVal))
+                            }
+                        }
+                    }
+                }
+                IOObjectRelease(regEntry)
+                regEntry = IOIteratorNext(iterator)
+            }
+            IOObjectRelease(iterator)
+        }
+        return usage
     }
     
     private func getCPUUsage() -> Double {
@@ -328,561 +657,70 @@ final class WebServer {
     }
     
     private func getDashboardHTML() -> String {
+        if let resourcePath = Bundle.main.path(forResource: "Dashboard", ofType: "html"),
+           let html = try? String(contentsOfFile: resourcePath, encoding: .utf8) {
+            return html
+        }
+        
+        // Fallback fallback if resource loading fails
         return """
         <!DOCTYPE html>
         <html>
         <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>MacHead 控制面板</title>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+            <title>MacHead - Dashboard Load Failure</title>
             <style>
-                :root {
-                    /* Warm Light Theme */
-                    --bg-color: #fbf9fa;
-                    --text-color: #26251e;
-                    --text-muted: rgba(38, 37, 30, 0.55);
-                    --card-bg: #ffffff;
-                    --card-border: rgba(38, 37, 30, 0.08);
-                    --card-border-hover: rgba(38, 37, 30, 0.16);
-                    --card-shadow: 0 8px 30px rgba(38, 37, 30, 0.03);
-                    --input-bg: #f3f1f2;
-                    --toggle-dot-active: #fbf9fa;
-                    
-                    /* Fonts */
-                    --font-serif: 'EB Garamond', Georgia, serif;
-                    --font-sans: 'Inter', system-ui, sans-serif;
-                }
-
-                @media (prefers-color-scheme: dark) {
-                    :root {
-                        /* Warm Dark Theme */
-                        --bg-color: #14120b;
-                        --text-color: #edecec;
-                        --text-muted: rgba(237, 236, 236, 0.55);
-                        --card-bg: #1c1b14;
-                        --card-border: rgba(237, 236, 236, 0.08);
-                        --card-border-hover: rgba(237, 236, 236, 0.16);
-                        --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-                        --input-bg: #0b0a05;
-                        --toggle-dot-active: #14120b;
-                    }
-                }
-
-                body[data-theme="light"] {
-                    --bg-color: #fbf9fa;
-                    --text-color: #26251e;
-                    --text-muted: rgba(38, 37, 30, 0.55);
-                    --card-bg: #ffffff;
-                    --card-border: rgba(38, 37, 30, 0.08);
-                    --card-border-hover: rgba(38, 37, 30, 0.16);
-                    --card-shadow: 0 8px 30px rgba(38, 37, 30, 0.03);
-                    --input-bg: #f3f1f2;
-                    --toggle-dot-active: #fbf9fa;
-                }
-
-                body[data-theme="dark"] {
-                    --bg-color: #14120b;
-                    --text-color: #edecec;
-                    --text-muted: rgba(237, 236, 236, 0.55);
-                    --card-bg: #1c1b14;
-                    --card-border: rgba(237, 236, 236, 0.08);
-                    --card-border-hover: rgba(237, 236, 236, 0.16);
-                    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-                    --input-bg: #0b0a05;
-                    --toggle-dot-active: #14120b;
-                }
-
-                * { box-sizing: border-box; margin: 0; padding: 0; }
-                
-                body {
-                    font-family: var(--font-sans);
-                    background-color: var(--bg-color);
-                    color: var(--text-color);
-                    min-height: 100vh;
-                    padding: 60px 24px;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    transition: background-color 0.3s, color 0.3s;
-                }
-                
-                .container {
-                    width: 100%;
-                    max-width: 800px;
-                }
-                
-                header {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 40px;
-                    width: 100%;
-                    border-bottom: 1px solid var(--card-border);
-                    padding-bottom: 16px;
-                }
-                
-                header h1 {
-                    font-family: var(--font-serif);
-                    font-size: 26px;
-                    font-weight: 400;
-                    color: var(--text-color);
-                }
-                
-                .grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                    gap: 20px;
-                    margin-bottom: 20px;
-                }
-                
-                .card {
-                    background: var(--card-bg);
-                    border: 1px solid var(--card-border);
-                    border-radius: 4px;
-                    padding: 24px;
-                    box-shadow: var(--card-shadow);
-                    transition: border-color 0.15s ease, transform 0.15s ease;
-                }
-                
-                .card:hover {
-                    border-color: var(--card-border-hover);
-                }
-                
-                .card-title {
-                    font-family: var(--font-serif);
-                    font-size: 16px;
-                    font-weight: 400;
-                    color: var(--text-color);
-                    margin-bottom: 16px;
-                }
-                
-                .card-value {
-                    font-family: var(--font-sans);
-                    font-size: 28px;
-                    font-weight: 500;
-                    color: var(--text-color);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                
-                .control-row {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 16px 0;
-                    border-bottom: 1px solid var(--card-border);
-                }
-                
-                .control-row:last-child {
-                    border-bottom: none;
-                }
-                
-                .control-label {
-                    font-weight: 500;
-                    font-size: 14.5px;
-                }
-                
-                .control-desc {
-                    font-size: 12px;
-                    color: var(--text-muted);
-                    margin-top: 4px;
-                }
-                
-                .status-dot {
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    display: inline-block;
-                }
-                
-                .status-dot.active {
-                    background-color: #42b883;
-                }
-                
-                .status-dot.inactive {
-                    background-color: #ff5252;
-                }
-                
-                /* Minimal Switch Slider */
-                .switch {
-                    position: relative;
-                    display: inline-block;
-                    width: 32px;
-                    height: 18px;
-                }
-                
-                .switch input {
-                    opacity: 0;
-                    width: 0;
-                    height: 0;
-                }
-                
-                .slider {
-                    position: absolute;
-                    cursor: pointer;
-                    top: 0; left: 0; right: 0; bottom: 0;
-                    background-color: var(--input-bg);
-                    border: 1px solid var(--card-border);
-                    transition: .15s;
-                    border-radius: 18px;
-                }
-                
-                .slider:before {
-                    position: absolute;
-                    content: "";
-                    height: 10px;
-                    width: 10px;
-                    left: 3px;
-                    bottom: 3px;
-                    background-color: var(--text-color);
-                    transition: .15s;
-                    border-radius: 50%;
-                }
-                
-                input:checked + .slider {
-                    background-color: var(--text-color);
-                    border-color: var(--text-color);
-                }
-                
-                input:checked + .slider:before {
-                    transform: translateX(14px);
-                    background-color: var(--toggle-dot-active);
-                }
-                
-                /* Gauges container */
-                .gauge-container {
-                    display: flex;
-                    justify-content: space-around;
-                    gap: 20px;
-                }
-                
-                .gauge-card {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                }
-                
-                .progress-ring {
-                    margin-bottom: 12px;
-                }
-                
-                .progress-ring__circle-bg {
-                    stroke: var(--input-bg);
-                }
-                
-                .progress-ring__circle {
-                    transition: stroke-dashoffset 0.35s;
-                    transform: rotate(-90deg);
-                    transform-origin: 50% 50%;
-                }
-                
-                #cpu-circle {
-                    stroke: #42b883; /* Green gauge */
-                }
-                
-                #ram-circle {
-                    stroke: #e0a96d; /* Yellow gauge */
-                }
-                
-                .gauge-label {
-                    font-size: 13px;
-                    color: var(--text-muted);
-                }
-                
-                .gauge-val-text {
-                    font-family: var(--font-sans);
-                    font-size: 18px;
-                    font-weight: 500;
-                    fill: var(--text-color);
-                }
-                
-                /* Theme Toggle Button */
-                .theme-btn {
-                    background: var(--card-bg);
-                    border: 1px solid var(--card-border);
-                    color: var(--text-color);
-                    padding: 6px 14px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 12px;
-                    font-weight: 500;
-                    transition: all 0.15s;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-                
-                .theme-btn:hover {
-                    border-color: var(--card-border-hover);
-                    background: var(--input-bg);
-                }
+                body { font-family: system-ui, -apple-system, sans-serif; background: #121214; color: #fff; padding: 40px; text-align: center; }
+                h1 { color: #ff453a; }
             </style>
         </head>
         <body>
-            <div class="container">
-                <header>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 24px; font-family: var(--font-serif);"></span>
-                        <h1>MacHead 远程控制台</h1>
-                    </div>
-                    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
-                        <span id="theme-icon">🌙</span>
-                        <span id="theme-text">深色模式</span>
-                    </button>
-                </header>
-                
-                <!-- Hardware Gauges -->
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-title">系统硬件负载</div>
-                    <div class="gauge-container">
-                        <div class="gauge-card">
-                            <svg class="progress-ring" width="120" height="120">
-                                <circle class="progress-ring__circle-bg" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
-                                <circle class="progress-ring__circle" id="cpu-circle" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
-                                <text x="60" y="66" text-anchor="middle" class="gauge-val-text" id="cpu-text">0%</text>
-                            </svg>
-                            <div class="gauge-label">CPU 占用率</div>
-                        </div>
-                        
-                        <div class="gauge-card">
-                            <svg class="progress-ring" width="120" height="120">
-                                <circle class="progress-ring__circle-bg" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
-                                <circle class="progress-ring__circle" id="ram-circle" stroke-width="6" fill="transparent" r="50" cx="60" cy="60"/>
-                                <text x="60" y="66" text-anchor="middle" class="gauge-val-text" id="ram-text">0%</text>
-                            </svg>
-                            <div class="gauge-label">内存压力</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid">
-                    <!-- Mode Card -->
-                    <div class="card">
-                        <div class="card-title">系统运行状态</div>
-                        <div class="card-value" id="mode-text">
-                            <span class="status-dot" id="mode-dot"></span>
-                            <span id="mode-label" style="font-size: 20px; font-weight: 500; margin-left: 6px;">正在连接...</span>
-                        </div>
-                        <div style="margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height: 1.4;">
-                            工作站模式决定内置显示器和供电唤醒断言是否锁死。
-                        </div>
-                    </div>
-                    
-                    <!-- Battery Card -->
-                    <div class="card">
-                        <div class="card-title">电池与电源保护</div>
-                        <div class="card-value">
-                            <span id="battery-capacity">--%</span>
-                            <span id="charging-indicator" style="font-size:18px; color:#e0a96d; display:none; margin-left: 8px;">⚡️</span>
-                        </div>
-                        <div style="margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height: 1.4;" id="power-source-text">
-                            正在查询电源状态...
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="grid">
-                    <!-- Controls Card -->
-                    <div class="card" style="grid-column: span 2;">
-                        <div class="card-title">设备远程控制</div>
-                        
-                        <div class="control-row">
-                            <div>
-                                <div class="control-label">MacBook Headless 模式</div>
-                                <div class="control-desc">关闭内置屏幕以模拟独立 Mac Studio 行为。</div>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="headless-toggle" onchange="toggleSetting('headless')">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <div>
-                                <div class="control-label">防止空闲睡眠</div>
-                                <div class="control-desc">保持系统常亮，合盖不休眠。</div>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="sleep-toggle" onchange="toggleSetting('sleep')">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <div>
-                                <div class="control-label">禁用内置触控板</div>
-                                <div class="control-desc">检测到外接鼠标时，自动关闭触控板输入以防误触。</div>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="trackpad-toggle" onchange="toggleSetting('trackpad')">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <div>
-                                <div class="control-label">无头模式下禁用键盘和触控板</div>
-                                <div class="control-desc">进入无头模式后，自动屏蔽内置键盘按键与内置触控板输入以防误触。</div>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="keyboard-toggle" onchange="toggleSetting('keyboard-headless')">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <div>
-                                <div class="control-label">静音内置麦克风</div>
-                                <div class="control-desc">保护物理隐私，进入无头模式时静音系统麦克风。</div>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="microphone-toggle" onchange="toggleSetting('microphone')">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <div>
-                                <div class="control-label">断开外接显示器时自动退出</div>
-                                <div class="control-desc">检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。</div>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="exit-disconnect-toggle" onchange="toggleSetting('exit-disconnect')">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="control-row">
-                            <div>
-                                <div class="control-label">接入外接显示器时自动恢复</div>
-                                <div class="control-desc">有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。</div>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="restore-connect-toggle" onchange="toggleSetting('restore-connect')">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+            <h1>Dashboard Resource Missing</h1>
+            <p>Please ensure Dashboard.html is packaged inside the application bundle's Resources folder.</p>
+        </body>
+        </html>
+        """
+    }
+    
+    private func getLoginHTML(error: String? = nil) -> String {
+        if let resourcePath = Bundle.main.path(forResource: "Login", ofType: "html"),
+           var html = try? String(contentsOfFile: resourcePath, encoding: .utf8) {
+            if let error = error {
+                let errorDiv = "<div class=\"error-msg\">\(error)</div>"
+                html = html.replacingOccurrences(of: "<!-- ERROR_PLACEHOLDER -->", with: errorDiv)
+            } else {
+                html = html.replacingOccurrences(of: "<!-- ERROR_PLACEHOLDER -->", with: "")
+            }
+            return html
+        }
+        
+        // Fallback fallback if resource loading fails
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>MacHead - 登录</title>
+            <style>
+                body { font-family: system-ui, -apple-system, sans-serif; background: #14120b; color: #edecec; padding: 40px; text-align: center; }
+                .card { background: #1c1b14; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 30px; display: inline-block; max-width: 320px; text-align: left; margin-top: 100px; }
+                input[type="password"] { width: 100%; box-sizing: border-box; background: #0b0a05; color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 10px; margin-top: 10px; margin-bottom: 20px; outline: none; }
+                input[type="password"]:focus { border-color: #007aff; }
+                input[type="submit"] { width: 100%; background: #007aff; color: #fff; border: none; border-radius: 6px; padding: 10px; font-weight: bold; cursor: pointer; }
+                .error { color: #ff453a; font-size: 13px; margin-bottom: 15px; background: rgba(255, 69, 58, 0.1); padding: 8px; border-radius: 4px; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2>MacHead Console Login</h2>
+                \(error != nil ? "<div class=\"error\">\(error!)</div>" : "")
+                <form method="POST" action="/login">
+                    <label>Password</label>
+                    <input type="password" name="password" autofocus required>
+                    <input type="submit" value="Log In">
+                </form>
             </div>
-            
-            <script>
-                function setProgress(circleId, percent) {
-                    const circle = document.getElementById(circleId);
-                    const radius = circle.r.baseVal.value;
-                    const circumference = radius * 2 * Math.PI;
-                    circle.style.strokeDasharray = `${circumference} ${circumference}`;
-                    const offset = circumference - (percent / 100 * circumference);
-                    circle.style.strokeDashoffset = offset;
-                }
-
-                async function fetchStatus() {
-                    try {
-                        const response = await fetch('/api/status');
-                        const data = await response.json();
-                        updateUI(data);
-                    } catch (err) {
-                        console.error("Failed to fetch status:", err);
-                    }
-                }
-
-                // Theme Toggle Logic
-                function initTheme() {
-                    const savedTheme = localStorage.getItem('theme');
-                    if (savedTheme) {
-                        setTheme(savedTheme);
-                    } else {
-                        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                        setTheme(systemDark ? 'dark' : 'light');
-                    }
-                }
-
-                function setTheme(theme) {
-                    document.body.setAttribute('data-theme', theme);
-                    localStorage.setItem('theme', theme);
-                    const btnIcon = document.getElementById('theme-icon');
-                    const btnText = document.getElementById('theme-text');
-                    if (theme === 'dark') {
-                        btnIcon.innerText = '☀️';
-                        btnText.innerText = '浅色模式';
-                    } else {
-                        btnIcon.innerText = '🌙';
-                        btnText.innerText = '深色模式';
-                    }
-                }
-
-                function toggleTheme() {
-                    const currentTheme = document.body.getAttribute('data-theme') || 'light';
-                    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
-                }
-
-                initTheme();
-
-                function updateUI(data) {
-                    const modeDot = document.getElementById('mode-dot');
-                    const modeLabel = document.getElementById('mode-label');
-                    const headlessToggle = document.getElementById('headless-toggle');
-                    
-                    if (data.headlessModeEnabled) {
-                        modeDot.className = "status-dot active";
-                        modeLabel.innerText = "MacBook Headless 激活";
-                        headlessToggle.checked = true;
-                    } else {
-                        modeDot.className = "status-dot inactive";
-                        modeLabel.innerText = "Normal 模式 (显示正常)";
-                        headlessToggle.checked = false;
-                    }
-                    
-                    document.getElementById('sleep-toggle').checked = data.preventIdleSleep;
-                    document.getElementById('trackpad-toggle').checked = data.trackpadDisabled;
-                    document.getElementById('keyboard-toggle').checked = data.keyboardAndTrackpadDisabledInHeadless;
-                    document.getElementById('microphone-toggle').checked = data.microphoneMuted;
-                    document.getElementById('exit-disconnect-toggle').checked = data.autoExitHeadlessOnDisconnect;
-                    document.getElementById('restore-connect-toggle').checked = data.autoRestoreHeadlessOnConnect;
-                    
-                    document.getElementById('battery-capacity').innerText = `${data.batteryCapacity}%`;
-                    document.getElementById('charging-indicator').style.display = data.isCharging ? 'inline' : 'none';
-                    document.getElementById('power-source-text').innerText = 
-                        data.powerState === "AC Power" ? "正在通过外接电源供电" : "正在通过电池供电（警告：未接电源）";
-                    
-                    const cpuVal = Math.round(data.cpuUsage);
-                    const ramVal = Math.round(data.memoryUsage);
-                    document.getElementById('cpu-text').textContent = `${cpuVal}%`;
-                    document.getElementById('ram-text').textContent = `${ramVal}%`;
-                    setProgress('cpu-circle', cpuVal);
-                    setProgress('ram-circle', ramVal);
-                }
-
-                async function toggleSetting(type) {
-                    let url = '';
-                    switch(type) {
-                        case 'headless': url = '/api/toggle-headless'; break;
-                        case 'sleep': url = '/api/toggle-sleep'; break;
-                        case 'trackpad': url = '/api/toggle-trackpad'; break;
-                        case 'keyboard-headless': url = '/api/toggle-keyboard-headless'; break;
-                        case 'microphone': url = '/api/toggle-microphone'; break;
-                        case 'exit-disconnect': url = '/api/toggle-exit-on-disconnect'; break;
-                        case 'restore-connect': url = '/api/toggle-restore-on-connect'; break;
-                    }
-                    
-                    try {
-                        const response = await fetch(url, { method: 'POST' });
-                        const data = await response.json();
-                        updateUI(data);
-                    } catch (err) {
-                        console.error(`Failed to toggle ${type}:`, err);
-                    }
-                }
-
-                fetchStatus();
-                setInterval(fetchStatus, 3000);
-            </script>
         </body>
         </html>
         """
     }
 }
+

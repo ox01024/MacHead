@@ -76,9 +76,11 @@ echo "Setting bundle version in Info.plist: Version ${VERSION} (Build ${BUILD})"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${APP_DIR}/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD}" "${APP_DIR}/Contents/Info.plist"
 
-# Copy AppIcon to resources
+# Copy AppIcon, Dashboard, and Login HTML to resources
 mkdir -p "${APP_DIR}/Contents/Resources"
 cp Resources/AppIcon.icns "${APP_DIR}/Contents/Resources/AppIcon.icns"
+cp Resources/Dashboard.html "${APP_DIR}/Contents/Resources/Dashboard.html"
+cp Resources/Login.html "${APP_DIR}/Contents/Resources/Login.html"
 
 # Apply ad-hoc signature (required for ARM64 macOS binaries and icon rendering)
 echo "Ad-hoc signing the application bundle..."
