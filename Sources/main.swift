@@ -40,6 +40,10 @@ if arguments.count > 1 {
         RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.2))
         exit(0)
         
+    } else if arg == "--test" {
+        HeadlessModeController.runTests()
+        exit(0)
+        
     } else if arg == "--help" || arg == "-h" || arg == "help" {
         print("MacHead - MacBook Headless Mode Manager (CLI Client)")
         print("Usage:")
@@ -49,6 +53,7 @@ if arguments.count > 1 {
         print("  -s, --status   Show current mode status (headless, normal, or offline)")
         print("  -e, --enable   Enable Headless Mode (turns off built-in display, locks sleep)")
         print("  -d, --disable  Disable Headless Mode (restores built-in display)")
+        print("  --test         Run unit tests for HeadlessModeController")
         print("  -h, --help     Show this help message")
         exit(0)
         
