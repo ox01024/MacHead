@@ -1,7 +1,7 @@
 {
-  "version": "0.1.12",
-  "build": 15,
-  "pubDate": "2026-07-09",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.12-macos-universal.dmg",
-  "releaseNotes": "1. 新增安全的局域网远程管理控制台，全面升级安全 Cookie 会话隔离鉴权与登录页；n2. 升级控制台顶栏深浅色模式与退出登录按钮为精美自适应 SVG 矢量图线稿；n3. 物理性能看板升级，引入 CPU 核心物理温度、真实物理内存（RAM）使用量与 GPU 显存负载细节监控。"
+  "version": "0.1.13",
+  "build": 16,
+  "pubDate": "2026-07-11",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.13-macos-universal.dmg",
+  "releaseNotes": "1. 修复了连接外接显示器时无法手动关闭 Headless 模式的缺陷； 2. 内部新增了对显示重配置状态的自动化集成测试套件。"
 }
