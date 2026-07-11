@@ -720,6 +720,26 @@ p {
   transition: all 0.3s ease;
 }
 
+.web-mockup[data-mock-theme="light"] {
+  --color-bg: #fbf9fa;
+  --color-bg-card: #ffffff;
+  --color-bg-input: #f3f1f2;
+  --color-border: rgba(38, 37, 30, 0.08);
+  --color-border-hover: rgba(38, 37, 30, 0.16);
+  --color-text-main: #26251e;
+  --color-text-muted: rgba(38, 37, 30, 0.55);
+}
+
+.web-mockup[data-mock-theme="dark"] {
+  --color-bg: #14120b;
+  --color-bg-card: #1c1b14;
+  --color-bg-input: #0b0a05;
+  --color-border: rgba(237, 236, 236, 0.08);
+  --color-border-hover: rgba(237, 236, 236, 0.16);
+  --color-text-main: #edecec;
+  --color-text-muted: rgba(237, 236, 236, 0.55);
+}
+
 .web-mockup-header {
   height: 36px;
   background: rgba(255, 255, 255, 0.01);

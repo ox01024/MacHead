@@ -44,9 +44,9 @@
           "priceCurrency": "USD"
         },
         "description": "MacHead 是一款轻量、零依赖的 macOS 原生服务器管理工具。通过 Apple 内置组件安全切断内屏信号、自动静音麦克风、智能守护电池并阻止系统休眠，让您的闲置 MacBook 合盖化身为极致冷静的 Headless 工作站。",
-        "downloadUrl": "https://releases.headlessmac.com/MacHead-v0.1.0-macos-universal.dmg",
+        "downloadUrl": "https://releases.headlessmac.com/MacHead-v0.1.13-macos-universal.dmg",
         "screenshot": "https://headlessmac.com/machead_hero.png",
-        "softwareVersion": "v0.1.0",
+        "softwareVersion": "v0.1.13",
         "publisher": {
           "@type": "Organization",
           "name": "MacHead Project",
@@ -88,7 +88,7 @@
           </a>
         </nav>
         <div class="nav-actions">
-          <a href="https://releases.headlessmac.com/MacHead-v0.1.0-macos-universal.dmg" class="btn btn-primary btn-sm" id="download-header-link">下载 Universal DMG</a>
+          <a href="https://releases.headlessmac.com/MacHead-v0.1.13-macos-universal.dmg" class="btn btn-primary btn-sm" id="download-header-link">下载 Universal DMG</a>
         </div>
       </div>
     </header>
@@ -101,7 +101,7 @@
           <div class="hero-content">
             <div class="hero-badge animate-fade-in">
               <span class="badge-dot"></span>
-              <span class="badge-text">v0.1.0 Universal 支持 Apple Silicon / Intel</span>
+              <span class="badge-text">v0.1.13 Universal 支持 Apple Silicon / Intel</span>
             </div>
             <h1 class="hero-title animate-slide-up">
               MacBook 合盖服务器<br/>
@@ -111,7 +111,7 @@
               MacHead 是一款轻量、零依赖的原生桌面工具。它能在逻辑上彻底熄灭内置屏幕以完美实现合盖运行，无需担心发热损坏屏幕，伴随智能电量保护与麦克风隐私锁，让您的闲置 MacBook 重焕新生。
             </p>
             <div class="hero-actions animate-slide-up-delay2">
-              <a href="https://releases.headlessmac.com/MacHead-v0.1.0-macos-universal.dmg" class="btn btn-primary btn-lg" id="download-hero-link">
+              <a href="https://releases.headlessmac.com/MacHead-v0.1.13-macos-universal.dmg" class="btn btn-primary btn-lg" id="download-hero-link">
                 <svg class="apple-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                   <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 22C7.79 22.05 6.8 20.68 5.96 19.47C4.25 17 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.1 16.67C20.08 16.74 19.67 18.11 18.71 19.5M15.97 4.17C16.63 3.37 17.07 2.28 16.95 1C15.98 1.04 14.81 1.65 14.11 2.47C13.5 3.17 12.97 4.28 13.12 5.5C14.2 5.58 15.3 4.97 15.97 4.17Z"></path>
                 </svg>
@@ -288,7 +288,7 @@
               
               <!-- Web Panel -->
               <div class="tab-panel" id="panel-web">
-                <div class="web-mockup">
+                <div class="web-mockup" id="web-mockup-wrapper" data-mock-theme="light">
                   <div class="web-mockup-header">
                     <div class="web-mockup-address">
                       <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; color: var(--color-text-main);">
@@ -298,123 +298,304 @@
                       http://192.168.100.131:8080
                     </div>
                   </div>
-                  <div class="web-mockup-body" style="font-family: var(--font-sans); background-color: var(--color-bg); padding: 24px; transition: background-color 0.3s;">
-                    <!-- Web Dashboard Header -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; width: 100%;">
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 20px; font-family: var(--font-serif); color: var(--color-text-main);"></span>
-                        <h3 style="font-family: var(--font-serif); font-size: 16px; font-weight: 400; color: var(--color-text-main); margin: 0;">MacHead 远程控制台</h3>
-                      </div>
-                      <div style="font-size: 10.5px; color: var(--color-text-muted); background: var(--color-bg-card); padding: 3px 8px; border: 1px solid var(--color-border); border-radius: 4px;">在线</div>
-                    </div>
+                  <div class="web-mockup-body" style="font-family: var(--font-sans); padding: 24px; transition: background-color 0.3s, color 0.3s;">
                     
-                    <!-- Hardware Gauges -->
-                    <div class="web-dash-card" style="margin-bottom: 16px; padding: 16px; width: 100%;">
-                      <div class="card-title" style="font-family: var(--font-serif); font-size: 14px; color: var(--color-text-main); margin-bottom: 12px;">系统硬件负载</div>
-                      <div class="gauge-container" style="display: flex; justify-content: space-around; gap: 16px; width: 100%;">
-                        <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center;">
-                          <svg class="progress-ring" width="80" height="80" style="margin-bottom: 6px;">
-                            <circle class="progress-ring__circle-bg" stroke-width="4" stroke="var(--color-bg-input)" fill="transparent" r="28" cx="40" cy="40"/>
-                            <circle class="progress-ring__circle" id="mock-cpu-circle" stroke="#42b883" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 126.6; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-                            <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-cpu-val">28%</text>
+                    <!-- 1. Login Simulator Screen -->
+                    <div id="web-mockup-login" class="web-mockup-login" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; text-align: center;">
+                      <span style="font-size: 32px; font-family: var(--font-serif); margin-bottom: 8px;"></span>
+                      <h4 style="font-size: 16px; font-weight: 600; margin: 0 0 6px 0; font-family: var(--font-sans); color: var(--color-text-main);">MacHead 远程控制台</h4>
+                      <p style="font-size: 12px; color: var(--color-text-muted); margin: 0 0 20px 0;">请输入安全密码以进入面板</p>
+                      
+                      <div id="web-login-error" style="display: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #ff453a; background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); margin-bottom: 16px; width: 100%; max-width: 240px; text-align: left;">
+                        密码错误，请重新输入
+                      </div>
+                      
+                      <form id="web-login-form" style="width: 100%; max-width: 240px; display: flex; flex-direction: column; gap: 12px;">
+                        <div style="text-align: left;">
+                          <label style="font-size: 10px; font-weight: 500; color: var(--color-text-muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">控制台密码</label>
+                          <input type="password" id="web-login-pass" placeholder="请输入密码 (如: admin)" style="width: 100%; box-sizing: border-box; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 6px; padding: 10px 14px; font-size: 13px; color: var(--color-text-main); outline: none; transition: border-color 0.2s;" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; padding: 10px; margin-top: 4px; font-size: 12.5px; border-radius: 6px; font-weight: 600;">登录</button>
+                      </form>
+                    </div>
+
+                    <!-- 2. Dashboard Simulator Screen -->
+                    <div id="web-mockup-dashboard" style="display: none;">
+                      <!-- Web Dashboard Header -->
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="font-size: 20px; font-family: var(--font-serif); color: var(--color-text-main);"></span>
+                          <h3 style="font-family: var(--font-serif); font-size: 15px; font-weight: 400; color: var(--color-text-main); margin: 0;">MacHead 远程控制台</h3>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <button class="cli-cmd-btn" id="web-mockup-theme-toggle" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-bg-card); color: var(--color-text-main); cursor: pointer; font-family: var(--font-sans);">
+                            深色模式
+                          </button>
+                          <button class="cli-cmd-btn" id="web-mockup-logout" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-bg-card); color: var(--color-text-main); cursor: pointer; display: flex; align-items: center; gap: 3px; font-family: var(--font-sans);">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            退出登录
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Alert Banners -->
+                      <div class="web-alert-box" id="web-mock-alert-box" style="margin-bottom: 16px;">
+                        <div class="web-alert warning" style="display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 8px 12px; border-radius: 4px; border: 1px solid rgba(224, 169, 109, 0.2); background: rgba(224, 169, 109, 0.08); color: var(--color-text-main);">
+                          <span style="font-size: 12px;">⚠️</span>
+                          <span>提示：目前系统处于合盖无头工作模式下运作。</span>
+                        </div>
+                      </div>
+                      
+                      <!-- Hardware Gauges -->
+                      <div class="web-dash-card" style="margin-bottom: 16px; padding: 16px; width: 100%;">
+                        <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 12px; display: flex; justify-content: space-between;">
+                          <span>系统硬件负载</span>
+                          <span style="font-size: 9.5px; color: var(--color-text-muted);" id="web-hardware-peaks">峰值 - CPU: 28% | RAM: 16%</span>
+                        </div>
+                        <div class="gauge-container" style="display: flex; justify-content: space-around; gap: 16px; width: 100%;">
+                          
+                          <!-- CPU Gauge -->
+                          <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                            <svg class="progress-ring" width="80" height="80" style="margin-bottom: 6px;">
+                              <circle class="progress-ring__circle-bg" stroke-width="4" stroke="var(--color-bg-input)" fill="transparent" r="28" cx="40" cy="40"/>
+                              <circle class="progress-ring__circle" id="mock-cpu-circle" stroke="#42b883" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 126.6; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
+                              <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-cpu-val">28%</text>
+                            </svg>
+                            <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">CPU 占用率</div>
+                            <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-cpu-temp">温度: -- °C</div>
+                            <!-- Sparkline Graph -->
+                            <div class="web-sparkline-container" style="width: 100%; height: 30px; margin-top: 8px;">
+                              <svg width="100%" height="100%" viewBox="0 0 160 30" preserveAspectRatio="none">
+                                <path id="web-cpu-spark-fill" class="web-sparkline-fill" fill="rgba(66, 184, 131, 0.08)"></path>
+                                <path id="web-cpu-spark-line" class="web-sparkline-path" stroke="#42b883" stroke-width="1.5"></path>
+                              </svg>
+                            </div>
+                          </div>
+                          
+                          <!-- RAM Gauge -->
+                          <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                            <svg class="progress-ring" width="80" height="80" style="margin-bottom: 6px;">
+                              <circle class="progress-ring__circle-bg" stroke-width="4" stroke="var(--color-bg-input)" fill="transparent" r="28" cx="40" cy="40"/>
+                              <circle class="progress-ring__circle" id="mock-ram-circle" stroke="#e0a96d" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 147.7; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
+                              <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-ram-val">16%</text>
+                            </svg>
+                            <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">内存占用</div>
+                            <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-ram-details">已用: -- GB / -- GB</div>
+                            <!-- Sparkline Graph -->
+                            <div class="web-sparkline-container" style="width: 100%; height: 30px; margin-top: 8px;">
+                              <svg width="100%" height="100%" viewBox="0 0 160 30" preserveAspectRatio="none">
+                                <path id="web-ram-spark-fill" class="web-sparkline-fill" fill="rgba(224, 169, 109, 0.08)"></path>
+                                <path id="web-ram-spark-line" class="web-sparkline-path" stroke="#e0a96d" stroke-width="1.5"></path>
+                              </svg>
+                            </div>
+                          </div>
+  
+                          <!-- GPU Gauge -->
+                          <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+                            <svg class="progress-ring" width="80" height="80" style="margin-bottom: 6px;">
+                              <circle class="progress-ring__circle-bg" stroke-width="4" stroke="var(--color-bg-input)" fill="transparent" r="28" cx="40" cy="40"/>
+                              <circle class="progress-ring__circle" id="mock-gpu-circle" stroke="#af52de" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 175.9; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
+                              <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-gpu-val">0%</text>
+                            </svg>
+                            <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">GPU 占用率</div>
+                            <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-gpu-vram">显存: -- GB / -- GB</div>
+                            <!-- Sparkline Graph -->
+                            <div class="web-sparkline-container" style="width: 100%; height: 30px; margin-top: 8px;">
+                              <svg width="100%" height="100%" viewBox="0 0 160 30" preserveAspectRatio="none">
+                                <path id="web-gpu-spark-fill" class="web-sparkline-fill" fill="rgba(175, 82, 222, 0.08)"></path>
+                                <path id="web-gpu-spark-line" class="web-sparkline-path" stroke="#af52de" stroke-width="1.5"></path>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Network throughput -->
+                      <div class="web-dash-card" style="margin-bottom: 16px; padding: 14px; width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                          <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main);">实时网络吞吐量</div>
+                          <div style="display: flex; gap: 8px; font-size: 9.5px; color: var(--color-text-muted);">
+                            <span id="web-rx-peak">↓ 峰值: 0 B/s</span>
+                            <span id="web-tx-peak">↑ 峰值: 0 B/s</span>
+                          </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-bottom: 6px;">
+                          <span id="web-net-rx" style="color: #42b883;">↓ 0 B/s</span>
+                          <span id="web-net-tx" style="color: #007aff;">↑ 0 B/s</span>
+                        </div>
+                        <div class="web-sparkline-container" style="width: 100%; height: 35px;">
+                          <svg width="100%" height="100%" viewBox="0 0 320 35" preserveAspectRatio="none">
+                            <path id="web-rx-spark-fill" class="web-sparkline-fill" fill="rgba(66, 184, 131, 0.05)"></path>
+                            <path id="web-rx-spark-line" class="web-sparkline-path" stroke="#42b883" stroke-width="1.2"></path>
+                            <path id="web-tx-spark-fill" class="web-sparkline-fill" fill="rgba(0, 122, 255, 0.05)"></path>
+                            <path id="web-tx-spark-line" class="web-sparkline-path" stroke="#007aff" stroke-width="1.2"></path>
                           </svg>
-                          <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">CPU 占用率</div>
-                          <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-cpu-temp">温度: -- °C</div>
+                        </div>
+                      </div>
+  
+                      <div class="web-grid">
+                        <!-- SSD Card -->
+                        <div class="web-dash-card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                          <div>
+                            <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 4px;">SSD 磁盘空间</div>
+                            <div style="font-size: 14px; font-weight: 600;" id="web-disk-val">128.5 GB / 512.0 GB</div>
+                            <div style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;" id="web-disk-free">剩余: 383.5 GB</div>
+                          </div>
+                          <div class="web-progress-bar-container" style="margin-top: 10px;">
+                            <div class="web-progress-bar green" id="web-disk-bar" style="width: 25.1%; height: 100%;"></div>
+                          </div>
+                        </div>
+
+                        <!-- Thermal & Metadata -->
+                        <div class="web-dash-card">
+                          <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 6px;">温控与元数据</div>
+                          <table class="web-meta-table">
+                            <tr>
+                              <td class="label">运行时间 (Uptime)</td>
+                              <td class="val" id="web-uptime-val" style="display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                                <span style="display: inline-block; width: 5px; height: 5px; background: #42b883; border-radius: 50%;"></span>
+                                <span>3小时 12分钟</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="label">系统热阻压力</td>
+                              <td class="val" style="display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+                                <span style="display: inline-block; width: 5px; height: 5px; background: #42b883; border-radius: 50%;" id="web-thermal-dot"></span>
+                                <span id="web-thermal-val">Nominal</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="label">电池实时温度</td>
+                              <td class="val" id="web-battery-temp">36.5 °C</td>
+                            </tr>
+                            <tr>
+                              <td class="label">合盖与外接屏</td>
+                              <td class="val" id="web-lid-val">💻 合盖 (Clamshell)</td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+
+                      <div class="web-grid" style="margin-top: 14px;">
+                        <!-- Mode Card -->
+                        <div class="web-dash-card">
+                          <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 6px;">系统运行状态</div>
+                          <div class="card-value" style="font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 6px; margin-bottom: 0;" id="web-mode-val">
+                            <span class="status-dot active" style="background-color: #42b883; width: 6px; height: 6px;" id="web-mode-dot"></span>
+                            <span id="web-mode-text">Headless 激活</span>
+                          </div>
+                          <p style="margin-top:6px; font-size:9.5px; color: var(--color-text-muted); line-height: 1.3;">
+                            工作站模式决定内置显示器和供电唤醒断言是否锁死。
+                          </p>
                         </div>
                         
-                        <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center;">
-                          <svg class="progress-ring" width="80" height="80" style="margin-bottom: 6px;">
-                            <circle class="progress-ring__circle-bg" stroke-width="4" stroke="var(--color-bg-input)" fill="transparent" r="28" cx="40" cy="40"/>
-                            <circle class="progress-ring__circle" id="mock-ram-circle" stroke="#e0a96d" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 147.7; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-                            <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-ram-val">16%</text>
-                          </svg>
-                          <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">内存占用</div>
-                          <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-ram-details">已用: -- GB / -- GB</div>
+                        <!-- Battery Card -->
+                        <div class="web-dash-card">
+                          <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 6px;">电池与电源状态</div>
+                          <table class="web-meta-table">
+                            <tr>
+                              <td class="label">剩余电量 / 充电</td>
+                              <td class="val">
+                                <span id="web-battery-cap">88%</span>
+                                <span id="web-charging-icon" style="color: #e0a96d; margin-left: 2px;">⚡️</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="label">电池健康度</td>
+                              <td class="val" id="web-battery-health">94%</td>
+                            </tr>
+                            <tr>
+                              <td class="label">电池循环次数</td>
+                              <td class="val" id="web-battery-cycles">48 次</td>
+                            </tr>
+                            <tr>
+                              <td class="label">当前供电来源</td>
+                              <td class="val" id="web-power-source">AC Power</td>
+                            </tr>
+                          </table>
+                        </div>
+                      </div>
+                      
+                      <!-- Controls Card -->
+                      <div class="web-dash-card" style="margin-top: 16px; padding: 16px;">
+                        <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 12px;">设备远程控制</div>
+                        
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">MacBook Headless 模式</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">关闭内置屏幕以模拟独立 Mac Studio 行为。</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-headless-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
+                        </div>
+                        
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">防止空闲睡眠</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">保持系统常亮，合盖不休眠。</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-sleep-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
                         </div>
 
-                        <div class="gauge-card" style="display: flex; flex-direction: column; align-items: center;">
-                          <svg class="progress-ring" width="80" height="80" style="margin-bottom: 6px;">
-                            <circle class="progress-ring__circle-bg" stroke-width="4" stroke="var(--color-bg-input)" fill="transparent" r="28" cx="40" cy="40"/>
-                            <circle class="progress-ring__circle" id="mock-gpu-circle" stroke="#af52de" stroke-width="4" fill="transparent" r="28" cx="40" cy="40" style="stroke-dasharray: 175.9 175.9; stroke-dashoffset: 175.9; transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-                            <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-gpu-val">0%</text>
-                          </svg>
-                          <div class="gauge-label" style="font-size: 11px; color: var(--color-text-muted);">GPU 占用率</div>
-                          <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-gpu-vram">显存: -- GB / -- GB</div>
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">禁用内置触控板</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">检测到外接鼠标时，自动关闭触控板输入以防误触。</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-trackpad-toggle">
+                            <span class="slider-mini"></span>
+                          </label>
                         </div>
-                      </div>
-                    </div>
+                        
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">无头模式下禁用键盘和触控板</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">进入无头模式后，自动屏蔽内置键盘按键与内置触控板输入以防误触。</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-kbd-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
+                        </div>
 
-                    <div class="web-grid">
-                      <!-- Mode Card -->
-                      <div class="web-dash-card">
-                        <div class="card-title" style="font-family: var(--font-serif); font-size: 14px; color: var(--color-text-main); margin-bottom: 8px;">系统运行状态</div>
-                        <div class="card-value" style="font-size: 18px; font-weight: 500; display: flex; align-items: center; gap: 6px;">
-                          <span class="status-dot active" style="background-color: #42b883; width: 6px; height: 6px;"></span>
-                          <span>Headless 激活</span>
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">静音内置麦克风</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">保护物理隐私，进入无头模式时静音系统麦克风。</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-mic-toggle">
+                            <span class="slider-mini"></span>
+                          </label>
                         </div>
-                        <p style="margin-top:8px; font-size:11px; color: var(--color-text-muted); line-height: 1.4;">
-                          工作站模式决定内置显示器和供电唤醒断言是否锁死。
-                        </p>
-                      </div>
-                      
-                      <!-- Battery Card -->
-                      <div class="web-dash-card">
-                        <div class="card-title" style="font-family: var(--font-serif); font-size: 14px; color: var(--color-text-main); margin-bottom: 8px;">电池与电源保护</div>
-                        <div class="card-value" style="font-size: 18px; font-weight: 500;">
-                          88% <span style="font-size: 13px; color: #e0a96d; margin-left: 4px;">⚡️</span>
+
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">断开外接显示器时自动退出</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-exit-disconnect-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
                         </div>
-                        <p style="margin-top:8px; font-size:11px; color: var(--color-text-muted); line-height: 1.4;">
-                          正在通过外接电源供电
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <!-- Controls Card -->
-                    <div class="web-dash-card" style="margin-top: 16px; padding: 16px;">
-                      <div class="card-title" style="font-family: var(--font-serif); font-size: 14px; color: var(--color-text-main); margin-bottom: 12px;">设备远程控制</div>
-                      
-                      <div class="web-toggle-row">
-                        <div>
-                          <div class="control-label" style="font-weight: 500; font-size: 12.5px;">MacBook Headless 模式</div>
-                          <div class="control-desc" style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 2px;">关闭内置屏幕以模拟独立 Mac Studio 行为。</div>
+
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">接入外接显示器时自动恢复</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-restore-connect-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
                         </div>
-                        <label class="switch-mini">
-                          <input type="checkbox" id="web-headless-toggle" checked>
-                          <span class="slider-mini"></span>
-                        </label>
-                      </div>
-                      
-                      <div class="web-toggle-row">
-                        <div>
-                          <div class="control-label" style="font-weight: 500; font-size: 12.5px;">防止空闲睡眠</div>
-                          <div class="control-desc" style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 2px;">保持系统常亮，合盖不休眠。</div>
-                        </div>
-                        <label class="switch-mini">
-                          <input type="checkbox" id="web-sleep-toggle" checked>
-                          <span class="slider-mini"></span>
-                        </label>
-                      </div>
-                      
-                      <div class="web-toggle-row">
-                        <div>
-                          <div class="control-label" style="font-weight: 500; font-size: 12.5px;">静音内置麦克风</div>
-                          <div class="control-desc" style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 2px;">保护物理隐私，进入无头模式时静音系统麦克风。</div>
-                        </div>
-                        <label class="switch-mini">
-                          <input type="checkbox" id="web-mic-toggle">
-                          <span class="slider-mini"></span>
-                        </label>
-                      </div>
-                      
-                      <div class="web-toggle-row">
-                        <div>
-                          <div class="control-label" style="font-weight: 500; font-size: 12.5px;">无头模式下禁用键盘和触控板</div>
-                          <div class="control-desc" style="font-size: 10.5px; color: var(--color-text-muted); margin-top: 2px;">进入无头模式后，自动屏蔽内置键盘按键与内置触控板输入以防误触。</div>
-                        </div>
-                        <label class="switch-mini">
-                          <input type="checkbox" id="web-kbd-toggle" checked>
-                          <span class="slider-mini"></span>
-                        </label>
                       </div>
                     </div>
                   </div>
@@ -438,7 +619,7 @@
               <div class="step-num">01</div>
               <h3 class="step-title">下载并安装 MacHead</h3>
               <p class="step-desc">下载双架构通用版的安装包文件，将 MacHead 的猫咪图标直接拖入您的应用程序目录中即可完成基础部署。</p>
-              <a href="https://releases.headlessmac.com/MacHead-v0.1.0-macos-universal.dmg" class="step-link" id="download-step-link">点击下载 DMG 安装包 →</a>
+              <a href="https://releases.headlessmac.com/MacHead-v0.1.13-macos-universal.dmg" class="step-link" id="download-step-link">点击下载 DMG 安装包 →</a>
             </div>
             
             <div class="step-card">
@@ -463,7 +644,7 @@
             <h2 class="cta-title">重塑您的 MacBook，即刻开始</h2>
             <p class="cta-desc">MacHead 个人版完全免费，我们坚守全本地化运行，绝不收集或向外传输您的任何使用与隐私数据。</p>
             <div class="cta-actions">
-              <a href="https://releases.headlessmac.com/MacHead-v0.1.0-macos-universal.dmg" class="btn btn-primary btn-lg" id="download-cta-link">下载 macOS Universal DMG</a>
+              <a href="https://releases.headlessmac.com/MacHead-v0.1.13-macos-universal.dmg" class="btn btn-primary btn-lg" id="download-cta-link">下载 macOS Universal DMG</a>
               <a href="https://github.com/ox01024/MacHead-Feedback/issues" target="_blank" class="btn btn-secondary btn-lg">前往 GitHub 提交反馈</a>
             </div>
           </div>
