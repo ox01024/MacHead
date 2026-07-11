@@ -75,9 +75,18 @@ final class HeadlessModeController {
     var isDisplayMonitoringStarted = false
     fileprivate(set) var activeExternalDisplays: Set<CGDirectDisplayID> = []
     
+    // MARK: - Test Hooks
+    var wasEnableHeadlessModeCalled = false
+    var wasDisableHeadlessModeCalled = false
+    var wasTriggerSafeRecoveryCalled = false
+    var mockExternalDisplays: Set<CGDirectDisplayID>? = nil
+    
     private init() {}
     
     func currentExternalDisplays() -> Set<CGDirectDisplayID> {
+        if let mock = mockExternalDisplays {
+            return mock
+        }
         var count: UInt32 = 0
         guard CGGetOnlineDisplayList(0, nil, &count) == .success else { return [] }
         var displays = [CGDirectDisplayID](repeating: 0, count: Int(count))
@@ -86,6 +95,7 @@ final class HeadlessModeController {
     }
     
     func enableHeadlessMode() {
+        wasEnableHeadlessModeCalled = true
         guard !isHeadlessModeEnabled else { return }
         isHeadlessModeEnabled = true
         UserDefaults.standard.set(true, forKey: "HeadlessModeEnabled")
@@ -112,6 +122,7 @@ final class HeadlessModeController {
     }
     
     func disableHeadlessMode() {
+        wasDisableHeadlessModeCalled = true
         guard isHeadlessModeEnabled else { return }
         isHeadlessModeEnabled = false
         UserDefaults.standard.set(false, forKey: "HeadlessModeEnabled")
@@ -138,6 +149,7 @@ final class HeadlessModeController {
     
     /// 触发防黑屏安全恢复，强行退出无头模式并弹窗告警
     func triggerSafeRecovery() {
+        wasTriggerSafeRecoveryCalled = true
         guard isHeadlessModeEnabled else { return }
         
         // 1. 退出无头模式
@@ -236,5 +248,103 @@ final class HeadlessModeController {
                 DisplayManager.shared.disconnectBuiltIn()
             }
         }
+    }
+    
+    static func runTests() {
+        print("Running HeadlessModeController Unit Tests...")
+        let controller = HeadlessModeController.shared
+        
+        // Save current real state
+        let originalIsHeadless = controller.isHeadlessModeEnabled
+        let originalIsMonitoring = controller.isDisplayMonitoringStarted
+        let originalActiveExternals = controller.activeExternalDisplays
+        
+        defer {
+            // Restore original state
+            controller.isHeadlessModeEnabled = originalIsHeadless
+            controller.isDisplayMonitoringStarted = originalIsMonitoring
+            controller.activeExternalDisplays = originalActiveExternals
+            controller.mockExternalDisplays = nil
+        }
+        
+        // Helper to reset hooks
+        func resetHooks() {
+            controller.wasEnableHeadlessModeCalled = false
+            controller.wasDisableHeadlessModeCalled = false
+            controller.wasTriggerSafeRecoveryCalled = false
+        }
+        
+        // Test 1: Manually turning off headless mode when an external display is connected.
+        // We want to make sure AutoRestoreHeadlessOnConnect does NOT trigger.
+        print("Test 1: Manually turning off headless mode when an external display is connected...")
+        resetHooks()
+        controller.isHeadlessModeEnabled = false // simulate we just set it to false
+        controller.activeExternalDisplays = [101]
+        controller.isDisplayMonitoringStarted = true
+        controller.mockExternalDisplays = [101] // external display remains connected
+        
+        // Trigger reconfiguration callback manually
+        displayReconfigurationCallback(displayID: 101, flags: [], userInfo: Unmanaged.passUnretained(controller).toOpaque())
+        
+        assert(!controller.wasEnableHeadlessModeCalled, "FAIL: Auto-restore was incorrectly triggered when manually disabling headless mode!")
+        print("Test 1: PASS")
+        
+        // Test 2: Unplugging the last external display when headless mode is active.
+        // We expect triggerSafeRecovery to be called.
+        print("Test 2: Unplugging the last external display when headless mode is active...")
+        resetHooks()
+        controller.isHeadlessModeEnabled = true
+        controller.activeExternalDisplays = [101]
+        controller.isDisplayMonitoringStarted = true
+        controller.mockExternalDisplays = [] // unplugged
+        
+        // Make sure user defaults has AutoExitHeadlessOnDisconnect set to true for test consistency
+        let originalAutoExit = UserDefaults.standard.bool(forKey: "AutoExitHeadlessOnDisconnect")
+        UserDefaults.standard.set(true, forKey: "AutoExitHeadlessOnDisconnect")
+        defer {
+            UserDefaults.standard.set(originalAutoExit, forKey: "AutoExitHeadlessOnDisconnect")
+        }
+        
+        displayReconfigurationCallback(displayID: 101, flags: [], userInfo: Unmanaged.passUnretained(controller).toOpaque())
+        
+        assert(controller.wasTriggerSafeRecoveryCalled, "FAIL: Safe recovery was not triggered when all external displays were disconnected!")
+        print("Test 2: PASS")
+        
+        // Test 3: Plugging in a new external display when headless mode is inactive.
+        // We expect enableHeadlessMode to be called.
+        print("Test 3: Plugging in a new external display when headless mode is inactive...")
+        resetHooks()
+        controller.isHeadlessModeEnabled = false
+        controller.activeExternalDisplays = []
+        controller.isDisplayMonitoringStarted = true
+        controller.mockExternalDisplays = [101] // plugged in
+        
+        let originalAutoRestore = UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect")
+        UserDefaults.standard.set(true, forKey: "AutoRestoreHeadlessOnConnect")
+        defer {
+            UserDefaults.standard.set(originalAutoRestore, forKey: "AutoRestoreHeadlessOnConnect")
+        }
+        
+        displayReconfigurationCallback(displayID: 101, flags: [], userInfo: Unmanaged.passUnretained(controller).toOpaque())
+        
+        assert(controller.wasEnableHeadlessModeCalled, "FAIL: Headless mode was not auto-restored when new display connected!")
+        print("Test 3: PASS")
+        
+        // Test 4: Plugging in a second external display when headless mode is active.
+        // We expect no action.
+        print("Test 4: Plugging in a second external display when headless mode is active...")
+        resetHooks()
+        controller.isHeadlessModeEnabled = true
+        controller.activeExternalDisplays = [101]
+        controller.isDisplayMonitoringStarted = true
+        controller.mockExternalDisplays = [101, 102]
+        
+        displayReconfigurationCallback(displayID: 102, flags: [], userInfo: Unmanaged.passUnretained(controller).toOpaque())
+        
+        assert(!controller.wasEnableHeadlessModeCalled, "FAIL: Incorrect action when adding second external display in headless mode!")
+        assert(!controller.wasDisableHeadlessModeCalled, "FAIL: Headless mode disabled when adding second external display!")
+        print("Test 4: PASS")
+        
+        print("All Tests Passed Successfully! 🎉")
     }
 }
