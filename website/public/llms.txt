@@ -30,6 +30,6 @@ MacHead includes a command line interface to manage states programmatically:
 
 ## Links & Community
 - **Official Website**: [https://headlessmac.com/](https://headlessmac.com/)
-- **Download dmg**: [Download Link](https://releases.headlessmac.com/MacHead-v0.1.13-macos-universal.dmg)
+- **Download dmg**: [Download Link](https://releases.headlessmac.com/MacHead-v0.1.14-macos-universal.dmg)
 - **Feedback & Issues**: [GitHub Issues](https://github.com/ox01024/MacHead-Feedback/issues)
 - **Community Discussions**: [GitHub Discussions](https://github.com/ox01024/MacHead-Feedback/discussions)

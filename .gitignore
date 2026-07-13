@@ -4,3 +4,5 @@ AppIcon.iconset/
 UserIcon.png
 *.zip
 *.dmg
+Resources/nezha-agent
+Resources/serverstatus-client

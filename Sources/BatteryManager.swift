@@ -21,6 +21,9 @@ final class BatteryManager {
     private(set) var cycleCount: Int = 0
     private(set) var batteryTemperature: Double = 0.0
     
+    private var lastPowerState: String?
+    private var wasLowBattery: Bool = false
+    
     private init() {}
     
     func start() {
@@ -31,8 +34,10 @@ final class BatteryManager {
         self.runLoopSource = source
         CFRunLoopAddSource(CFRunLoopGetMain(), source, CFRunLoopMode.defaultMode)
         
-        // Initial evaluation
-        handlePowerSourceChanged()
+        // Initial evaluation (don't alert on cold boot)
+        updateBatteryInfo()
+        self.lastPowerState = powerState
+        self.wasLowBattery = (currentCapacity <= (UserDefaults.standard.integer(forKey: "BatteryThreshold") == 0 ? 20 : UserDefaults.standard.integer(forKey: "BatteryThreshold")))
     }
     
     func handlePowerSourceChanged() {
@@ -44,6 +49,33 @@ final class BatteryManager {
         
         let onBattery = (powerState == kIOPSBatteryPowerValue)
         let lowBattery = (currentCapacity <= thresholdVal)
+        
+        // Trigger alerts on state changes
+        if let lastState = lastPowerState, lastState != powerState {
+            if onBattery {
+                NotificationService.shared.sendAlert(
+                    type: .powerDisconnect,
+                    title: "外部电源已断开 🔌",
+                    body: "Mac 已切换至电池供电。当前剩余电量：\(currentCapacity)%，请及时检查电源连接情况。"
+                )
+            } else {
+                NotificationService.shared.sendAlert(
+                    type: .powerDisconnect,
+                    title: "外部电源已恢复 🔌",
+                    body: "Mac 已恢复交流电供电，当前正在充电，剩余电量：\(currentCapacity)%。"
+                )
+            }
+        }
+        lastPowerState = powerState
+        
+        if lowBattery && !wasLowBattery && onBattery && enableProtection {
+            NotificationService.shared.sendAlert(
+                type: .lowBattery,
+                title: "系统低电量警告 🔋",
+                body: "Mac 剩余电量已降至 \(currentCapacity)%，低于电池保护阈值（\(thresholdVal)%）。MacHead 已自动释放休眠阻止，Mac 将进入自动休眠状态以保护电池寿命。"
+            )
+        }
+        wasLowBattery = lowBattery
         
         let shouldActive = enableProtection && onBattery && lowBattery
         

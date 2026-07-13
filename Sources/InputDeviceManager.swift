@@ -9,6 +9,7 @@ final class InputDeviceManager {
     
     private var manager: IOHIDManager?
     private var externalMice = Set<IOHIDDevice>()
+    private var externalKeyboards = Set<IOHIDDevice>()
     private var builtInTrackpads = Set<IOHIDDevice>()
     private var builtInKeyboards = Set<IOHIDDevice>()
     private var seizedTrackpads = Set<IOHIDDevice>()
@@ -85,6 +86,8 @@ final class InputDeviceManager {
         if isKeyboard {
             if isBuiltIn {
                 builtInKeyboards.insert(device)
+            } else {
+                externalKeyboards.insert(device)
             }
             
             // 为键盘设备注册按键输入时序回调
@@ -114,6 +117,8 @@ final class InputDeviceManager {
         
         if builtInKeyboards.contains(device) {
             builtInKeyboards.remove(device)
+        } else if externalKeyboards.contains(device) {
+            externalKeyboards.remove(device)
         } else if builtInTrackpads.contains(device) {
             if seizedTrackpads.contains(device) {
                 IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
@@ -136,11 +141,18 @@ final class InputDeviceManager {
     
     func evaluateTrackpadAndKeyboardState() {
         let isHeadless = HeadlessModeController.shared.isHeadlessModeEnabled
-        let disableInHeadless = UserDefaults.standard.bool(forKey: "DisableKeyboardAndTrackpadInHeadlessMode")
-        let disableTrackpadWhenMouseConnected = UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")
         
-        let shouldDisableTrackpad = (isHeadless && disableInHeadless) || (disableTrackpadWhenMouseConnected && !externalMice.isEmpty)
-        let shouldDisableKeyboard = isHeadless && disableInHeadless
+        let disableKeyboardInHeadless = UserDefaults.standard.bool(forKey: "DisableKeyboardInHeadless")
+        let disableKeyboardWhenExtKeyConnected = UserDefaults.standard.bool(forKey: "DisableKeyboardWhenExternalKeyboardConnected")
+        
+        let disableTrackpadInHeadless = UserDefaults.standard.bool(forKey: "DisableTrackpadInHeadless")
+        let disableTrackpadWhenExtMouseConnected = UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")
+        
+        let hasExtKeyboard = !externalKeyboards.isEmpty
+        let hasExtMouse = !externalMice.isEmpty
+        
+        let shouldDisableKeyboard = (isHeadless && disableKeyboardInHeadless) || (disableKeyboardWhenExtKeyConnected && hasExtKeyboard)
+        let shouldDisableTrackpad = (isHeadless && disableTrackpadInHeadless) || (disableTrackpadWhenExtMouseConnected && hasExtMouse)
         
         // 1. 评估内置触控板的 Seize 独占拦截
         if shouldDisableTrackpad {

@@ -13,15 +13,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Register default preferences
         UserDefaults.standard.register(defaults: [
             "PreventIdleSleep": true,
+            "KeepRunningOnLidClose": false,
             "AutoEnableHeadlessOnLaunch": true,
             "DisableTrackpadWhenExternalMouseConnected": false,
+            "DisableKeyboardInHeadless": false,
+            "DisableKeyboardWhenExternalKeyboardConnected": false,
+            "DisableTrackpadInHeadless": false,
             "EnableBatteryProtection": true,
             "BatteryThreshold": 20,
             "MuteMicrophoneInHeadlessMode": false,
             "EnableWebServer": false,
             "DisableKeyboardAndTrackpadInHeadlessMode": false,
             "AutoExitHeadlessOnDisconnect": true,
-            "AutoRestoreHeadlessOnConnect": true
+            "AutoRestoreHeadlessOnConnect": true,
+            "nezhaEnabled": false,
+            "nezhaServer": "",
+            "nezhaSecret": "",
+            "nezhaTls": false,
+            "serverStatusEnabled": false,
+            "serverStatusAddr": "",
+            "serverStatusUser": "",
+            "serverStatusPassword": "",
+            "kumaEnabled": false,
+            "kumaPushUrl": "",
+            "kumaInterval": 60.0,
+            "notificationsEnabled": false,
+            "barkEnabled": false,
+            "barkKey": "",
+            "telegramEnabled": false,
+            "telegramBotToken": "",
+            "telegramChatId": "",
+            "overheatAlertEnabled": false,
+            "overheatThreshold": 85.0
         ])
         
         // Generate random default WebServerPassword if not present
@@ -42,6 +65,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Start monitoring display plug/unplug events globally
         controller.registerDisplayCallback()
+        
+        // Start all active integrations (Nezha, ServerStatus, Uptime Kuma, SMC)
+        IntegrationManager.shared.startAllServices()
         
         // Create menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -228,12 +254,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let view = PreferencesView()
             let controller = NSHostingController(rootView: view)
             let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 480, height: 420),
-                styleMask: [.titled, .closable, .miniaturizable],
+                contentRect: NSRect(x: 0, y: 0, width: 680, height: 580),
+                styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
                 backing: .buffered,
                 defer: false
             )
             window.title = "MacHead 偏好设置"
+            window.titlebarAppearsTransparent = true
+            window.titleVisibility = .hidden
+            window.backgroundColor = .clear
             window.contentViewController = controller
             window.center()
             window.isReleasedWhenClosed = false
@@ -267,7 +296,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    func applicationWillTerminate(_ notification: Notification) {
+        IntegrationManager.shared.stopAllServices()
+        WebServer.shared.stop()
+        if controller.isHeadlessModeEnabled {
+            controller.disableHeadlessMode()
+        }
+    }
+    
     @objc private func quitApp() {
+        // Stop all integrations
+        IntegrationManager.shared.stopAllServices()
+        
         // Stop Web Server
         WebServer.shared.stop()
         
