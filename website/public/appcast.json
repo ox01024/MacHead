@@ -1,6 +1,6 @@
 {
   "version": "0.1.14",
-  "build": 17,
+  "build": 18,
   "pubDate": "2026-07-13",
   "url": "https://releases.headlessmac.com/MacHead-v0.1.14-macos-universal.dmg",
   "releaseNotes": "1. 实现了全新的“合盖后仍然保持运行”功能（防休眠与合盖守护）；2. 完美修复了 Apple Silicon (M系列) 芯片下温度显示 0.0°C 以及物理风扇状态误报的 Bug；3. 重构了输入设备保护页面为横向多选对齐卡片，移除了全局设置中的冗余副标题描述。"
