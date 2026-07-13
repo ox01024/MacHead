@@ -8,14 +8,126 @@ struct DisplayInfo: Hashable {
     let isApple: Bool
 }
 
+enum PreferenceTab: String, CaseIterable, Identifiable {
+    case general
+    case hardware
+    case integrations
+    case status
+    
+    var id: String { self.rawValue }
+    
+    var title: String {
+        switch self {
+        case .general: return "常规设置"
+        case .hardware: return "硬件与电源"
+        case .integrations: return "集成与通知"
+        case .status: return "显示器与状态"
+        }
+    }
+    
+    var iconName: String {
+        switch self {
+        case .general: return "gearshape.fill"
+        case .hardware: return "cpu"
+        case .integrations: return "network"
+        case .status: return "display"
+        }
+    }
+    
+    var iconColor: Color {
+        switch self {
+        case .general: return .gray // Metallic grey to match native General tab, prevents blending when row is highlighted
+        case .hardware: return .orange
+        case .integrations: return .purple
+        case .status: return .green
+        }
+    }
+}
+
+// Refined Card Style for Modern macOS with absolute light/dark colors
+struct SettingsCard<Content: View>: View {
+    @Environment(\.colorScheme) var colorScheme
+    let title: String
+    let content: Content
+    
+    init(title: String, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 11, weight: .medium)) // Matches Apple Settings category title size
+                .foregroundColor(.secondary)
+                .padding(.leading, 8)
+            
+            VStack(alignment: .leading, spacing: 0) { // Spacing 0 for divider layout
+                content
+            }
+            .background(colorScheme == .dark ? Color(red: 0.18, green: 0.18, blue: 0.20) : Color.white)
+            .cornerRadius(10)
+            .shadow(color: Color.black.opacity(0.02), radius: 1, x: 0, y: 0.5)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(colorScheme == .dark ? Color.white.opacity(0.04) : Color.black.opacity(0.04), lineWidth: 0.5)
+            )
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.bottom, 12)
+    }
+}
+
+// Modern setting row styling matching macOS System Settings
+struct SettingsRow<Control: View>: View {
+    let title: String
+    let subtitle: String?
+    let control: Control
+    
+    init(_ title: String, subtitle: String? = nil, @ViewBuilder control: () -> Control) {
+        self.title = title
+        self.subtitle = subtitle
+        self.control = control()
+    }
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.body)
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+            }
+            Spacer()
+            control
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(minHeight: 38)
+    }
+}
+
 struct PreferencesView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     @AppStorage("AutoEnableHeadlessOnLaunch") private var autoEnableOnLaunch = true
     @AppStorage("PreventIdleSleep") private var preventIdleSleep = true
+    @AppStorage("KeepRunningOnLidClose") private var keepRunningOnLidClose = false
     @AppStorage("AutoExitHeadlessOnDisconnect") private var autoExitOnDisconnect = true
     @AppStorage("AutoRestoreHeadlessOnConnect") private var autoRestoreOnConnect = true
     @State private var launchAtLogin = LaunchAtLoginHelper.shared.isEnabled
     @State private var connectedDisplays: [DisplayInfo] = []
-    @State private var disableTrackpad = UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")
+    
+    // Multi-select states for built-in keyboard & trackpad disabling conditions
+    @State private var disableKeyboardInHeadless = UserDefaults.standard.bool(forKey: "DisableKeyboardInHeadless")
+    @State private var disableKeyboardWhenExtKeyConnected = UserDefaults.standard.bool(forKey: "DisableKeyboardWhenExternalKeyboardConnected")
+    @State private var disableTrackpadInHeadless = UserDefaults.standard.bool(forKey: "DisableTrackpadInHeadless")
+    @State private var disableTrackpadWhenExtMouseConnected = UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")
+
     @State private var enableBatteryProtection = UserDefaults.standard.bool(forKey: "EnableBatteryProtection")
     @State private var batteryThreshold = UserDefaults.standard.integer(forKey: "BatteryThreshold") == 0 ? 20 : UserDefaults.standard.integer(forKey: "BatteryThreshold")
     @State private var batteryCapacity = BatteryManager.shared.currentCapacity
@@ -26,315 +138,996 @@ struct PreferencesView: View {
     @State private var enableWebServer = UserDefaults.standard.bool(forKey: "EnableWebServer")
     @State private var webServerIP = WebServer.shared.getLocalIPAddress()
     @State private var webServerPassword = UserDefaults.standard.string(forKey: "WebServerPassword") ?? ""
-    @State private var disableKeyboardAndTrackpadInHeadless = UserDefaults.standard.bool(forKey: "DisableKeyboardAndTrackpadInHeadlessMode")
     @State private var isAccessibilityTrusted = AXIsProcessTrusted()
 
+    // SMC metrics watcher
+    @ObservedObject private var smc = SMCManager.shared
+
+    // Third-party integration configurations
+    @State private var nezhaEnabled = UserDefaults.standard.bool(forKey: "nezhaEnabled")
+    @State private var nezhaServer = UserDefaults.standard.string(forKey: "nezhaServer") ?? ""
+    @State private var nezhaSecret = UserDefaults.standard.string(forKey: "nezhaSecret") ?? ""
+    @State private var nezhaTls = UserDefaults.standard.bool(forKey: "nezhaTls")
+
+    @State private var serverStatusEnabled = UserDefaults.standard.bool(forKey: "serverStatusEnabled")
+    @State private var serverStatusAddr = UserDefaults.standard.string(forKey: "serverStatusAddr") ?? ""
+    @State private var serverStatusUser = UserDefaults.standard.string(forKey: "serverStatusUser") ?? ""
+    @State private var serverStatusPassword = UserDefaults.standard.string(forKey: "serverStatusPassword") ?? ""
+
+    @State private var kumaEnabled = UserDefaults.standard.bool(forKey: "kumaEnabled")
+    @State private var kumaPushUrl = UserDefaults.standard.string(forKey: "kumaPushUrl") ?? ""
+    @State private var kumaInterval = UserDefaults.standard.double(forKey: "kumaInterval") == 0 ? 60.0 : UserDefaults.standard.double(forKey: "kumaInterval")
+
+    @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+    @State private var barkEnabled = UserDefaults.standard.bool(forKey: "barkEnabled")
+    @State private var barkKey = UserDefaults.standard.string(forKey: "barkKey") ?? ""
+    @State private var telegramEnabled = UserDefaults.standard.bool(forKey: "telegramEnabled")
+    @State private var telegramBotToken = UserDefaults.standard.string(forKey: "telegramBotToken") ?? ""
+    @State private var telegramChatId = UserDefaults.standard.string(forKey: "telegramChatId") ?? ""
+    @State private var overheatAlertEnabled = UserDefaults.standard.bool(forKey: "overheatAlertEnabled")
+    @State private var overheatThreshold = UserDefaults.standard.double(forKey: "overheatThreshold") == 0 ? 85.0 : UserDefaults.standard.double(forKey: "overheatThreshold")
+
+    @State private var selectedTab = PreferenceTab.general
+
+    // Modals visibility states for Switch + Button (设定...) sheets
+    @State private var showWebServerConfig = false
+    @State private var showOverheatConfig = false
+    @State private var showNotificationsConfig = false
+    @State private var showNezhaConfig = false
+    @State private var showServerStatusConfig = false
+    @State private var showKumaConfig = false
+    @State private var showBatteryConfig = false
+
+    private var detailBackgroundColor: Color {
+        colorScheme == .dark ? Color(red: 0.11, green: 0.11, blue: 0.12) : Color(red: 0.957, green: 0.957, blue: 0.965)
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            // Header / App Branding
-            HStack(spacing: 12) {
-                if let appIcon = NSImage(named: NSImage.applicationIconName) {
-                    Image(nsImage: appIcon)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 44, height: 44)
-                } else {
-                    Image(systemName: "macmini.fill")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 40, height: 40)
-                        .foregroundColor(.accentColor)
+        HStack(spacing: 0) {
+            // Left Sidebar (Stretches to top bounds, utilizes native List styling)
+            VStack(alignment: .leading, spacing: 0) {
+                // Sidebar Header
+                HStack(spacing: 8) {
+                    if let appIcon = NSImage(named: NSImage.applicationIconName) {
+                        Image(nsImage: appIcon)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 32, height: 32)
+                    } else {
+                        Image(systemName: "macmini.fill")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 28, height: 28)
+                            .foregroundColor(.accentColor)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("MacHead")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                        Text("v\(UpdateManager.shared.currentVersion)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 52) // Offset for traffic lights
+                .padding(.bottom, 16)
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("MacHead")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Text("MacBook 无头工作站模式管理器")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                // Sidebar List with native highlights and selection capsule
+                List(selection: $selectedTab) {
+                    ForEach(PreferenceTab.allCases) { tab in
+                        HStack(spacing: 8) {
+                            Image(systemName: tab.iconName)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(width: 20, height: 20)
+                                .background(tab.iconColor.gradient)
+                                .cornerRadius(5)
+                            
+                            Text(tab.title)
+                                .font(.body)
+                        }
+                        .tag(tab)
+                        .frame(height: 28)
+                    }
                 }
+                .listStyle(.sidebar)
+                .scrollContentBackground(.hidden)
+                
                 Spacer()
-            }
-            .padding()
-            .background(Color(NSColor.windowBackgroundColor))
-            
-            Divider()
-            
-            ScrollView {
-                Form {
-                    Section(header: Text("启动与运行").font(.headline)) {
-                        Toggle("开机自启动", isOn: Binding(
-                            get: { self.launchAtLogin },
-                            set: { newValue in
-                                self.launchAtLogin = newValue
-                                LaunchAtLoginHelper.shared.isEnabled = newValue
-                            }
-                        ))
-                        .help("在 Mac 开机登录时自动运行 MacHead。")
-                        
-                        Toggle("启动时自动进入 Headless 模式", isOn: $autoEnableOnLaunch)
-                            .help("应用启动时，若检测到外接显示器则自动切断内屏并启用 Headless 模式。")
-                    }
-                    .padding(.bottom, 10)
-                    
-                    Divider()
-                    
-                    Section(header: Text("电源管理").font(.headline)) {
-                        Toggle("防止空闲睡眠", isOn: $preventIdleSleep)
-                            .help("在 Headless 模式激活期间，阻止 Mac 因长时间闲置而自动休眠。")
-                    }
-                    .padding(.vertical, 10)
-                    
-                    Divider()
-                    
-                    Section(header: Text("输入设备管理").font(.headline)) {
-                        Toggle("有外接鼠标时禁用内置触控板", isOn: Binding(
-                            get: { self.disableTrackpad },
-                            set: { newValue in
-                                self.disableTrackpad = newValue
-                                UserDefaults.standard.set(newValue, forKey: "DisableTrackpadWhenExternalMouseConnected")
-                                InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
-                            }
-                        ))
-                        .help("检测到 USB 或蓝牙等外接鼠标连接时，自动独占内置触控板并禁用其输入。")
-                        
-                        Toggle("无头模式下自动禁用内置键盘和触控板", isOn: Binding(
-                            get: { self.disableKeyboardAndTrackpadInHeadless },
-                            set: { newValue in
-                                self.disableKeyboardAndTrackpadInHeadless = newValue
-                                UserDefaults.standard.set(newValue, forKey: "DisableKeyboardAndTrackpadInHeadlessMode")
-                                InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
-                                self.isAccessibilityTrusted = AXIsProcessTrusted()
-                            }
-                        ))
-                        .help("合盖或进入无头工作站模式后，自动屏蔽内置键盘按键与触控板，防止误触。")
-                        
-                        if disableKeyboardAndTrackpadInHeadless && !isAccessibilityTrusted {
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .foregroundColor(.orange)
-                                    Text("未授权辅助功能权限")
-                                        .font(.subheadline)
-                                        .bold()
-                                }
-                                Text("请在“系统设置 -> 隐私与安全性 -> 辅助功能”中允许 MacHead，以使屏蔽键盘功能生效。")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                Button("去系统设置开启") {
-                                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-                                        NSWorkspace.shared.open(url)
-                                    }
-                                }
-                                .buttonStyle(.borderless)
-                                .font(.caption)
-                                .foregroundColor(.accentColor)
-                            }
-                            .padding(.top, 4)
-                        }
-                    }
-                    .padding(.vertical, 10)
-                    
-                    Divider()
-                    
-                    Section(header: Text("电池与电源保护").font(.headline)) {
-                        HStack {
-                            Text("当前电量: \(batteryCapacity)%")
-                            if isCharging {
-                                Image(systemName: "bolt.fill")
-                                    .foregroundColor(.yellow)
-                            }
-                            Spacer()
-                            Text(batteryState == "AC Power" ? "外接电源直供" : "电池供电中")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        Toggle("启用低电量电池保护", isOn: Binding(
-                            get: { self.enableBatteryProtection },
-                            set: { newValue in
-                                self.enableBatteryProtection = newValue
-                                UserDefaults.standard.set(newValue, forKey: "EnableBatteryProtection")
-                                BatteryManager.shared.handlePowerSourceChanged()
-                            }
-                        ))
-                        .help("在电池供电且电量低于设定阈值时，自动允许系统睡眠以防电池耗尽。")
-                        
-                        if enableBatteryProtection {
-                            HStack {
-                                Text("允许休眠电量阈值: \(batteryThreshold)%")
-                                Slider(value: Binding(
-                                    get: { Double(self.batteryThreshold) },
-                                    set: { newValue in
-                                        let intVal = Int(newValue)
-                                        self.batteryThreshold = intVal
-                                        UserDefaults.standard.set(intVal, forKey: "BatteryThreshold")
-                                        BatteryManager.shared.handlePowerSourceChanged()
-                                    }
-                                ), in: 10...50, step: 5)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 10)
-                    
-                    Divider()
-                    
-                    Section(header: Text("多媒体设备").font(.headline)) {
-                        HStack {
-                            Text("麦克风状态: \(isMicrophoneMuted ? "已静音 🔇" : "正常 🎙️")")
-                            Spacer()
-                        }
-                        
-                        Toggle("无头模式下自动静音内置麦克风", isOn: Binding(
-                            get: { self.muteMicrophone },
-                            set: { newValue in
-                                self.muteMicrophone = newValue
-                                UserDefaults.standard.set(newValue, forKey: "MuteMicrophoneInHeadlessMode")
-                                if HeadlessModeController.shared.isHeadlessModeEnabled {
-                                    if newValue {
-                                        MediaDeviceManager.shared.muteBuiltInMicrophone()
-                                    } else {
-                                        MediaDeviceManager.shared.forceUnmute()
-                                    }
-                                    self.isMicrophoneMuted = MediaDeviceManager.shared.isMuted
-                                }
-                            }
-                        ))
-                        .help("当 MacBook 进入无头模式后，自动静音系统默认的内置麦克风，退出时恢复。")
-                    }
-                    .padding(.vertical, 10)
-                    
-                    Divider()
-                    
-                    Section(header: Text("远程控制").font(.headline)) {
-                        Toggle("启用局域网 Web 控制面板", isOn: Binding(
-                            get: { self.enableWebServer },
-                            set: { newValue in
-                                self.enableWebServer = newValue
-                                UserDefaults.standard.set(newValue, forKey: "EnableWebServer")
-                                if newValue {
-                                    WebServer.shared.start()
-                                    self.webServerIP = WebServer.shared.getLocalIPAddress()
-                                } else {
-                                    WebServer.shared.stop()
-                                }
-                            }
-                        ))
-                        .help("开启后，允许在局域网内通过浏览器远程管理和监控您的 MacBook。")
-                        
-                        if enableWebServer {
-                            HStack {
-                                Text("管理账号:")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                Text("admin")
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                            }
-                            .padding(.vertical, 2)
-                            
-                            HStack {
-                                Text("管理密码:")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                TextField("管理密码", text: Binding(
-                                    get: { self.webServerPassword },
-                                    set: { newValue in
-                                        self.webServerPassword = newValue
-                                        UserDefaults.standard.set(newValue, forKey: "WebServerPassword")
-                                    }
-                                ))
-                                .textFieldStyle(.roundedBorder)
-                                .frame(width: 150)
-                            }
-                            .padding(.vertical, 2)
-                            
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("本地局域网访问地址:")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                Text("http://\(webServerIP):8080")
-                                    .font(.system(.body, design: .monospaced))
-                                    .foregroundColor(.accentColor)
-                                    .textSelection(.enabled)
-                            }
-                            .padding(.vertical, 4)
-                        }
-                    }
-                    .padding(.vertical, 10)
-                    
-                    Divider()
-                    
-                    Section(header: Text("显示器与 Headless 守护").font(.headline)) {
-                        Toggle("无外接显示器时自动退出 Headless 模式 (防黑屏)", isOn: $autoExitOnDisconnect)
-                            .help("当检测到所有外接显示器断开时，自动退出 Headless 模式并重新开启内屏，防止设备彻底黑屏锁定。")
-                        
-                        Toggle("接入外接显示器时自动恢复 Headless 模式", isOn: $autoRestoreOnConnect)
-                            .help("当有外接显示器重新接入时，若当前未处于无头模式，则自动恢复切断内屏并启用 Headless 模式。")
-                    }
-                    .padding(.vertical, 10)
-                    
-                    Divider()
-                    
-                    Section(header: Text("系统状态").font(.headline)) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("当前显示器列表:")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            ForEach(connectedDisplays, id: \.self) { display in
-                                HStack {
-                                    Label(
-                                        display.name,
-                                        systemImage: display.isBuiltIn ? "laptopcomputer" : (display.isApple ? "apple.studio.display" : "display")
-                                    )
-                                    .font(.body)
-                                }
-                            }
-                            
-                            if connectedDisplays.isEmpty {
-                                Text("未检测到显示器")
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .padding(.vertical, 4)
-                    }
-                    .padding(.top, 10)
-                }
-                .padding()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
-            Divider()
-            
-            // Footer
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Version \(UpdateManager.shared.currentVersion)")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
-                    
+                
+                // Sidebar Footer (Updates)
+                VStack(alignment: .leading, spacing: 2) {
                     Button(action: {
                         UpdateManager.shared.checkForUpdates(silent: false)
                     }) {
                         Text("检查更新...")
                             .foregroundColor(.accentColor)
+                            .font(.footnote)
                     }
                     .buttonStyle(.plain)
-                    .font(.footnote)
                 }
-                Spacer()
-                Button("关闭") {
-                    NSApp.keyWindow?.close()
-                }
-                .keyboardShortcut(.defaultAction)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 20)
             }
-            .padding()
-            .background(Color(NSColor.windowBackgroundColor))
+            .frame(width: 180)
+            .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow))
+            
+            // Right Details Panel (Solid system color, stretches to Y=0 top bounds)
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        
+                        // Active Section Title matching Apple native settings page headers
+                        Text(selectedTab.title)
+                            .font(.system(size: 22, weight: .bold))
+                            .foregroundColor(.primary)
+                            .padding(.leading, 8)
+                            .padding(.top, 48) // Aligns perfectly with left sidebar content top offset
+                            .padding(.bottom, 4)
+                        
+                        switch selectedTab {
+                        case .general:
+                            SettingsCard(title: "启动与运行") {
+                                SettingsRow("开机自启动") {
+                                    Toggle("", isOn: Binding(
+                                        get: { self.launchAtLogin },
+                                        set: { newValue in
+                                            self.launchAtLogin = newValue
+                                            LaunchAtLoginHelper.shared.isEnabled = newValue
+                                        }
+                                    ))
+                                    .toggleStyle(.switch)
+                                    .labelsHidden()
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("启动时自动进入无头模式") {
+                                    Toggle("", isOn: $autoEnableOnLaunch)
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                }
+                            }
+                            
+                            SettingsCard(title: "局域网远程控制") {
+                                SettingsRow("启用局域网 Web 控制面板") {
+                                    HStack(spacing: 12) {
+                                        Toggle("", isOn: Binding(
+                                            get: { self.enableWebServer },
+                                            set: { newValue in
+                                                self.enableWebServer = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "EnableWebServer")
+                                                if newValue {
+                                                    WebServer.shared.start()
+                                                    self.webServerIP = WebServer.shared.getLocalIPAddress()
+                                                } else {
+                                                    WebServer.shared.stop()
+                                                }
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                            self.showWebServerConfig = true
+                                        }
+                                    }
+                                }
+                            }
+                            
+                        case .hardware:
+                            SettingsCard(title: "电源管理") {
+                                SettingsRow("防止空闲睡眠") {
+                                    Toggle("", isOn: Binding(
+                                        get: { self.preventIdleSleep },
+                                        set: { newValue in
+                                            self.preventIdleSleep = newValue
+                                            HeadlessModeController.shared.evaluatePowerAssertion()
+                                        }
+                                    ))
+                                    .toggleStyle(.switch)
+                                    .labelsHidden()
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("合盖后仍然保持运行状态") {
+                                    Toggle("", isOn: Binding(
+                                        get: { self.keepRunningOnLidClose },
+                                        set: { newValue in
+                                            self.keepRunningOnLidClose = newValue
+                                            HeadlessModeController.shared.evaluatePowerAssertion()
+                                        }
+                                    ))
+                                    .toggleStyle(.switch)
+                                    .labelsHidden()
+                                }
+                            }
+                            
+                            SettingsCard(title: "输入设备保护") {
+                                SettingsRow("禁用内置键盘") {
+                                    HStack(spacing: 16) {
+                                        Toggle("无头模式下", isOn: Binding(
+                                            get: { self.disableKeyboardInHeadless },
+                                            set: { newValue in
+                                                self.disableKeyboardInHeadless = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "DisableKeyboardInHeadless")
+                                                InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
+                                                self.isAccessibilityTrusted = AXIsProcessTrusted()
+                                            }
+                                        ))
+                                        .toggleStyle(.checkbox)
+                                        
+                                        Toggle("外接键盘下", isOn: Binding(
+                                            get: { self.disableKeyboardWhenExtKeyConnected },
+                                            set: { newValue in
+                                                self.disableKeyboardWhenExtKeyConnected = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "DisableKeyboardWhenExternalKeyboardConnected")
+                                                InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
+                                                self.isAccessibilityTrusted = AXIsProcessTrusted()
+                                            }
+                                        ))
+                                        .toggleStyle(.checkbox)
+                                    }
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("禁用内置触控板") {
+                                    HStack(spacing: 16) {
+                                        Toggle("无头模式下", isOn: Binding(
+                                            get: { self.disableTrackpadInHeadless },
+                                            set: { newValue in
+                                                self.disableTrackpadInHeadless = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "DisableTrackpadInHeadless")
+                                                InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
+                                            }
+                                        ))
+                                        .toggleStyle(.checkbox)
+                                        
+                                        Toggle("外接鼠标下", isOn: Binding(
+                                            get: { self.disableTrackpadWhenExtMouseConnected },
+                                            set: { newValue in
+                                                self.disableTrackpadWhenExtMouseConnected = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "DisableTrackpadWhenExternalMouseConnected")
+                                                InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
+                                            }
+                                        ))
+                                        .toggleStyle(.checkbox)
+                                    }
+                                }
+                                
+                                if (disableKeyboardInHeadless || disableKeyboardWhenExtKeyConnected) && !isAccessibilityTrusted {
+                                    VStack(alignment: .leading, spacing: 6) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "exclamationmark.triangle.fill")
+                                                .foregroundColor(.orange)
+                                            Text("未授权辅助功能权限")
+                                                .bold()
+                                        }
+                                        Text("请在“系统设置 -> 隐私与安全性 -> 辅助功能”中允许 MacHead，以使屏蔽键盘功能生效。")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                        Button("去系统设置开启") {
+                                            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+                                                NSWorkspace.shared.open(url)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                        .foregroundColor(.accentColor)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.bottom, 12)
+                                }
+                            }
+                            
+                            SettingsCard(title: "电池保护与睡眠") {
+                                SettingsRow("启用低电量电池保护") {
+                                    HStack(spacing: 12) {
+                                        Toggle("", isOn: Binding(
+                                            get: { self.enableBatteryProtection },
+                                            set: { newValue in
+                                                self.enableBatteryProtection = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "EnableBatteryProtection")
+                                                BatteryManager.shared.handlePowerSourceChanged()
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                            self.showBatteryConfig = true
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            SettingsCard(title: "多媒体设备") {
+                                SettingsRow("内置麦克风状态") {
+                                    Text(isMicrophoneMuted ? "已静音 🔇" : "正常 🎙️")
+                                        .fontWeight(.medium)
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("无头模式下自动静音内置麦克风") {
+                                    Toggle("", isOn: Binding(
+                                        get: { self.muteMicrophone },
+                                        set: { newValue in
+                                            self.muteMicrophone = newValue
+                                            UserDefaults.standard.set(newValue, forKey: "MuteMicrophoneInHeadlessMode")
+                                            if HeadlessModeController.shared.isHeadlessModeEnabled {
+                                                if newValue {
+                                                    MediaDeviceManager.shared.muteBuiltInMicrophone()
+                                                } else {
+                                                    MediaDeviceManager.shared.forceUnmute()
+                                                }
+                                                self.isMicrophoneMuted = MediaDeviceManager.shared.isMuted
+                                            }
+                                        }
+                                    ))
+                                    .toggleStyle(.switch)
+                                    .labelsHidden()
+                                }
+                            }
+                            
+                        case .integrations:
+                            SettingsCard(title: "系统硬件监控 & 告警") {
+                                SettingsRow("当前芯片温度") {
+                                    Text(String(format: "%.1f°C", smc.currentTemperature))
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(smc.currentTemperature >= overheatThreshold ? .red : .primary)
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("当前风扇转速") {
+                                    Text(smc.isFanless ? "无风扇 (被动散热)" : (smc.fanSpeed > 0 ? "\(smc.fanSpeed) RPM" : "正常 (系统自动控制)"))
+                                        .fontWeight(.semibold)
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("启用芯片过热报警") {
+                                    HStack(spacing: 12) {
+                                        Toggle("", isOn: Binding(
+                                            get: { self.overheatAlertEnabled },
+                                            set: { newValue in
+                                                self.overheatAlertEnabled = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "overheatAlertEnabled")
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                            self.showOverheatConfig = true
+                                        }
+                                    }
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("启用消息推送通道") {
+                                    HStack(spacing: 12) {
+                                        Toggle("", isOn: Binding(
+                                            get: { self.notificationsEnabled },
+                                            set: { newValue in
+                                                self.notificationsEnabled = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "notificationsEnabled")
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                            self.showNotificationsConfig = true
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            SettingsCard(title: "哪吒监控 & ServerStatus 探针") {
+                                SettingsRow("启用哪吒监控 (Nezha Agent)") {
+                                    HStack(spacing: 12) {
+                                        Toggle("", isOn: Binding(
+                                            get: { self.nezhaEnabled },
+                                            set: { newValue in
+                                                self.nezhaEnabled = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "nezhaEnabled")
+                                                if newValue {
+                                                    NezhaAgentService.shared.start()
+                                                } else {
+                                                    NezhaAgentService.shared.stop()
+                                                }
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                            self.showNezhaConfig = true
+                                        }
+                                    }
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("启用 ServerStatus 客户端") {
+                                    HStack(spacing: 12) {
+                                        Toggle("", isOn: Binding(
+                                            get: { self.serverStatusEnabled },
+                                            set: { newValue in
+                                                self.serverStatusEnabled = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "serverStatusEnabled")
+                                                if newValue {
+                                                    ServerStatusService.shared.start()
+                                                } else {
+                                                    ServerStatusService.shared.stop()
+                                                }
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                            self.showServerStatusConfig = true
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            SettingsCard(title: "Uptime Kuma 心跳打卡") {
+                                SettingsRow("启用 Uptime Kuma 推送") {
+                                    HStack(spacing: 12) {
+                                        Toggle("", isOn: Binding(
+                                            get: { self.kumaEnabled },
+                                            set: { newValue in
+                                                self.kumaEnabled = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "kumaEnabled")
+                                                if newValue {
+                                                    UptimeKumaService.shared.start()
+                                                } else {
+                                                    UptimeKumaService.shared.stop()
+                                                }
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                            self.showKumaConfig = true
+                                        }
+                                    }
+                                }
+                            }
+                            
+                        case .status:
+                            SettingsCard(title: "显示器与 Headless 守护策略") {
+                                SettingsRow("断开全部外屏时自动恢复内屏") {
+                                    Toggle("", isOn: $autoExitOnDisconnect)
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                }
+                                
+                                Divider().padding(.horizontal, 16)
+                                
+                                SettingsRow("接入外屏时自动进入无头模式") {
+                                    Toggle("", isOn: $autoRestoreOnConnect)
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                }
+                            }
+                            
+                            SettingsCard(title: "当前连接的显示器") {
+                                if connectedDisplays.isEmpty {
+                                    SettingsRow("未检测到有效显示器") {
+                                        Text("无")
+                                            .foregroundColor(.secondary)
+                                    }
+                                } else {
+                                    VStack(alignment: .leading, spacing: 0) {
+                                        ForEach(Array(connectedDisplays.enumerated()), id: \.offset) { index, display in
+                                            if index > 0 {
+                                                Divider().padding(.horizontal, 16)
+                                            }
+                                            SettingsRow(display.name) {
+                                                Image(systemName: display.isBuiltIn ? "laptopcomputer" : (display.isApple ? "apple.studio.display" : "display"))
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 24)
+                }
+                .background(detailBackgroundColor)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(detailBackgroundColor)
         }
-        .frame(width: 480, height: 820)
+        .ignoresSafeArea()
+        .frame(width: 680, height: 580)
+        
+        // ------------------ Web控制面板配置弹窗 ------------------
+        .sheet(isPresented: $showWebServerConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("局域网 Web 控制面板配置")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("管理密码:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        TextField("设置密码", text: Binding(
+                            get: { self.webServerPassword },
+                            set: { newValue in
+                                self.webServerPassword = newValue
+                                UserDefaults.standard.set(newValue, forKey: "WebServerPassword")
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 180)
+                    }
+                    
+                    HStack {
+                        Text("访问地址:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        Text("http://\(webServerIP):8080")
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundColor(.accentColor)
+                            .textSelection(.enabled)
+                    }
+                }
+                .padding(.vertical, 8)
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        self.showWebServerConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 380, height: 180)
+        }
+        
+        // ------------------ 电池休眠保护配置弹窗 ------------------
+        .sheet(isPresented: $showBatteryConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("低电量电池保护配置")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("当前电量:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        Text("\(batteryCapacity)%")
+                            .fontWeight(.semibold)
+                    }
+                    
+                    HStack {
+                        Text("电源状态:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        Text(batteryState == "AC Power" ? "外接电源直供" : "电池供电中")
+                            .fontWeight(.medium)
+                    }
+                    
+                    HStack {
+                        Text("休眠电量阈值:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        Slider(value: Binding(
+                            get: { Double(self.batteryThreshold) },
+                            set: { newValue in
+                                let intVal = Int(newValue)
+                                self.batteryThreshold = intVal
+                                UserDefaults.standard.set(intVal, forKey: "BatteryThreshold")
+                                BatteryManager.shared.handlePowerSourceChanged()
+                            }
+                        ), in: 10...50, step: 5)
+                        .frame(width: 160)
+                        
+                        Text("\(batteryThreshold)%")
+                            .fontWeight(.bold)
+                    }
+                }
+                .padding(.vertical, 8)
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        self.showBatteryConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 380, height: 220)
+        }
+        
+        // ------------------ SMC 过热温度报警配置弹窗 ------------------
+        .sheet(isPresented: $showOverheatConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("芯片过热报警配置")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("当前温度:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        Text(String(format: "%.1f°C", smc.currentTemperature))
+                            .fontWeight(.semibold)
+                            .foregroundColor(smc.currentTemperature >= overheatThreshold ? .red : .primary)
+                    }
+                    
+                    HStack {
+                        Text("报警温度阈值:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        Slider(value: Binding(
+                            get: { self.overheatThreshold },
+                            set: { newValue in
+                                self.overheatThreshold = newValue
+                                UserDefaults.standard.set(newValue, forKey: "overheatThreshold")
+                            }
+                        ), in: 60...95, step: 5)
+                        .frame(width: 160)
+                        
+                        Text("\(Int(overheatThreshold))°C")
+                            .fontWeight(.bold)
+                    }
+                }
+                .padding(.vertical, 8)
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        self.showOverheatConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 380, height: 200)
+        }
+        
+        // ------------------ 推送通道集成配置弹窗 ------------------
+        .sheet(isPresented: $showNotificationsConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("消息推送通道配置")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Toggle("启用 Bark 推送 (iOS)", isOn: Binding(
+                                    get: { self.barkEnabled },
+                                    set: { newValue in
+                                        self.barkEnabled = newValue
+                                        UserDefaults.standard.set(newValue, forKey: "barkEnabled")
+                                    }
+                                ))
+                                .toggleStyle(.switch)
+                                Spacer()
+                            }
+                            
+                            if barkEnabled {
+                                HStack {
+                                    Text("Bark Key:")
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 80, alignment: .leading)
+                                    TextField("填入 Bark Device Key", text: Binding(
+                                        get: { self.barkKey },
+                                        set: { newValue in
+                                            self.barkKey = newValue
+                                            UserDefaults.standard.set(newValue, forKey: "barkKey")
+                                        }
+                                    ))
+                                    .textFieldStyle(.roundedBorder)
+                                }
+                                .padding(.leading, 12)
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Toggle("启用 Telegram Bot 推送", isOn: Binding(
+                                    get: { self.telegramEnabled },
+                                    set: { newValue in
+                                        self.telegramEnabled = newValue
+                                        UserDefaults.standard.set(newValue, forKey: "telegramEnabled")
+                                    }
+                                ))
+                                .toggleStyle(.switch)
+                                Spacer()
+                            }
+                            
+                            if telegramEnabled {
+                                VStack(spacing: 8) {
+                                    HStack {
+                                        Text("Bot Token:")
+                                            .foregroundColor(.secondary)
+                                            .frame(width: 80, alignment: .leading)
+                                        TextField("填入 Bot Token", text: Binding(
+                                            get: { self.telegramBotToken },
+                                            set: { newValue in
+                                                self.telegramBotToken = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "telegramBotToken")
+                                            }
+                                        ))
+                                        .textFieldStyle(.roundedBorder)
+                                    }
+                                    
+                                    HStack {
+                                        Text("Chat ID:")
+                                            .foregroundColor(.secondary)
+                                            .frame(width: 80, alignment: .leading)
+                                        TextField("填入 Chat ID", text: Binding(
+                                            get: { self.telegramChatId },
+                                            set: { newValue in
+                                                self.telegramChatId = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "telegramChatId")
+                                            }
+                                        ))
+                                        .textFieldStyle(.roundedBorder)
+                                    }
+                                }
+                                .padding(.leading, 12)
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        HStack {
+                            Button("发送测试通知") {
+                                NotificationService.shared.sendAlert(type: .test, title: "连接测试", body: "这是一条来自 MacHead 的集成状态测试通知，连接正常！", force: true)
+                            }
+                            .buttonStyle(.bordered)
+                            Spacer()
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        self.showNotificationsConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 400, height: 380)
+        }
+        
+        // ------------------ 哪吒监控配置弹窗 ------------------
+        .sheet(isPresented: $showNezhaConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("哪吒监控配置")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("面板地址:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        TextField("host:port", text: Binding(
+                            get: { self.nezhaServer },
+                            set: { newValue in
+                                self.nezhaServer = newValue
+                                UserDefaults.standard.set(newValue, forKey: "nezhaServer")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 180)
+                    }
+                    
+                    HStack {
+                        Text("连接密钥:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        SecureField("Secret Key", text: Binding(
+                            get: { self.nezhaSecret },
+                            set: { newValue in
+                                self.nezhaSecret = newValue
+                                UserDefaults.standard.set(newValue, forKey: "nezhaSecret")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 180)
+                    }
+                    
+                    HStack {
+                        Text("安全传输:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        Toggle("启用 SSL/TLS 加密", isOn: Binding(
+                            get: { self.nezhaTls },
+                            set: { newValue in
+                                self.nezhaTls = newValue
+                                UserDefaults.standard.set(newValue, forKey: "nezhaTls")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ))
+                        .toggleStyle(.switch)
+                    }
+                }
+                .padding(.vertical, 8)
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        self.showNezhaConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 380, height: 240)
+        }
+        
+        // ------------------ ServerStatus 配置弹窗 ------------------
+        .sheet(isPresented: $showServerStatusConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("ServerStatus 客户端配置")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("服务端地址:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        TextField("grpc://host:port", text: Binding(
+                            get: { self.serverStatusAddr },
+                            set: { newValue in
+                                self.serverStatusAddr = newValue
+                                UserDefaults.standard.set(newValue, forKey: "serverStatusAddr")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 180)
+                    }
+                    
+                    HStack {
+                        Text("主机用户名:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        TextField("User ID", text: Binding(
+                            get: { self.serverStatusUser },
+                            set: { newValue in
+                                self.serverStatusUser = newValue
+                                UserDefaults.standard.set(newValue, forKey: "serverStatusUser")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 180)
+                    }
+                    
+                    HStack {
+                        Text("连接密码:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 90, alignment: .leading)
+                        SecureField("Password", text: Binding(
+                            get: { self.serverStatusPassword },
+                            set: { newValue in
+                                self.serverStatusPassword = newValue
+                                UserDefaults.standard.set(newValue, forKey: "serverStatusPassword")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 180)
+                    }
+                }
+                .padding(.vertical, 8)
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        self.showServerStatusConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 380, height: 240)
+        }
+        
+        // ------------------ Uptime Kuma 配置弹窗 ------------------
+        .sheet(isPresented: $showKumaConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Uptime Kuma 推送配置")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("推送 URL:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        TextField("http(s)://...", text: Binding(
+                            get: { self.kumaPushUrl },
+                            set: { newValue in
+                                self.kumaPushUrl = newValue
+                                UserDefaults.standard.set(newValue, forKey: "kumaPushUrl")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 220)
+                    }
+                    
+                    HStack {
+                        Text("汇报间隔:")
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        Slider(value: Binding(
+                            get: { self.kumaInterval },
+                            set: { newValue in
+                                self.kumaInterval = newValue
+                                UserDefaults.standard.set(newValue, forKey: "kumaInterval")
+                                IntegrationManager.shared.reloadServices()
+                            }
+                        ), in: 10...300, step: 10)
+                        .frame(width: 160)
+                        
+                        Text("\(Int(kumaInterval)) 秒")
+                            .fontWeight(.bold)
+                    }
+                }
+                .padding(.vertical, 8)
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        self.showKumaConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 380, height: 200)
+        }
         .onAppear {
             updateConnectedDisplays()
             updateBatteryState()
@@ -356,7 +1149,39 @@ struct PreferencesView: View {
         self.webServerIP = WebServer.shared.getLocalIPAddress()
         self.webServerPassword = UserDefaults.standard.string(forKey: "WebServerPassword") ?? ""
         self.isAccessibilityTrusted = AXIsProcessTrusted()
-        self.disableKeyboardAndTrackpadInHeadless = UserDefaults.standard.bool(forKey: "DisableKeyboardAndTrackpadInHeadlessMode")
+        
+        self.disableKeyboardInHeadless = UserDefaults.standard.bool(forKey: "DisableKeyboardInHeadless")
+        self.disableKeyboardWhenExtKeyConnected = UserDefaults.standard.bool(forKey: "DisableKeyboardWhenExternalKeyboardConnected")
+        self.disableTrackpadInHeadless = UserDefaults.standard.bool(forKey: "DisableTrackpadInHeadless")
+        self.disableTrackpadWhenExtMouseConnected = UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")
+        
+        // Sync integrations states
+        self.nezhaEnabled = UserDefaults.standard.bool(forKey: "nezhaEnabled")
+        self.nezhaServer = UserDefaults.standard.string(forKey: "nezhaServer") ?? ""
+        self.nezhaSecret = UserDefaults.standard.string(forKey: "nezhaSecret") ?? ""
+        self.nezhaTls = UserDefaults.standard.bool(forKey: "nezhaTls")
+        
+        self.serverStatusEnabled = UserDefaults.standard.bool(forKey: "serverStatusEnabled")
+        self.serverStatusAddr = UserDefaults.standard.string(forKey: "serverStatusAddr") ?? ""
+        self.serverStatusUser = UserDefaults.standard.string(forKey: "serverStatusUser") ?? ""
+        self.serverStatusPassword = UserDefaults.standard.string(forKey: "serverStatusPassword") ?? ""
+        
+        self.kumaEnabled = UserDefaults.standard.bool(forKey: "kumaEnabled")
+        self.kumaPushUrl = UserDefaults.standard.string(forKey: "kumaPushUrl") ?? ""
+        self.kumaInterval = UserDefaults.standard.double(forKey: "kumaInterval") == 0 ? 60.0 : UserDefaults.standard.double(forKey: "kumaInterval")
+        
+        self.notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+        self.barkEnabled = UserDefaults.standard.bool(forKey: "barkEnabled")
+        self.barkKey = UserDefaults.standard.string(forKey: "barkKey") ?? ""
+        self.telegramEnabled = UserDefaults.standard.bool(forKey: "telegramEnabled")
+        self.telegramBotToken = UserDefaults.standard.string(forKey: "telegramBotToken") ?? ""
+        self.telegramChatId = MapKeysToString(UserDefaults.standard.string(forKey: "telegramChatId"))
+        self.overheatAlertEnabled = UserDefaults.standard.bool(forKey: "overheatAlertEnabled")
+        self.overheatThreshold = UserDefaults.standard.double(forKey: "overheatThreshold") == 0 ? 85.0 : UserDefaults.standard.double(forKey: "overheatThreshold")
+    }
+    
+    private func MapKeysToString(_ val: String?) -> String {
+        return val ?? ""
     }
     
     private func updateConnectedDisplays() {
@@ -377,5 +1202,24 @@ struct PreferencesView: View {
             }
             return DisplayInfo(id: id, name: name, isBuiltIn: isBuiltIn, isApple: isApple)
         }
+    }
+}
+
+// SwiftUI VisualEffectView helper for macOS background styling
+struct VisualEffectView: NSViewRepresentable {
+    let material: NSVisualEffectView.Material
+    let blendingMode: NSVisualEffectView.BlendingMode
+    
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = .active
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
+        nsView.material = material
+        nsView.blendingMode = blendingMode
     }
 }

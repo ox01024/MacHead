@@ -76,11 +76,19 @@ echo "Setting bundle version in Info.plist: Version ${VERSION} (Build ${BUILD})"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${APP_DIR}/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD}" "${APP_DIR}/Contents/Info.plist"
 
-# Copy AppIcon, Dashboard, and Login HTML to resources
+# Copy AppIcon, Dashboard, Login HTML, and monitoring binaries to resources
 mkdir -p "${APP_DIR}/Contents/Resources"
 cp Resources/AppIcon.icns "${APP_DIR}/Contents/Resources/AppIcon.icns"
 cp Resources/Dashboard.html "${APP_DIR}/Contents/Resources/Dashboard.html"
 cp Resources/Login.html "${APP_DIR}/Contents/Resources/Login.html"
+if [ -f "Resources/nezha-agent" ]; then
+  cp Resources/nezha-agent "${APP_DIR}/Contents/Resources/nezha-agent"
+  chmod +x "${APP_DIR}/Contents/Resources/nezha-agent"
+fi
+if [ -f "Resources/serverstatus-client" ]; then
+  cp Resources/serverstatus-client "${APP_DIR}/Contents/Resources/serverstatus-client"
+  chmod +x "${APP_DIR}/Contents/Resources/serverstatus-client"
+fi
 
 # Apply ad-hoc signature (required for ARM64 macOS binaries and icon rendering)
 echo "Ad-hoc signing the application bundle..."
@@ -92,3 +100,12 @@ rm -rf "/Applications/${APP_NAME}.app"
 cp -R "${APP_DIR}" "/Applications/"
 
 echo "Build successful! Created Universal ${APP_DIR} and installed to /Applications."
+
+# Restart the app if it was running, or open it so the user can test immediately
+if pgrep -x "${APP_NAME}" > /dev/null; then
+  echo "Detecting running instance of ${APP_NAME}. Restarting..."
+  killall "${APP_NAME}" || true
+  sleep 0.5
+fi
+open "/Applications/${APP_NAME}.app"
+echo "${APP_NAME} has been launched/restarted."

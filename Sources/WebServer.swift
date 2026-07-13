@@ -241,6 +241,15 @@ final class WebServer {
                 NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
                 self.sendResponse(json: self.getStatusJSON(), connection: connection)
             }
+        } else if method == "POST" && path == "/api/toggle-keep-running" {
+            DispatchQueue.main.async {
+                let key = "KeepRunningOnLidClose"
+                let val = !UserDefaults.standard.bool(forKey: key)
+                UserDefaults.standard.set(val, forKey: key)
+                HeadlessModeController.shared.evaluatePowerAssertion()
+                NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+                self.sendResponse(json: self.getStatusJSON(), connection: connection)
+            }
         } else if method == "POST" && path == "/api/toggle-exit-on-disconnect" {
             DispatchQueue.main.async {
                 let key = "AutoExitHeadlessOnDisconnect"
@@ -419,6 +428,7 @@ final class WebServer {
         {
           "headlessModeEnabled": \(HeadlessModeController.shared.isHeadlessModeEnabled),
           "preventIdleSleep": \(UserDefaults.standard.bool(forKey: "PreventIdleSleep")),
+          "keepRunningOnLidClose": \(UserDefaults.standard.bool(forKey: "KeepRunningOnLidClose")),
           "trackpadDisabled": \(UserDefaults.standard.bool(forKey: "DisableTrackpadWhenExternalMouseConnected")),
           "keyboardAndTrackpadDisabledInHeadless": \(UserDefaults.standard.bool(forKey: "DisableKeyboardAndTrackpadInHeadlessMode")),
           "microphoneMuted": \(MediaDeviceManager.shared.isMuted),

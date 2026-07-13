@@ -17,6 +17,45 @@ jobs:
         with:
           fetch-depth: 0 # 获取完整 Git 历史以生成 Technical Release Notes
 
+      - name: Fetch and Merge Latest Nezha & ServerStatus Binaries 📥
+        run: |
+          mkdir -p Resources
+          TEMP_DIR="temp_binaries"
+          mkdir -p "${TEMP_DIR}"
+          
+          echo "Determining latest Nezha Agent version..."
+          NEZHA_VER=$(curl -sI https://github.com/nezhahq/agent/releases/latest | grep -i location | awk -F'/' '{print $NF}' | tr -d '\r\n')
+          echo "Latest Nezha Version: ${NEZHA_VER}"
+          
+          curl -L -o "${TEMP_DIR}/nezha_amd64.zip" "https://github.com/nezhahq/agent/releases/download/${NEZHA_VER}/nezha-agent_darwin_amd64.zip"
+          curl -L -o "${TEMP_DIR}/nezha_arm64.zip" "https://github.com/nezhahq/agent/releases/download/${NEZHA_VER}/nezha-agent_darwin_arm64.zip"
+          
+          unzip -o "${TEMP_DIR}/nezha_amd64.zip" -d "${TEMP_DIR}/nezha_amd64"
+          unzip -o "${TEMP_DIR}/nezha_arm64.zip" -d "${TEMP_DIR}/nezha_arm64"
+          
+          lipo -create \
+            "${TEMP_DIR}/nezha_amd64/nezha-agent" \
+            "${TEMP_DIR}/nezha_arm64/nezha-agent" \
+            -output Resources/nezha-agent
+          
+          echo "Determining latest ServerStatus-Rust version..."
+          STATUS_VER=$(curl -sI https://github.com/zdz/ServerStatus-Rust/releases/latest | grep -i location | awk -F'/' '{print $NF}' | tr -d '\r\n')
+          echo "Latest ServerStatus Version: ${STATUS_VER}"
+          
+          curl -L -o "${TEMP_DIR}/status_amd64.zip" "https://github.com/zdz/ServerStatus-Rust/releases/download/${STATUS_VER}/client-x86_64-apple-darwin.zip"
+          curl -L -o "${TEMP_DIR}/status_arm64.zip" "https://github.com/zdz/ServerStatus-Rust/releases/download/${STATUS_VER}/client-aarch64-apple-darwin.zip"
+          
+          unzip -o "${TEMP_DIR}/status_amd64.zip" -d "${TEMP_DIR}/status_amd64"
+          unzip -o "${TEMP_DIR}/status_arm64.zip" -d "${TEMP_DIR}/status_arm64"
+          
+          lipo -create \
+            "${TEMP_DIR}/status_amd64/stat_client" \
+            "${TEMP_DIR}/status_arm64/stat_client" \
+            -output Resources/serverstatus-client
+          
+          rm -rf "${TEMP_DIR}"
+          echo "Successfully prepared latest universal binaries!"
+
       - name: Build Application 🔧
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}

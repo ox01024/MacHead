@@ -71,6 +71,7 @@ final class HeadlessModeController {
     
     private(set) var isHeadlessModeEnabled = false
     private var sleepAssertionID: IOPMAssertionID = 0
+    private var activeAssertionType: String = ""
     private var isCallbackRegistered = false
     var isDisplayMonitoringStarted = false
     fileprivate(set) var activeExternalDisplays: Set<CGDirectDisplayID> = []
@@ -167,22 +168,35 @@ final class HeadlessModeController {
         alert.runModal()
     }
     
-    /// 动态管理空闲睡眠断言
+    /// 动态管理空闲与合盖睡眠断言
     func updateSleepAssertion(enabled: Bool) {
+        let keepRunningOnLidClose = UserDefaults.standard.bool(forKey: "KeepRunningOnLidClose")
+        let targetType = keepRunningOnLidClose ? (kIOPMAssertionTypePreventSystemSleep as String) : (kIOPMAssertionTypePreventUserIdleSystemSleep as String)
+        
         if enabled {
             guard isHeadlessModeEnabled else { return }
+            
+            // 如果已有断言且类型不符，先释放
+            if sleepAssertionID != 0 && activeAssertionType != targetType {
+                IOPMAssertionRelease(sleepAssertionID)
+                NSLog("MacHead: 释放旧类型电源断言，ID: %d", sleepAssertionID)
+                sleepAssertionID = 0
+                activeAssertionType = ""
+            }
+            
             if sleepAssertionID == 0 {
                 let reason = "MacHead: Headless mode active" as CFString
                 let result = IOPMAssertionCreateWithName(
-                    kIOPMAssertionTypePreventUserIdleSystemSleep as CFString,
+                    targetType as CFString,
                     IOPMAssertionLevel(kIOPMAssertionLevelOn),
                     reason,
                     &sleepAssertionID
                 )
                 if result != kIOReturnSuccess {
-                    NSLog("MacHead: 无法创建电源断言 %d", result)
+                    NSLog("MacHead: 无法创建电源断言 (%@) %d", targetType, result)
                 } else {
-                    NSLog("MacHead: 成功创建电源断言，ID: %d", sleepAssertionID)
+                    NSLog("MacHead: 成功创建电源断言 (%@)，ID: %d", targetType, sleepAssertionID)
+                    activeAssertionType = targetType
                 }
             }
         } else {
@@ -190,6 +204,7 @@ final class HeadlessModeController {
                 IOPMAssertionRelease(sleepAssertionID)
                 NSLog("MacHead: 释放电源断言，ID: %d", sleepAssertionID)
                 sleepAssertionID = 0
+                activeAssertionType = ""
             }
         }
     }
