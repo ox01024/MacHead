@@ -1,7 +1,7 @@
 {
-  "version": "0.1.14",
-  "build": 18,
-  "pubDate": "2026-07-13",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.14-macos-universal.dmg",
-  "releaseNotes": "1. 实现了全新的“合盖后仍然保持运行”功能（防休眠与合盖守护）；2. 完美修复了 Apple Silicon (M系列) 芯片下温度显示 0.0°C 以及物理风扇状态误报的 Bug；3. 重构了输入设备保护页面为横向多选对齐卡片，移除了全局设置中的冗余副标题描述。"
+  "version": "1.0.0",
+  "build": 19,
+  "pubDate": "2026-07-18",
+  "url": "https://releases.headlessmac.com/MacHead-v1.0.0-macos-universal.dmg",
+  "releaseNotes": "1. 界面全新升级：设置面板重构为四大独立维度卡片，提供更直观清晰的配置管理；\n2. 硬件与电源防护：新增电池低电量智能保护设定与麦克风隐私开关，键盘触控板禁用支持在无头/外接设备状态下细粒度多选；\n3. 系统集成与监控：全面接入系统硬件监控告警、哪吒监控/ServerStatus 客户端探针以及 Uptime Kuma 心跳打卡；\n4. 显示器策略优化：完美支持断开全部外屏时自动恢复内屏、接入外屏秒级重入无头模式，避免一切黑屏锁死风险。"
 }
