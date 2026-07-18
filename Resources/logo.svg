@@ -1,9 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 1024 1024" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" fill="none">
+  <!-- Cursor-style monochrome: black mark on white -->
   <rect width="1024" height="1024" fill="#FFFFFF"/>
+  <!-- depth plate -->
   <rect x="236" y="420" width="580" height="220" rx="110" fill="#000000" opacity="0.18"/>
+  <!-- main chassis -->
   <rect x="204" y="380" width="580" height="220" rx="110" fill="#000000"/>
+  <!-- vents (cutouts) -->
   <rect x="304" y="446" width="24" height="84" rx="12" fill="#FFFFFF"/>
   <rect x="348" y="446" width="24" height="84" rx="12" fill="#FFFFFF"/>
+  <!-- LEDs -->
   <circle cx="648" cy="490" r="16" fill="#FFFFFF"/>
   <circle cx="700" cy="490" r="16" fill="#FFFFFF"/>
 </svg>
