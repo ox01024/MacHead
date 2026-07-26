@@ -7,6 +7,35 @@
 import './style.css';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 0. Mobile hamburger navigation
+    const menuToggle = document.getElementById('nav-menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+    if (menuToggle && navLinks) {
+        const closeMenu = () => {
+            navLinks.classList.remove('open');
+            menuToggle.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            menuToggle.setAttribute('aria-label', '打开导航菜单');
+        };
+
+        menuToggle.addEventListener('click', () => {
+            const isOpen = navLinks.classList.toggle('open');
+            menuToggle.classList.toggle('open', isOpen);
+            menuToggle.setAttribute('aria-expanded', String(isOpen));
+            menuToggle.setAttribute('aria-label', isOpen ? '关闭导航菜单' : '打开导航菜单');
+        });
+
+        // Close the dropdown after choosing a destination
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
+
+        // Reset state when resizing back to the desktop layout
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) closeMenu();
+        });
+    }
+
     // 1. Copy Shell Command to Clipboard
     const copyBtn = document.getElementById('copy-hero-cmd');
     if (copyBtn) {
