@@ -112,9 +112,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         
-        // Silent background check for updates 3 seconds after launch
+        // Silent background check for updates 3 seconds after launch & send telemetry heartbeat
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             UpdateManager.shared.checkForUpdates(silent: true)
+            TelemetryManager.shared.track(event: "app_heartbeat")
         }
     }
     

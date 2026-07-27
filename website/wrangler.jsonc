@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "headlessmac",
+  "pages_build_output_dir": "dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "machead-telemetry-db",
+      "database_id": "b5c4ddd6-70a7-412e-92ec-3893892b598d"
+    }
+  ]
+}

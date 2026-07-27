@@ -84,6 +84,7 @@ final class BatteryManager {
             NSLog("MacHead: 电池保护状态发生变化 -> 激活: %@", String(shouldActive))
             
             if shouldActive {
+                TelemetryManager.shared.track(event: "app_event", extraInfo: ["action": "battery_protection_fired"])
                 NSLog("MacHead: 低电量保护触发！电量为 %d%% (低于阈值 %d%%) 且处于电池供电下。释放休眠阻碍。", currentCapacity, thresholdVal)
             } else {
                 NSLog("MacHead: 电池保护解除 (电量: %d%%, 直供: %@)。", currentCapacity, String(!onBattery))

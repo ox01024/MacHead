@@ -120,6 +120,7 @@ final class HeadlessModeController {
         )
         
         NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+        TelemetryManager.shared.track(event: "app_event", extraInfo: ["action": "enable_headless"])
     }
     
     func disableHeadlessMode() {
@@ -146,6 +147,7 @@ final class HeadlessModeController {
         )
         
         NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+        TelemetryManager.shared.track(event: "app_event", extraInfo: ["action": "disable_headless"])
     }
     
     /// 触发防黑屏安全恢复，强行退出无头模式并弹窗告警
