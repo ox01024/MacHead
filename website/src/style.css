@@ -15,7 +15,7 @@
   --color-border-hover: rgba(38, 37, 30, 0.16);
   
   --color-text-main: #26251e;
-  --color-text-muted: rgba(38, 37, 30, 0.55);
+  --color-text-muted: #57554b;
   
   /* Primary Button: Dark on Light */
   --color-btn-primary-bg: #26251e;
@@ -40,7 +40,7 @@
     --color-border-hover: rgba(237, 236, 236, 0.16);
     
     --color-text-main: #edecec;
-    --color-text-muted: rgba(237, 236, 236, 0.55);
+    --color-text-muted: #b8b6b6;
     
     /* Primary Button: Light on Dark */
     --color-btn-primary-bg: #edecec;
