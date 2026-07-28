@@ -143,11 +143,29 @@ struct PreferencesView: View {
     // SMC metrics watcher
     @ObservedObject private var smc = SMCManager.shared
 
-    // Third-party integration configurations
     @State private var nezhaEnabled = UserDefaults.standard.bool(forKey: "nezhaEnabled")
     @State private var nezhaServer = UserDefaults.standard.string(forKey: "nezhaServer") ?? ""
     @State private var nezhaSecret = UserDefaults.standard.string(forKey: "nezhaSecret") ?? ""
     @State private var nezhaTls = UserDefaults.standard.bool(forKey: "nezhaTls")
+    @State private var nezhaStatus: NezhaStatus = NezhaAgentService.shared.currentStatus
+
+    private var nezhaStatusColor: Color {
+        switch nezhaStatus {
+        case .connected: return .green
+        case .connecting: return .orange
+        case .error: return .red
+        case .stopped: return .gray
+        }
+    }
+
+    private var nezhaStatusBadgeText: String {
+        switch nezhaStatus {
+        case .connected: return "已连接"
+        case .connecting: return "连接中..."
+        case .error: return "连接失败"
+        case .stopped: return "已停用"
+        }
+    }
 
     @State private var serverStatusEnabled = UserDefaults.standard.bool(forKey: "serverStatusEnabled")
     @State private var serverStatusAddr = UserDefaults.standard.string(forKey: "serverStatusAddr") ?? ""
@@ -531,7 +549,23 @@ struct PreferencesView: View {
                             
                             SettingsCard(title: "哪吒监控 & ServerStatus 探针") {
                                 SettingsRow("启用哪吒监控 (Nezha Agent)") {
-                                    HStack(spacing: 12) {
+                                    HStack(spacing: 10) {
+                                        if nezhaEnabled {
+                                            HStack(spacing: 4) {
+                                                Circle()
+                                                    .fill(nezhaStatusColor)
+                                                    .frame(width: 6, height: 6)
+                                                Text(nezhaStatusBadgeText)
+                                                    .font(.caption2)
+                                                    .fontWeight(.medium)
+                                                    .foregroundColor(nezhaStatusColor)
+                                            }
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 3)
+                                            .background(nezhaStatusColor.opacity(0.12))
+                                            .cornerRadius(5)
+                                        }
+
                                         Toggle("", isOn: Binding(
                                             get: { self.nezhaEnabled },
                                             set: { newValue in
@@ -931,72 +965,93 @@ struct PreferencesView: View {
         // ------------------ 哪吒监控配置弹窗 ------------------
         .sheet(isPresented: $showNezhaConfig) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("哪吒监控配置")
-                    .font(.headline)
-                    .fontWeight(.bold)
+                HStack {
+                    Text("哪吒监控配置")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Button("测试重新连接") {
+                        IntegrationManager.shared.reloadServices()
+                    }
+                    .controlSize(.small)
+                }
                 
+                // 实时诊断卡片
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(nezhaStatusColor)
+                            .frame(width: 8, height: 8)
+                        Text("当前状态:")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text(nezhaStatusBadgeText)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(nezhaStatusColor)
+                    }
+                    
+                    Text(nezhaStatus.displayText)
+                        .font(.caption2)
+                        .foregroundColor(nezhaStatusColor)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(nezhaStatusColor.opacity(0.1))
+                .cornerRadius(8)
+
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Text("面板地址:")
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
-                        TextField("host:port", text: Binding(
-                            get: { self.nezhaServer },
-                            set: { newValue in
-                                self.nezhaServer = newValue
+                        TextField("host:port (如 104.223.55.31:8008)", text: $nezhaServer)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 220)
+                            .onChange(of: nezhaServer) { newValue in
                                 UserDefaults.standard.set(newValue, forKey: "nezhaServer")
-                                IntegrationManager.shared.reloadServices()
                             }
-                        ))
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 180)
                     }
                     
                     HStack {
                         Text("连接密钥:")
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
-                        SecureField("Secret Key", text: Binding(
-                            get: { self.nezhaSecret },
-                            set: { newValue in
-                                self.nezhaSecret = newValue
+                        SecureField("Secret Key", text: $nezhaSecret)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 220)
+                            .onChange(of: nezhaSecret) { newValue in
                                 UserDefaults.standard.set(newValue, forKey: "nezhaSecret")
-                                IntegrationManager.shared.reloadServices()
                             }
-                        ))
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 180)
                     }
                     
                     HStack {
                         Text("安全传输:")
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
-                        Toggle("启用 SSL/TLS 加密", isOn: Binding(
-                            get: { self.nezhaTls },
-                            set: { newValue in
-                                self.nezhaTls = newValue
+                        Toggle("启用 SSL/TLS 加密", isOn: $nezhaTls)
+                            .toggleStyle(.switch)
+                            .onChange(of: nezhaTls) { newValue in
                                 UserDefaults.standard.set(newValue, forKey: "nezhaTls")
-                                IntegrationManager.shared.reloadServices()
                             }
-                        ))
-                        .toggleStyle(.switch)
                     }
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, 4)
                 
                 Spacer()
                 
                 HStack {
                     Spacer()
                     Button("完成") {
+                        IntegrationManager.shared.reloadServices()
                         self.showNezhaConfig = false
                     }
                     .keyboardShortcut(.defaultAction)
                 }
             }
             .padding(20)
-            .frame(width: 380, height: 240)
+            .frame(width: 440, height: 380)
         }
         
         // ------------------ ServerStatus 配置弹窗 ------------------
@@ -1136,6 +1191,11 @@ struct PreferencesView: View {
             updateConnectedDisplays()
             updateBatteryState()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .nezhaStatusChanged)) { notif in
+            if let status = notif.object as? NezhaStatus {
+                self.nezhaStatus = status
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             self.isAccessibilityTrusted = AXIsProcessTrusted()
         }
@@ -1160,6 +1220,7 @@ struct PreferencesView: View {
         self.nezhaServer = UserDefaults.standard.string(forKey: "nezhaServer") ?? ""
         self.nezhaSecret = UserDefaults.standard.string(forKey: "nezhaSecret") ?? ""
         self.nezhaTls = UserDefaults.standard.bool(forKey: "nezhaTls")
+        self.nezhaStatus = NezhaAgentService.shared.currentStatus
         
         self.serverStatusEnabled = UserDefaults.standard.bool(forKey: "serverStatusEnabled")
         self.serverStatusAddr = UserDefaults.standard.string(forKey: "serverStatusAddr") ?? ""
