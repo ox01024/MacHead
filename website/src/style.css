@@ -1028,7 +1028,7 @@ input:checked + .slider-mini:before {
 
 .footer-tagline {
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .footer-links-group {
@@ -1050,7 +1050,7 @@ input:checked + .slider-mini:before {
 .footer-links-group a {
   text-decoration: none;
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   transition: color 0.15s ease;
 }
 .footer-links-group a:hover {
@@ -1058,14 +1058,13 @@ input:checked + .slider-mini:before {
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  border-top: 1px solid var(--color-border);
   padding-top: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 10.5px;
-  color: var(--color-text-muted);
-  opacity: 0.5;
+  font-size: 11px;
+  color: var(--color-text-secondary);
   flex-direction: column;
   gap: 10px;
   text-align: center;
