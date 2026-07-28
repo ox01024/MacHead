@@ -467,50 +467,49 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("MacHead Web: Native CSS View Timeline supported.");
     }
 
-    // 6. Dynamic version and download links from appcast.json
-    fetch('./appcast.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    // 6. Centralized Dynamic Version & Download Link Synchronizer
+    function syncReleaseMetadata(version, downloadUrl) {
+        // Update all download buttons (by class .js-download-link or known IDs)
+        const downloadElements = document.querySelectorAll('.js-download-link, #download-header-link, #download-hero-link, #download-step-link, #download-cta-link');
+        downloadElements.forEach(el => {
+            el.setAttribute('href', downloadUrl);
+        });
+
+        // Update all version badge text elements
+        const badgeElements = document.querySelectorAll('.js-version-badge, .hero-badge .badge-text');
+        badgeElements.forEach(el => {
+            el.textContent = `v${version} Universal 支持 Apple Silicon / Intel`;
+        });
+
+        // Update CTA download button text
+        const ctaBtn = document.getElementById('download-cta-link');
+        if (ctaBtn) {
+            ctaBtn.textContent = `下载 macOS Universal DMG v${version}`;
+        }
+
+        // Update JSON-LD Structured Data for SEO
+        const ldScript = document.getElementById('schema-json-ld');
+        if (ldScript) {
+            try {
+                const schema = JSON.parse(ldScript.textContent);
+                schema.softwareVersion = version;
+                schema.downloadUrl = downloadUrl;
+                ldScript.textContent = JSON.stringify(schema, null, 2);
+            } catch (e) {
+                console.warn('MacHead Web: Could not update JSON-LD schema', e);
             }
-            return response.json();
-        })
+        }
+    }
+
+    fetch('/appcast.json')
+        .then(res => res.ok ? res.json() : Promise.reject(res.status))
         .then(data => {
-            if (data && data.url) {
-                const latestUrl = data.url;
-                const version = data.version;
-                
-                // Update all download button hrefs
-                const downloadIds = [
-                    'download-header-link',
-                    'download-hero-link',
-                    'download-step-link',
-                    'download-cta-link'
-                ];
-                
-                downloadIds.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) {
-                        el.setAttribute('href', latestUrl);
-                    }
-                });
-                
-                // Update version badge text dynamically
-                const badge = document.querySelector('.hero-badge .badge-text');
-                if (badge) {
-                    badge.textContent = `v${version} Universal 支持 Apple Silicon / Intel`;
-                }
-                
-                // Update CTA download button text
-                const ctaBtn = document.getElementById('download-cta-link');
-                if (ctaBtn) {
-                    ctaBtn.textContent = `下载 macOS Universal DMG v${version}`;
-                }
-                
-                console.log(`MacHead Web: Dynamically updated download links to v${version}`);
+            if (data && data.url && data.version) {
+                syncReleaseMetadata(data.version, data.url);
+                console.log(`MacHead Web: Centralized release metadata synced (v${data.version})`);
             }
         })
         .catch(err => {
-            console.error('MacHead Web: Failed to load appcast.json metadata:', err);
+            console.warn('MacHead Web: Using fallback release metadata due to appcast fetch status:', err);
         });
 });
