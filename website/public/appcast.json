@@ -1,7 +1,7 @@
 {
-  "version": "0.1.15",
-  "build": 19,
+  "version": "0.1.16",
+  "build": 20,
   "pubDate": "2026-07-28",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.15-macos-universal.dmg",
-  "releaseNotes": "1. 全面上线隐私优先的核心指标遥测与心跳机制； 2. 优化了 Headless 模式与电池保护事件的统计记录； 3. 接入 Cloudflare D1 数据库支撑全栈数据分析。"
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.16-macos-universal.dmg",
+  "releaseNotes": "1. 增加哪吒监控实时连接状态指示器与智能错误诊断； 2. 修复哪吒配置弹窗尺寸偏小被遮挡的问题； 3. 优化配置修改体验，防止编辑输入时频繁断连重启。"
 }
