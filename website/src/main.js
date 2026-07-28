@@ -470,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. Centralized Dynamic Version & Download Link Synchronizer
     function syncReleaseMetadata(version, downloadUrl) {
         // Update all download buttons (by class .js-download-link or known IDs)
-        const downloadElements = document.querySelectorAll('.js-download-link, #download-header-link, #download-hero-link, #download-step-link, #download-cta-link');
+        const downloadElements = document.querySelectorAll('.js-download-link, #download-header-link, #download-hero-link, #download-cta-link');
         downloadElements.forEach(el => {
             el.setAttribute('href', downloadUrl);
         });
