@@ -48,6 +48,7 @@ public final class NezhaAgentService {
         let defaults = UserDefaults.standard
         guard defaults.bool(forKey: "nezhaEnabled") else {
             currentStatus = .stopped
+            killOrphanedProcesses()
             return
         }
         
@@ -89,6 +90,7 @@ public final class NezhaAgentService {
         let configContent = """
         client_secret: "\(secret)"
         debug: true
+        disable_auto_update: true
         server: "\(server)"
         tls: \(isTls ? "true" : "false")
         """
@@ -172,11 +174,6 @@ public final class NezhaAgentService {
         outputPipe?.fileHandleForReading.readabilityHandler = nil
         errorPipe?.fileHandleForReading.readabilityHandler = nil
         
-        guard isServiceRunning else {
-            currentStatus = .stopped
-            return
-        }
-        
         print("NezhaAgentService: Stopping nezha-agent...")
         
         process?.terminationHandler = nil
@@ -186,9 +183,21 @@ public final class NezhaAgentService {
             proc.waitUntilExit()
         }
         
+        killOrphanedProcesses()
+        
         process = nil
         isServiceRunning = false
         currentStatus = .stopped
+    }
+    
+    private func killOrphanedProcesses() {
+        let task = Process()
+        task.launchPath = "/usr/bin/killall"
+        task.arguments = ["nezha-agent"]
+        try? task.run()
+        
+        let tmpDir = (NSTemporaryDirectory() as NSString).appendingPathComponent("nezha-agent")
+        try? FileManager.default.removeItem(atPath: tmpDir)
     }
     
     public func isRunning() -> Bool {
