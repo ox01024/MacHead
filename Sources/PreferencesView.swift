@@ -114,7 +114,7 @@ struct SettingsRow<Control: View>: View {
 struct PreferencesView: View {
     @Environment(\.colorScheme) var colorScheme
     
-    @AppStorage("AutoEnableHeadlessOnLaunch") private var autoEnableOnLaunch = true
+    @AppStorage("AutoEnableHeadlessOnLaunch") private var autoEnableOnLaunch = false
     @AppStorage("PreventIdleSleep") private var preventIdleSleep = true
     @AppStorage("KeepRunningOnLidClose") private var keepRunningOnLidClose = false
     @AppStorage("AutoExitHeadlessOnDisconnect") private var autoExitOnDisconnect = true

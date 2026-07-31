@@ -3,6 +3,7 @@ import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
+    private var popover: NSPopover?
     private let controller = HeadlessModeController.shared
     private var preferencesWindow: NSWindow?
     
@@ -14,7 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         UserDefaults.standard.register(defaults: [
             "PreventIdleSleep": true,
             "KeepRunningOnLidClose": false,
-            "AutoEnableHeadlessOnLaunch": true,
+            "AutoEnableHeadlessOnLaunch": false,
             "DisableTrackpadWhenExternalMouseConnected": false,
             "DisableKeyboardInHeadless": false,
             "DisableKeyboardWhenExternalKeyboardConnected": false,
@@ -71,8 +72,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Create menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        statusItem.button?.target = self
+        statusItem.button?.action = #selector(statusItemClicked(_:))
+        statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         updateIcon()
-        updateMenu()
         
         // Observe headless mode state changes (such as auto-restoration)
         NotificationCenter.default.addObserver(
@@ -108,7 +111,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.controller.enableHeadlessMode()
                 self.updateIcon()
-                self.updateMenu()
             }
         }
         
@@ -204,22 +206,60 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    private func updateMenu() {
+    @objc private func statusItemClicked(_ sender: NSStatusBarButton) {
+        guard let event = NSApp.currentEvent else { return }
+        if event.type == .rightMouseUp {
+            showContextMenu()
+        } else {
+            togglePopover(sender)
+        }
+    }
+    
+    @objc private func togglePopover(_ sender: NSStatusBarButton) {
+        if let popover = popover, popover.isShown {
+            popover.performClose(sender)
+        } else {
+            showPopover(sender)
+        }
+    }
+    
+    private func showPopover(_ sender: NSStatusBarButton) {
+        if popover == nil {
+            let popoverInstance = NSPopover()
+            popoverInstance.behavior = .transient
+            popoverInstance.animates = true
+            self.popover = popoverInstance
+        }
+        
+        let popoverView = StatusPopoverView(
+            onOpenPreferences: { [weak self] in
+                self?.popover?.performClose(nil)
+                self?.openPreferences()
+            },
+            onQuitApp: { [weak self] in
+                self?.popover?.performClose(nil)
+                self?.quitApp()
+            }
+        )
+        
+        popover?.contentViewController = NSHostingController(rootView: popoverView)
+        popover?.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
+        popover?.contentViewController?.view.window?.makeKey()
+    }
+    
+    private func showContextMenu() {
         let menu = NSMenu()
         
-        // Mode toggle item
         let toggleItem = NSMenuItem(
-            title: "MacBook Headless 模式",
+            title: controller.isHeadlessModeEnabled ? "恢复内置屏显示" : "开启 Headless 模式",
             action: #selector(toggleHeadlessModeMenuAction),
             keyEquivalent: "h"
         )
         toggleItem.target = self
-        toggleItem.state = controller.isHeadlessModeEnabled ? .on : .off
         menu.addItem(toggleItem)
         
         menu.addItem(NSMenuItem.separator())
         
-        // Preferences item
         let preferencesItem = NSMenuItem(
             title: "偏好设置...",
             action: #selector(openPreferences),
@@ -230,16 +270,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem.separator())
         
-        // Quit item
         let quitItem = NSMenuItem(
             title: "退出 MacHead",
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
         quitItem.target = self
-        menu.addItem(quitItem)
-        
         statusItem.menu = menu
+        statusItem.button?.performClick(nil)
+        statusItem.menu = nil
     }
     
     @objc private func toggleHeadlessModeMenuAction() {
@@ -278,7 +317,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc private func handleStateChanged() {
         updateIcon()
-        updateMenu()
         InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
     }
     
