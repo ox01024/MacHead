@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import IOKit.ps
 import IOKit
 
@@ -8,18 +9,18 @@ private func batteryChangedCallback(context: UnsafeMutableRawPointer?) {
     manager.handlePowerSourceChanged()
 }
 
-final class BatteryManager {
+final class BatteryManager: ObservableObject {
     static let shared = BatteryManager()
     
     private var runLoopSource: CFRunLoopSource?
     
-    private(set) var currentCapacity: Int = 100
-    private(set) var isCharging: Bool = false
-    private(set) var powerState: String = "AC Power"
-    private(set) var isBatteryProtectionActive: Bool = false
-    private(set) var batteryHealth: Double = 100.0
-    private(set) var cycleCount: Int = 0
-    private(set) var batteryTemperature: Double = 0.0
+    @Published private(set) var currentCapacity: Int = 100
+    @Published private(set) var isCharging: Bool = false
+    @Published private(set) var powerState: String = "AC Power"
+    @Published private(set) var isBatteryProtectionActive: Bool = false
+    @Published private(set) var batteryHealth: Double = 100.0
+    @Published private(set) var cycleCount: Int = 0
+    @Published private(set) var batteryTemperature: Double = 0.0
     
     private var lastPowerState: String?
     private var wasLowBattery: Bool = false

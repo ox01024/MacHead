@@ -27,21 +27,8 @@ final class InputDeviceManager {
         let newManager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
         self.manager = newManager
         
-        let matchingTypes: [[String: Any]] = [
-            [
-                kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-                kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse
-            ],
-            [
-                kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-                kIOHIDDeviceUsageKey: kHIDUsage_GD_Pointer
-            ],
-            [
-                kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-                kIOHIDDeviceUsageKey: kHIDUsage_GD_Keyboard
-            ]
-        ]
-        IOHIDManagerSetDeviceMatchingMultiple(newManager, matchingTypes as CFArray)
+        // 匹配所有输入设备（包括 Apple Silicon 内置键盘与 Apple Top Case SPI 设备）
+        IOHIDManagerSetDeviceMatching(newManager, nil)
         
         let context = Unmanaged.passUnretained(self).toOpaque()
         
@@ -63,14 +50,14 @@ final class InputDeviceManager {
         if result != kIOReturnSuccess {
             NSLog("MacHead: IOHIDManagerOpen 失败: %d", result)
         } else {
-            NSLog("MacHead: IOHIDManager 启动并成功开始监听输入设备变化")
+            NSLog("MacHead: IOHIDManager 全量监听启动成功")
         }
     }
     
     private func isDeviceBuiltIn(_ device: IOHIDDevice) -> Bool {
         let transport = IOHIDDeviceGetProperty(device, kIOHIDTransportKey as CFString) as? String ?? ""
         let name = IOHIDDeviceGetProperty(device, kIOHIDProductKey as CFString) as? String ?? ""
-        return transport == "SPI" || name.contains("Internal")
+        return transport == "SPI" || name.contains("Internal") || name.contains("Top Case") || name.contains("Apple")
     }
     
     private func deviceConnected(_ device: IOHIDDevice) {
@@ -79,9 +66,14 @@ final class InputDeviceManager {
         
         let primaryUsagePage = IOHIDDeviceGetProperty(device, kIOHIDPrimaryUsagePageKey as CFString) as? Int ?? 0
         let primaryUsage = IOHIDDeviceGetProperty(device, kIOHIDPrimaryUsageKey as CFString) as? Int ?? 0
-        let isKeyboard = (primaryUsagePage == kHIDPage_GenericDesktop && primaryUsage == kHIDUsage_GD_Keyboard)
         
-        NSLog("MacHead: 检测到输入设备连接: %@ (内置: %@, 键盘: %@)", name, String(isBuiltIn), String(isKeyboard))
+        let isKeyboard = (primaryUsagePage == kHIDPage_GenericDesktop && primaryUsage == kHIDUsage_GD_Keyboard) ||
+                         (primaryUsagePage == kHIDPage_KeyboardOrKeypad) ||
+                         (primaryUsagePage == 7) ||
+                         name.localizedCaseInsensitiveContains("Keyboard") ||
+                         name.localizedCaseInsensitiveContains("Top Case")
+        
+        NSLog("MacHead: 检测到输入设备连接: %@ (内置: %@, 键盘: %@, Page: %d, Usage: %d)", name, String(isBuiltIn), String(isKeyboard), primaryUsagePage, primaryUsage)
         
         if isKeyboard {
             if isBuiltIn {
