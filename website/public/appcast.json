@@ -1,7 +1,7 @@
 {
-  "version": "0.1.16",
-  "build": 20,
-  "pubDate": "2026-07-28",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.16-macos-universal.dmg",
-  "releaseNotes": "1. 增加哪吒监控实时连接状态指示器与智能错误诊断； 2. 修复哪吒配置弹窗尺寸偏小被遮挡的问题； 3. 优化配置修改体验，防止编辑输入时频繁断连重启。"
+  "version": "0.1.17",
+  "build": 21,
+  "pubDate": "2026-07-31",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.17-macos-universal.dmg",
+  "releaseNotes": "1. 新增全新菜单栏状态控制面板，支持一键无头模式切换与硬件状态实时卡片； 2. 优化非无头 MacBook 用户的初始默认预设，避免首次启动误切； 3. 优化浮窗自适应动画与平滑交互。"
 }
