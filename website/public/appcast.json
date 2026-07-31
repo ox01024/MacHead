@@ -1,7 +1,7 @@
 {
-  "version": "0.1.17",
-  "build": 21,
+  "version": "0.1.18",
+  "build": 22,
   "pubDate": "2026-07-31",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.17-macos-universal.dmg",
-  "releaseNotes": "1. 新增全新菜单栏状态控制面板，支持一键无头模式切换与硬件状态实时卡片； 2. 优化非无头 MacBook 用户的初始默认预设，避免首次启动误切； 3. 优化浮窗自适应动画与平滑交互。"
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.18-macos-universal.dmg",
+  "releaseNotes": "1. 修复哪吒监控 Agent 自动更新锁导致的死锁无法建立连接问题； 2. 增加启动前的临时锁目录自动清理逻辑。"
 }
