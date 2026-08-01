@@ -192,6 +192,7 @@ struct PreferencesView: View {
     @State private var showOverheatConfig = false
     @State private var showNotificationsConfig = false
     @State private var showNezhaConfig = false
+    @State private var isNezhaConfigModified = false
     @State private var showServerStatusConfig = false
     @State private var showKumaConfig = false
     @State private var showBatteryConfig = false
@@ -582,8 +583,9 @@ struct PreferencesView: View {
                                         .labelsHidden()
                                         
                                         Button("设定...") {
-                                            self.showNezhaConfig = true
-                                        }
+                                             self.isNezhaConfigModified = false
+                                             self.showNezhaConfig = true
+                                         }
                                     }
                                 }
                                 
@@ -1011,6 +1013,7 @@ struct PreferencesView: View {
                             .frame(width: 220)
                             .onChange(of: nezhaServer) { newValue in
                                 UserDefaults.standard.set(newValue, forKey: "nezhaServer")
+                                self.isNezhaConfigModified = true
                             }
                     }
                     
@@ -1023,6 +1026,7 @@ struct PreferencesView: View {
                             .frame(width: 220)
                             .onChange(of: nezhaSecret) { newValue in
                                 UserDefaults.standard.set(newValue, forKey: "nezhaSecret")
+                                self.isNezhaConfigModified = true
                             }
                     }
                     
@@ -1034,6 +1038,7 @@ struct PreferencesView: View {
                             .toggleStyle(.switch)
                             .onChange(of: nezhaTls) { newValue in
                                 UserDefaults.standard.set(newValue, forKey: "nezhaTls")
+                                self.isNezhaConfigModified = true
                             }
                     }
                 }
@@ -1044,7 +1049,10 @@ struct PreferencesView: View {
                 HStack {
                     Spacer()
                     Button("完成") {
-                        IntegrationManager.shared.reloadServices()
+                        if self.isNezhaConfigModified {
+                            self.isNezhaConfigModified = false
+                            IntegrationManager.shared.reloadServices()
+                        }
                         self.showNezhaConfig = false
                     }
                     .keyboardShortcut(.defaultAction)
