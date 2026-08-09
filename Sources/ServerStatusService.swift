@@ -84,15 +84,16 @@ public final class ServerStatusService {
         guard isServiceRunning else { return }
         
         print("ServerStatusService: Stopping serverstatus-client...")
-        process?.terminationHandler = nil
+        let procToStop = self.process
+        self.process = nil
+        self.isServiceRunning = false
         
-        if let proc = process, proc.isRunning {
-            proc.terminate()
-            proc.waitUntilExit()
+        DispatchQueue.global(qos: .userInitiated).async {
+            procToStop?.terminationHandler = nil
+            if let proc = procToStop, proc.isRunning {
+                proc.terminate()
+            }
         }
-        
-        process = nil
-        isServiceRunning = false
     }
     
     public func isRunning() -> Bool {

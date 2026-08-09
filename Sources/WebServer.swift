@@ -454,7 +454,9 @@ final class WebServer {
           "batteryCycleCount": \(BatteryManager.shared.cycleCount),
           "batteryTemp": \(BatteryManager.shared.batteryTemperature),
           "rxSpeed": \(rxSpeed),
-          "txSpeed": \(txSpeed)
+          "txSpeed": \(txSpeed),
+          "frpEnabled": \(UserDefaults.standard.bool(forKey: "frpEnabled")),
+          "frpRunning": \(FrpService.shared.isRunning())
         }
         """
     }

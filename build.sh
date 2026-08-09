@@ -89,6 +89,10 @@ if [ -f "Resources/serverstatus-client" ]; then
   cp Resources/serverstatus-client "${APP_DIR}/Contents/Resources/serverstatus-client"
   chmod +x "${APP_DIR}/Contents/Resources/serverstatus-client"
 fi
+if [ -f "Resources/frpc" ]; then
+  cp Resources/frpc "${APP_DIR}/Contents/Resources/frpc"
+  chmod +x "${APP_DIR}/Contents/Resources/frpc"
+fi
 
 # Apply ad-hoc signature (required for ARM64 macOS binaries and icon rendering)
 echo "Ad-hoc signing the application bundle..."

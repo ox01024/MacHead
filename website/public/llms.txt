@@ -10,7 +10,7 @@
 - **Plug-and-Play Adaptability**: Seamlessly detects external display connections, auto-activating the headless screen cutoff when unplugged and restoring screen power immediately when reconnected.
 
 ## Installation & Getting Started
-1. **Download**: Obtain the dual-architecture DMG installer from `https://headlessmac.com/`.
+1. **Download**: Obtain the dual-architecture DMG installer from `https://headlessmac.com/` or via `https://releases.headlessmac.com/latest.dmg`.
 2. **Move to Applications**: Drag the `MacHead.app` to your `/Applications` directory.
 3. **Run Application**: Double-click to start. A cat status bar icon will appear in the macOS menu bar.
 4. **Permissions**: Grant Accessibility permissions when prompted if you wish to enable the built-in keyboard and trackpad lock feature.
@@ -24,12 +24,12 @@ MacHead includes a command line interface to manage states programmatically:
 
 ## Key Technical Facts
 - **Architecture**: Universal binary supporting both Apple Silicon (M1/M2/M3/M4) and Intel Macs.
-- **Minimum OS**: macOS Monterey (12.0) and later.
+- **Minimum OS**: macOS Ventura (13.0) and later.
 - **APIs Used**: Apple SkyLight API, IOKit Power Management.
 - **Privacy & Telemetry**: 100% offline. Zero telemetry, tracking, or network communication. The remote web console only runs on the local network (LAN) and does not call home.
 
 ## Links & Community
 - **Official Website**: [https://headlessmac.com/](https://headlessmac.com/)
-- **Download dmg**: [Download Link](https://releases.headlessmac.com/MacHead-v0.1.14-macos-universal.dmg)
+- **Download dmg**: [Download Link](https://releases.headlessmac.com/latest.dmg)
 - **Feedback & Issues**: [GitHub Issues](https://github.com/ox01024/MacHead-Feedback/issues)
 - **Community Discussions**: [GitHub Discussions](https://github.com/ox01024/MacHead-Feedback/discussions)

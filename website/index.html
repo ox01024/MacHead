@@ -1,38 +1,42 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- SEO Meta Tags -->
-    <title>MacHead - MacBook 合盖无头服务器管理工具 | macOS Headless Mode</title>
-    <meta name="description" content="MacHead 是一款轻量、零依赖的 macOS 原生工具：合盖后安全熄灭内置屏幕、自动静音麦克风、防休眠并守护电池，让闲置 MacBook 变身冷静省电的 Headless 无头服务器。支持 Apple Silicon 与 Intel，免费下载。" />
-    <meta name="keywords" content="MacBook, Headless, Clamshell, Server, macOS, SkyLight API, Open Source, 软路由, 合盖不休眠, 服务器" />
+    <title>MacHead - Turn MacBook into Headless Server | 碎屏 MacBook 变身无头服务器</title>
+    <meta name="description" content="MacHead is a free, lightweight macOS tool that turns any MacBook (even with a broken screen) into a headless server. Disable internal display, auto-mute mic, prevent sleep & protect battery. 免费将闲置/碎屏 MacBook 变身 Headless 无头服务器，支持 Apple Silicon 与 Intel。" />
+    <meta name="keywords" content="MacHead, macbook headless mode, macbook headless server, broken screen macbook server, disable macbook internal display, macbook clamshell server, turn macbook into server, macbook 无头模式, macbook 碎屏改造服务器, 合盖不休眠, macOS headless, homelab macbook, SkyLight API, 软路由" />
     <link rel="canonical" href="https://headlessmac.com/" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="theme-color" content="#fbf9fa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14120b" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="alternate" hreflang="zh-CN" href="https://headlessmac.com/" />
+    <link rel="alternate" hreflang="en" href="https://headlessmac.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://headlessmac.com/" />
     <script src="/telemetry.js" defer></script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:locale" content="zh_CN" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="MacHead - MacBook 合盖无头服务器管理工具 | macOS Headless Mode" />
-    <meta property="og:description" content="MacHead 是一款轻量、零依赖的 macOS 原生工具：合盖后安全熄灭内置屏幕、自动静音麦克风、防休眠并守护电池，让闲置 MacBook 变身冷静省电的 Headless 无头服务器。支持 Apple Silicon 与 Intel，免费下载。" />
+    <meta property="og:title" content="MacHead - Turn MacBook into Headless Server" />
+    <meta property="og:description" content="Free macOS tool to turn any MacBook (broken screen OK) into a silent headless server. Disable display, auto-mute mic, prevent sleep & guard battery. Apple Silicon + Intel." />
     <meta property="og:url" content="https://headlessmac.com/" />
     <meta property="og:site_name" content="MacHead" />
     <meta property="og:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
     <meta property="og:image:width" content="1360" />
     <meta property="og:image:height" content="1224" />
     <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:alt" content="MacHead macOS 应用偏好设置界面截图" />
+    <meta property="og:image:alt" content="MacHead macOS app preferences UI showing headless mode controls" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MacHead - MacBook 合盖无头服务器管理工具 | macOS Headless Mode" />
-    <meta name="twitter:description" content="MacHead 是一款轻量、零依赖的 macOS 原生工具：合盖后安全熄灭内置屏幕、自动静音麦克风、防休眠并守护电池，让闲置 MacBook 变身冷静省电的 Headless 无头服务器。支持 Apple Silicon 与 Intel，免费下载。" />
+    <meta name="twitter:title" content="MacHead - Turn Any MacBook into a Headless Server" />
+    <meta name="twitter:description" content="Broken MacBook screen? Turn it into a silent, cool headless server with MacHead. Free, open-source, zero dependencies. Apple Silicon + Intel." />
     <meta name="twitter:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
 
     <!-- Structured Data (JSON-LD) -->
@@ -41,22 +45,27 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "MacHead",
-        "operatingSystem": "macOS",
+        "alternateName": ["MacHead Headless Server Manager", "MacBook 无头服务器管理工具"],
+        "operatingSystem": "macOS 13.0+",
         "applicationCategory": "UtilityApplication",
         "offers": {
           "@type": "Offer",
           "price": "0.00",
-          "priceCurrency": "USD"
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
         },
-        "description": "MacHead 是一款轻量、零依赖的 macOS 原生工具：合盖后安全熄灭内置屏幕、自动静音麦克风、防休眠并守护电池，让闲置 MacBook 变身冷静省电的 Headless 无头服务器。",
-        "inLanguage": "zh-CN",
-        "downloadUrl": "https://releases.headlessmac.com/MacHead-v0.1.14-macos-universal.dmg",
+        "description": "Free, lightweight macOS tool that transforms any MacBook into a headless server. Disables internal display via SkyLight API, auto-mutes microphone, prevents sleep, and protects battery health.",
+        "inLanguage": ["zh-CN", "en"],
+        "downloadUrl": "https://releases.headlessmac.com/latest.dmg",
+        "installUrl": "https://headlessmac.com/",
         "screenshot": "https://headlessmac.com/machead_hero_v0.1.14.png",
-        "softwareVersion": "v0.1.14",
+        "softwareVersion": "0.1.18",
+        "processorRequirements": "Apple Silicon (M1/M2/M3/M4) or Intel x86_64",
         "publisher": {
           "@type": "Organization",
           "name": "MacHead Project",
-          "url": "https://headlessmac.com"
+          "url": "https://headlessmac.com",
+          "logo": "https://headlessmac.com/logo.png"
         }
       }
     </script>
@@ -65,8 +74,57 @@
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "MacHead",
+        "alternateName": "HeadlessMac",
         "url": "https://headlessmac.com/",
-        "inLanguage": "zh-CN"
+        "inLanguage": ["zh-CN", "en"]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Can I use a MacBook with a broken screen as a server?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! MacHead lets you turn any MacBook — even one with a cracked or broken screen — into a headless server. It logically disables the internal display using macOS SkyLight API, so you can close the lid and run it as a silent, cool server without any external monitor."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does MacHead disable the MacBook's internal display?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "MacHead uses Apple's native SkyLight framework private API to logically cut off the internal display signal at the system level. This is not simply turning down brightness — it completely stops the display from receiving power, preventing heat buildup under the closed lid."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does MacHead work on both Apple Silicon and Intel Macs?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, MacHead ships as a Universal binary that natively supports both Apple Silicon (M1, M2, M3, M4) and Intel-based Macs running macOS Monterey (12.0) or later."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is MacHead free and open source?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, MacHead is 100% free with an MIT license. It runs entirely offline with zero telemetry or tracking. The web dashboard only operates on your local network (LAN)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "碎屏的 MacBook 还能当服务器用吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "可以！MacHead 可以将任何 MacBook（包括碎屏的）变成无头服务器。它通过 macOS SkyLight API 在逻辑层彻底关闭内置屏幕，合盖即可安静、低温运行，无需外接显示器。"
+            }
+          }
+        ]
       }
     </script>
     
@@ -91,6 +149,7 @@
           <a itemprop="url" href="/#features" class="nav-link"><span itemprop="name">功能特性</span></a>
           <a itemprop="url" href="/#playground" class="nav-link"><span itemprop="name">交互演练</span></a>
           <a itemprop="url" href="/#install" class="nav-link"><span itemprop="name">安装指南</span></a>
+          <a itemprop="url" href="/#faq" class="nav-link"><span itemprop="name">FAQ</span></a>
           <a itemprop="url" href="https://github.com/ox01024/MacHead-Feedback/issues" target="_blank" rel="noopener" class="nav-link github-btn">
             <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
@@ -116,7 +175,7 @@
           <div class="hero-content">
             <div class="hero-badge animate-fade-in">
               <span class="badge-dot"></span>
-              <span class="badge-text">v0.1.16 Universal 支持 Apple Silicon / Intel</span>
+              <span class="badge-text">v0.1.18 Universal 支持 Apple Silicon / Intel</span>
             </div>
             <h1 class="hero-title animate-slide-up">
               MacBook 合盖服务器<br/>
@@ -258,7 +317,7 @@
               </div>
               <div class="bento-content">
                 <h3 class="bento-title">无缝接入自建服务器监控集群</h3>
-                <p class="bento-desc">原生集成了哪吒监控 (Nezha) 与 ServerStatus 客户端。只需填入面板地址，即可将合盖运行的 MacBook 接入自建云端看板，实时同步 CPU、内存与网速曲线，搭配直观的状态指示与智能诊断，让设备在线率一目了然。</p>
+                <p class="bento-desc">原生集成了 FRP 内网穿透 (frpc)、哪吒监控 (Nezha) 与 ServerStatus 客户端。只需填入面板地址，即可将合盖运行的 MacBook 接入自建云端看板，实时同步 CPU、内存与网速曲线，搭配直观的状态指示与智能诊断，让设备在线率一目了然。</p>
               </div>
             </div>
           </div>
@@ -679,6 +738,42 @@
       </section>
     </main>
 
+    <!-- FAQ Section for SEO (bilingual crawlable content) -->
+    <section class="faq-section scroll-effect" id="faq">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">常见问题 FAQ</h2>
+          <p class="section-subtitle">Frequently Asked Questions about MacHead</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary class="faq-question">Can I use a MacBook with a broken screen as a server?</summary>
+            <p class="faq-answer">Yes! MacHead lets you turn any MacBook — even one with a cracked or broken screen — into a headless server. It logically disables the internal display using macOS SkyLight API, so you can close the lid and run it as a silent, cool server without any external monitor. Perfect for homelab setups, home automation, or repurposing old MacBooks.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">碎屏的 MacBook 还能当服务器用吗？</summary>
+            <p class="faq-answer">可以！MacHead 可以将任何 MacBook（包括碎屏的）变成无头服务器。它通过 macOS SkyLight API 在逻辑层彻底关闭内置屏幕，合盖即可安静、低温运行，无需外接显示器。非常适合家庭实验室、智能家居或旧 MacBook 再利用。</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">How does MacHead disable the MacBook's internal display?</summary>
+            <p class="faq-answer">MacHead uses Apple's native SkyLight framework private API to logically cut off the internal display signal at the system level. This is not simply turning down brightness — it completely stops the display from receiving power, preventing heat buildup under the closed lid. This approach is safer and more thorough than clamshell mode workarounds.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">Does MacHead work on Apple Silicon and Intel Macs?</summary>
+            <p class="faq-answer">Yes, MacHead ships as a Universal binary that natively supports both Apple Silicon (M1, M2, M3, M4) and Intel-based Macs running macOS Monterey (12.0) or later. Download once, run on any Mac.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">Is MacHead free? Does it collect any data?</summary>
+            <p class="faq-answer">MacHead is 100% free with an MIT open-source license. It runs entirely offline with zero telemetry or tracking. The built-in web dashboard only operates on your local network (LAN) and never phones home.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">MacHead 和合盖模式 (Clamshell Mode) 有什么区别？</summary>
+            <p class="faq-answer">macOS 原生的合盖模式需要外接显示器才能工作，且内置屏幕仍然在通电发热。MacHead 的 Headless 模式从逻辑层彻底切断内屏信号，无需外接显示器即可合盖运行，同时自动静音麦克风、防止休眠、屏蔽内置键盘和触控板误触，是真正为服务器场景设计的解决方案。</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
       <div class="container footer-container">
@@ -687,7 +782,7 @@
             <img src="/logo.png" alt="MacHead Logo" class="footer-logo-img" width="20" height="20" loading="lazy" />
             <span>MacHead</span>
           </div>
-          <p class="footer-tagline">MacBook 合盖服务器无头模式管理器</p>
+          <p class="footer-tagline">MacBook Headless Server Manager | 合盖无头模式管理器</p>
         </div>
         <div class="footer-right">
           <div class="footer-links-group">

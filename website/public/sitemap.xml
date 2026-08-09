@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://headlessmac.com/</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://headlessmac.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://headlessmac.com/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://headlessmac.com/" />
+    <image:image>
+      <image:loc>https://headlessmac.com/machead_hero_v0.1.14.png</image:loc>
+      <image:title>MacHead macOS Preferences UI</image:title>
+      <image:caption>MacHead headless server manager preferences window showing display controls, battery guard, and input device settings</image:caption>
+    </image:image>
+    <image:image>
+      <image:loc>https://headlessmac.com/machead_web_dash_v0.1.14.png</image:loc>
+      <image:title>MacHead Web Dashboard</image:title>
+      <image:caption>MacHead LAN remote control dashboard with real-time CPU, RAM, GPU monitoring and system controls</image:caption>
+    </image:image>
   </url>
 </urlset>

@@ -176,6 +176,41 @@ struct PreferencesView: View {
     @State private var kumaPushUrl = UserDefaults.standard.string(forKey: "kumaPushUrl") ?? ""
     @State private var kumaInterval = UserDefaults.standard.double(forKey: "kumaInterval") == 0 ? 60.0 : UserDefaults.standard.double(forKey: "kumaInterval")
 
+    @State private var frpEnabled = UserDefaults.standard.bool(forKey: "frpEnabled")
+    @State private var frpMode = UserDefaults.standard.string(forKey: "frpMode") ?? "quick"
+    @State private var frpServerAddr = UserDefaults.standard.string(forKey: "frpServerAddr") ?? ""
+    @State private var frpServerPort = UserDefaults.standard.string(forKey: "frpServerPort") ?? "7000"
+    @State private var frpToken = UserDefaults.standard.string(forKey: "frpToken") ?? ""
+    @State private var frpProxyName = UserDefaults.standard.string(forKey: "frpProxyName") ?? "machead-ssh"
+    @State private var frpProxyType = UserDefaults.standard.string(forKey: "frpProxyType") ?? "tcp"
+    @State private var frpLocalIP = UserDefaults.standard.string(forKey: "frpLocalIP") ?? "127.0.0.1"
+    @State private var frpLocalPort = UserDefaults.standard.string(forKey: "frpLocalPort") ?? "22"
+    @State private var frpRemotePort = UserDefaults.standard.string(forKey: "frpRemotePort") ?? "6022"
+    @State private var frpCustomDomains = UserDefaults.standard.string(forKey: "frpCustomDomains") ?? ""
+    @State private var frpSubdomain = UserDefaults.standard.string(forKey: "frpSubdomain") ?? ""
+    @State private var frpCustomConfig = UserDefaults.standard.string(forKey: "frpCustomConfig") ?? ""
+    @State private var frpStatus: FrpStatus = FrpService.shared.currentStatus
+    @State private var frpRules: [FrpProxyRule] = FrpService.loadRules()
+    @State private var frpBinaryPath = UserDefaults.standard.string(forKey: "frpBinaryPath") ?? ""
+
+    private var frpStatusColor: Color {
+        switch frpStatus {
+        case .connected: return .green
+        case .connecting: return .orange
+        case .error: return .red
+        case .stopped: return .gray
+        }
+    }
+
+    private var frpStatusBadgeText: String {
+        switch frpStatus {
+        case .connected: return "已连接"
+        case .connecting: return "连接中..."
+        case .error: return "连接失败"
+        case .stopped: return "已停用"
+        }
+    }
+
     @State private var notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
     @State private var barkEnabled = UserDefaults.standard.bool(forKey: "barkEnabled")
     @State private var barkKey = UserDefaults.standard.string(forKey: "barkKey") ?? ""
@@ -196,6 +231,8 @@ struct PreferencesView: View {
     @State private var showServerStatusConfig = false
     @State private var showKumaConfig = false
     @State private var showBatteryConfig = false
+    @State private var showFrpConfig = false
+    @State private var isFrpConfigModified = false
 
     private var detailBackgroundColor: Color {
         colorScheme == .dark ? Color(red: 0.11, green: 0.11, blue: 0.12) : Color(red: 0.957, green: 0.957, blue: 0.965)
@@ -615,6 +652,48 @@ struct PreferencesView: View {
                                 }
                             }
                             
+                            SettingsCard(title: "FRP 内网穿透服务") {
+                                SettingsRow("启用 FRP 客户端 (frpc)") {
+                                    HStack(spacing: 10) {
+                                        if frpEnabled {
+                                            HStack(spacing: 4) {
+                                                Circle()
+                                                    .fill(frpStatusColor)
+                                                    .frame(width: 6, height: 6)
+                                                Text(frpStatusBadgeText)
+                                                    .font(.caption2)
+                                                    .fontWeight(.medium)
+                                                    .foregroundColor(frpStatusColor)
+                                            }
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 3)
+                                            .background(frpStatusColor.opacity(0.12))
+                                            .cornerRadius(5)
+                                        }
+
+                                        Toggle("", isOn: Binding(
+                                            get: { self.frpEnabled },
+                                            set: { newValue in
+                                                self.frpEnabled = newValue
+                                                UserDefaults.standard.set(newValue, forKey: "frpEnabled")
+                                                if newValue {
+                                                    FrpService.shared.start()
+                                                } else {
+                                                    FrpService.shared.stop()
+                                                }
+                                            }
+                                        ))
+                                        .toggleStyle(.switch)
+                                        .labelsHidden()
+                                        
+                                        Button("设定...") {
+                                             self.isFrpConfigModified = false
+                                             self.showFrpConfig = true
+                                         }
+                                    }
+                                }
+                            }
+                            
                             SettingsCard(title: "Uptime Kuma 心跳打卡") {
                                 SettingsRow("启用 Uptime Kuma 推送") {
                                     HStack(spacing: 12) {
@@ -971,9 +1050,33 @@ struct PreferencesView: View {
                     Text("哪吒监控配置")
                         .font(.headline)
                         .fontWeight(.bold)
+                    
+                    Toggle("启用服务", isOn: Binding(
+                        get: { self.nezhaEnabled },
+                        set: { newValue in
+                            self.nezhaEnabled = newValue
+                            UserDefaults.standard.set(newValue, forKey: "nezhaEnabled")
+                            if newValue {
+                                NezhaAgentService.shared.start()
+                            } else {
+                                NezhaAgentService.shared.stop()
+                            }
+                        }
+                    ))
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                    .padding(.leading, 8)
+                    
                     Spacer()
-                    Button("测试重新连接") {
-                        IntegrationManager.shared.reloadServices()
+                    
+                    Button("测试连接并启用") {
+                        self.nezhaEnabled = true
+                        UserDefaults.standard.set(true, forKey: "nezhaEnabled")
+                        NezhaAgentService.shared.stop()
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            Thread.sleep(forTimeInterval: 0.2)
+                            NezhaAgentService.shared.start()
+                        }
                     }
                     .controlSize(.small)
                 }
@@ -1135,6 +1238,378 @@ struct PreferencesView: View {
         }
         
         // ------------------ Uptime Kuma 配置弹窗 ------------------
+        // ------------------ FRP 内网穿透配置弹窗 ------------------
+        // ------------------ FRP 内网穿透配置弹窗 ------------------
+        .sheet(isPresented: $showFrpConfig) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("FRP 内网穿透配置 (frpc)")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    
+                    Toggle("启用服务", isOn: Binding(
+                        get: { self.frpEnabled },
+                        set: { newValue in
+                            self.frpEnabled = newValue
+                            UserDefaults.standard.set(newValue, forKey: "frpEnabled")
+                            if newValue {
+                                FrpService.shared.start()
+                            } else {
+                                FrpService.shared.stop()
+                            }
+                        }
+                    ))
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                    .padding(.leading, 8)
+                    
+                    Spacer()
+                    
+                    Button("测试连接并启用") {
+                        self.frpEnabled = true
+                        UserDefaults.standard.set(true, forKey: "frpEnabled")
+                        FrpService.saveRules(self.frpRules)
+                        FrpService.shared.stop()
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            Thread.sleep(forTimeInterval: 0.2)
+                            FrpService.shared.start()
+                        }
+                    }
+                    .controlSize(.small)
+                }
+                
+                // 实时诊断卡片
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(frpStatusColor)
+                            .frame(width: 8, height: 8)
+                        Text("当前状态:")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                        Text(frpStatusBadgeText)
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(frpStatusColor)
+                    }
+                    
+                    Text(frpStatus.displayText)
+                        .font(.caption2)
+                        .foregroundColor(frpStatusColor)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(frpStatusColor.opacity(0.1))
+                .cornerRadius(8)
+
+                Picker("配置模式", selection: Binding(
+                    get: { self.frpMode },
+                    set: { newValue in
+                        self.frpMode = newValue
+                        UserDefaults.standard.set(newValue, forKey: "frpMode")
+                        self.isFrpConfigModified = true
+                    }
+                )) {
+                    Text("快捷模式").tag("quick")
+                    Text("自定义配置").tag("custom")
+                }
+                .pickerStyle(.segmented)
+
+                if frpMode == "quick" {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 14) {
+                            // 服务端信息卡片
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("FRP 服务端基本信息")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack {
+                                    Text("服务器地址:")
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 90, alignment: .leading)
+                                    TextField("x.x.x.x 或 frp.domain.com", text: $frpServerAddr)
+                                        .textFieldStyle(.roundedBorder)
+                                        .onChange(of: frpServerAddr) { newValue in
+                                            UserDefaults.standard.set(newValue, forKey: "frpServerAddr")
+                                            self.isFrpConfigModified = true
+                                        }
+                                }
+                                
+                                HStack {
+                                    Text("服务器端口:")
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 90, alignment: .leading)
+                                    TextField("7000", text: $frpServerPort)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(width: 100)
+                                        .onChange(of: frpServerPort) { newValue in
+                                            UserDefaults.standard.set(newValue, forKey: "frpServerPort")
+                                            self.isFrpConfigModified = true
+                                        }
+                                }
+                                
+                                HStack {
+                                    Text("Auth Token:")
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 90, alignment: .leading)
+                                    SecureField("可选，无 Token 可留空", text: $frpToken)
+                                        .textFieldStyle(.roundedBorder)
+                                        .onChange(of: frpToken) { newValue in
+                                            UserDefaults.standard.set(newValue, forKey: "frpToken")
+                                            self.isFrpConfigModified = true
+                                        }
+                                }
+                                
+                                HStack {
+                                    Text("frpc 路径:")
+                                        .foregroundColor(.secondary)
+                                        .frame(width: 90, alignment: .leading)
+                                    TextField("自动使用内置 frpc 或系统路径", text: $frpBinaryPath)
+                                        .textFieldStyle(.roundedBorder)
+                                        .onChange(of: frpBinaryPath) { newValue in
+                                            UserDefaults.standard.set(newValue, forKey: "frpBinaryPath")
+                                            self.isFrpConfigModified = true
+                                        }
+                                    Button("浏览...") {
+                                        let panel = NSOpenPanel()
+                                        panel.canChooseFiles = true
+                                        panel.canChooseDirectories = false
+                                        panel.allowsMultipleSelection = false
+                                        panel.message = "选择 frpc 可执行文件"
+                                        panel.prompt = "选择"
+                                        if panel.runModal() == .OK, let url = panel.url {
+                                            self.frpBinaryPath = url.path
+                                            UserDefaults.standard.set(url.path, forKey: "frpBinaryPath")
+                                            self.isFrpConfigModified = true
+                                        }
+                                    }
+                                    .controlSize(.small)
+                                }
+                            }
+                            .padding(12)
+                            .background(Color.primary.opacity(0.04))
+                            .cornerRadius(8)
+                            
+                            // 代理隧道规则列表栏
+                            HStack {
+                                Text("代理隧道映射规则 (\(frpRules.count) 条)")
+                                    .font(.caption)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.secondary)
+                                
+                                Spacer()
+                                
+                                Button(action: {
+                                    let newRule = FrpProxyRule(
+                                        name: "proxy-\(frpRules.count + 1)",
+                                        type: "tcp",
+                                        localIP: "127.0.0.1",
+                                        localPort: "8080",
+                                        remotePort: "\(8080 + frpRules.count)"
+                                    )
+                                    self.frpRules.append(newRule)
+                                    FrpService.saveRules(self.frpRules)
+                                    self.isFrpConfigModified = true
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "plus.circle.fill")
+                                        Text("添加隧道规则")
+                                    }
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                            
+                            if frpRules.isEmpty {
+                                VStack(spacing: 8) {
+                                    Text("暂无代理隧道映射规则")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Button("添加默认规则 (SSH + Web)") {
+                                        self.frpRules = FrpService.loadRules()
+        self.frpBinaryPath = UserDefaults.standard.string(forKey: "frpBinaryPath") ?? ""
+                                        FrpService.saveRules(self.frpRules)
+                                        self.isFrpConfigModified = true
+                                    }
+                                    .controlSize(.small)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(16)
+                                .background(Color.primary.opacity(0.03))
+                                .cornerRadius(8)
+                            } else {
+                                ForEach(Array(frpRules.enumerated()), id: \.element.id) { index, rule in
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Text("#\(index + 1)")
+                                                .font(.caption2)
+                                                .fontWeight(.bold)
+                                                .foregroundColor(.secondary)
+                                                .frame(width: 20)
+                                            
+                                            TextField("规则名称", text: Binding(
+                                                get: { self.frpRules[index].name },
+                                                set: { newValue in
+                                                    self.frpRules[index].name = newValue
+                                                    FrpService.saveRules(self.frpRules)
+                                                    self.isFrpConfigModified = true
+                                                }
+                                            ))
+                                            .textFieldStyle(.roundedBorder)
+                                            .frame(width: 140)
+                                            
+                                            Picker("", selection: Binding(
+                                                get: { self.frpRules[index].type },
+                                                set: { newValue in
+                                                    self.frpRules[index].type = newValue
+                                                    FrpService.saveRules(self.frpRules)
+                                                    self.isFrpConfigModified = true
+                                                }
+                                            )) {
+                                                Text("TCP").tag("tcp")
+                                                Text("UDP").tag("udp")
+                                                Text("HTTP").tag("http")
+                                                Text("HTTPS").tag("https")
+                                            }
+                                            .pickerStyle(.segmented)
+                                            .frame(width: 180)
+                                            
+                                            Spacer()
+                                            
+                                            Button(action: {
+                                                self.frpRules.remove(at: index)
+                                                FrpService.saveRules(self.frpRules)
+                                                self.isFrpConfigModified = true
+                                            }) {
+                                                Image(systemName: "trash")
+                                                    .foregroundColor(.red)
+                                            }
+                                            .buttonStyle(.borderless)
+                                            .help("删除此规则")
+                                        }
+                                        
+                                        HStack(spacing: 8) {
+                                            Text("本地IP:")
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                            TextField("127.0.0.1", text: Binding(
+                                                get: { self.frpRules[index].localIP },
+                                                set: { newValue in
+                                                    self.frpRules[index].localIP = newValue
+                                                    FrpService.saveRules(self.frpRules)
+                                                    self.isFrpConfigModified = true
+                                                }
+                                            ))
+                                            .textFieldStyle(.roundedBorder)
+                                            .frame(width: 90)
+                                            
+                                            Text("本地端口:")
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                            TextField("22", text: Binding(
+                                                get: { self.frpRules[index].localPort },
+                                                set: { newValue in
+                                                    self.frpRules[index].localPort = newValue
+                                                    FrpService.saveRules(self.frpRules)
+                                                    self.isFrpConfigModified = true
+                                                }
+                                            ))
+                                            .textFieldStyle(.roundedBorder)
+                                            .frame(width: 55)
+                                            
+                                            if frpRules[index].type == "tcp" || frpRules[index].type == "udp" {
+                                                Text("远程端口:")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.secondary)
+                                                TextField("6022", text: Binding(
+                                                    get: { self.frpRules[index].remotePort },
+                                                    set: { newValue in
+                                                        self.frpRules[index].remotePort = newValue
+                                                        FrpService.saveRules(self.frpRules)
+                                                        self.isFrpConfigModified = true
+                                                    }
+                                                ))
+                                                .textFieldStyle(.roundedBorder)
+                                                .frame(width: 65)
+                                            } else {
+                                                Text("绑定域名:")
+                                                    .font(.caption2)
+                                                    .foregroundColor(.secondary)
+                                                TextField("domain.com", text: Binding(
+                                                    get: { self.frpRules[index].customDomains },
+                                                    set: { newValue in
+                                                        self.frpRules[index].customDomains = newValue
+                                                        FrpService.saveRules(self.frpRules)
+                                                        self.isFrpConfigModified = true
+                                                    }
+                                                ))
+                                                .textFieldStyle(.roundedBorder)
+                                                .frame(width: 110)
+                                            }
+                                        }
+                                        .padding(.leading, 24)
+                                    }
+                                    .padding(10)
+                                    .background(Color.primary.opacity(0.03))
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                                    )
+                                }
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("配置文件内容 (支持 TOML / INI 语法):")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        
+                        TextEditor(text: Binding(
+                            get: { self.frpCustomConfig },
+                            set: { newValue in
+                                self.frpCustomConfig = newValue
+                                UserDefaults.standard.set(newValue, forKey: "frpCustomConfig")
+                                self.isFrpConfigModified = true
+                            }
+                        ))
+                        .font(.system(.caption, design: .monospaced))
+                        .frame(height: 260)
+                        .padding(4)
+                        .background(Color(NSColor.textBackgroundColor))
+                        .cornerRadius(6)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.primary.opacity(0.15), lineWidth: 1)
+                        )
+                    }
+                }
+                
+                Spacer()
+                
+                HStack {
+                    Spacer()
+                    Button("完成") {
+                        FrpService.saveRules(self.frpRules)
+                        if self.isFrpConfigModified {
+                            self.isFrpConfigModified = false
+                            IntegrationManager.shared.reloadServices()
+                        }
+                        self.showFrpConfig = false
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+            .padding(20)
+            .frame(width: 540, height: 600)
+        }
+        
         .sheet(isPresented: $showKumaConfig) {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Uptime Kuma 推送配置")
@@ -1199,6 +1674,11 @@ struct PreferencesView: View {
             updateConnectedDisplays()
             updateBatteryState()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .frpStatusChanged)) { notif in
+            if let status = notif.object as? FrpStatus {
+                self.frpStatus = status
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .nezhaStatusChanged)) { notif in
             if let status = notif.object as? NezhaStatus {
                 self.nezhaStatus = status
@@ -1234,6 +1714,23 @@ struct PreferencesView: View {
         self.serverStatusAddr = UserDefaults.standard.string(forKey: "serverStatusAddr") ?? ""
         self.serverStatusUser = UserDefaults.standard.string(forKey: "serverStatusUser") ?? ""
         self.serverStatusPassword = UserDefaults.standard.string(forKey: "serverStatusPassword") ?? ""
+        
+        self.frpEnabled = UserDefaults.standard.bool(forKey: "frpEnabled")
+        self.frpMode = UserDefaults.standard.string(forKey: "frpMode") ?? "quick"
+        self.frpServerAddr = UserDefaults.standard.string(forKey: "frpServerAddr") ?? ""
+        self.frpServerPort = UserDefaults.standard.string(forKey: "frpServerPort") ?? "7000"
+        self.frpToken = UserDefaults.standard.string(forKey: "frpToken") ?? ""
+        self.frpProxyName = UserDefaults.standard.string(forKey: "frpProxyName") ?? "machead-ssh"
+        self.frpProxyType = UserDefaults.standard.string(forKey: "frpProxyType") ?? "tcp"
+        self.frpLocalIP = UserDefaults.standard.string(forKey: "frpLocalIP") ?? "127.0.0.1"
+        self.frpLocalPort = UserDefaults.standard.string(forKey: "frpLocalPort") ?? "22"
+        self.frpRemotePort = UserDefaults.standard.string(forKey: "frpRemotePort") ?? "6022"
+        self.frpCustomDomains = UserDefaults.standard.string(forKey: "frpCustomDomains") ?? ""
+        self.frpSubdomain = UserDefaults.standard.string(forKey: "frpSubdomain") ?? ""
+        self.frpCustomConfig = UserDefaults.standard.string(forKey: "frpCustomConfig") ?? ""
+        self.frpStatus = FrpService.shared.currentStatus
+        self.frpRules = FrpService.loadRules()
+        self.frpBinaryPath = UserDefaults.standard.string(forKey: "frpBinaryPath") ?? ""
         
         self.kumaEnabled = UserDefaults.standard.bool(forKey: "kumaEnabled")
         self.kumaPushUrl = UserDefaults.standard.string(forKey: "kumaPushUrl") ?? ""

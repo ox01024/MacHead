@@ -16,6 +16,7 @@ public final class IntegrationManager: ObservableObject {
         NezhaAgentService.shared.start()
         ServerStatusService.shared.start()
         UptimeKumaService.shared.start()
+        FrpService.shared.start()
         startTemperatureAlertWatcher()
     }
     
@@ -24,27 +25,30 @@ public final class IntegrationManager: ObservableObject {
         NezhaAgentService.shared.stop()
         ServerStatusService.shared.stop()
         UptimeKumaService.shared.stop()
+        FrpService.shared.stop()
         stopTemperatureAlertWatcher()
     }
     
     public func reloadServices() {
         print("IntegrationManager: Config changed, reloading integrations...")
-        
-        // 1. Nezha reload
-        NezhaAgentService.shared.stop()
-        NezhaAgentService.shared.start()
-        
-        // 2. ServerStatus reload
-        ServerStatusService.shared.stop()
-        ServerStatusService.shared.start()
-        
-        // 3. Uptime Kuma reload
-        UptimeKumaService.shared.stop()
-        UptimeKumaService.shared.start()
-        
-        // 4. Overheat monitor reload
-        stopTemperatureAlertWatcher()
-        startTemperatureAlertWatcher()
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            NezhaAgentService.shared.stop()
+            ServerStatusService.shared.stop()
+            UptimeKumaService.shared.stop()
+            FrpService.shared.stop()
+            
+            Thread.sleep(forTimeInterval: 0.2)
+            
+            NezhaAgentService.shared.start()
+            ServerStatusService.shared.start()
+            UptimeKumaService.shared.start()
+            FrpService.shared.start()
+            
+            DispatchQueue.main.async {
+                self?.stopTemperatureAlertWatcher()
+                self?.startTemperatureAlertWatcher()
+            }
+        }
     }
     
     private func setupSMCWatcher() {

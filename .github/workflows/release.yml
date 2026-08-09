@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0 # 获取完整 Git 历史以生成 Technical Release Notes
 
-      - name: Fetch and Merge Latest Nezha & ServerStatus Binaries 📥
+      - name: Fetch and Merge Latest Nezha, ServerStatus & FRP Binaries 📥
         run: |
           mkdir -p Resources
           TEMP_DIR="temp_binaries"
@@ -52,6 +52,22 @@ jobs:
             "${TEMP_DIR}/status_amd64/stat_client" \
             "${TEMP_DIR}/status_arm64/stat_client" \
             -output Resources/serverstatus-client
+          
+          echo "Determining latest FRP version..."
+          FRP_VER=$(curl -sI https://github.com/fatedier/frp/releases/latest | grep -i location | awk -F'/' '{print $NF}' | tr -d '\r\n')
+          echo "Latest FRP Version: ${FRP_VER}"
+          FRP_RAW_VER="${FRP_VER#v}"
+          
+          curl -L -o "${TEMP_DIR}/frp_amd64.tar.gz" "https://github.com/fatedier/frp/releases/download/${FRP_VER}/frp_${FRP_RAW_VER}_darwin_amd64.tar.gz"
+          curl -L -o "${TEMP_DIR}/frp_arm64.tar.gz" "https://github.com/fatedier/frp/releases/download/${FRP_VER}/frp_${FRP_RAW_VER}_darwin_arm64.tar.gz"
+          
+          tar -xzf "${TEMP_DIR}/frp_amd64.tar.gz" -C "${TEMP_DIR}"
+          tar -xzf "${TEMP_DIR}/frp_arm64.tar.gz" -C "${TEMP_DIR}"
+          
+          lipo -create \
+            "${TEMP_DIR}/frp_${FRP_RAW_VER}_darwin_amd64/frpc" \
+            "${TEMP_DIR}/frp_${FRP_RAW_VER}_darwin_arm64/frpc" \
+            -output Resources/frpc
           
           rm -rf "${TEMP_DIR}"
           echo "Successfully prepared latest universal binaries!"

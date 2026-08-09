@@ -175,19 +175,18 @@ public final class NezhaAgentService {
         errorPipe?.fileHandleForReading.readabilityHandler = nil
         
         print("NezhaAgentService: Stopping nezha-agent...")
+        let procToStop = self.process
+        self.process = nil
+        self.isServiceRunning = false
+        self.currentStatus = .stopped
         
-        process?.terminationHandler = nil
-        
-        if let proc = process, proc.isRunning {
-            proc.terminate()
-            proc.waitUntilExit()
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            procToStop?.terminationHandler = nil
+            if let proc = procToStop, proc.isRunning {
+                proc.terminate()
+            }
+            self?.killOrphanedProcesses()
         }
-        
-        killOrphanedProcesses()
-        
-        process = nil
-        isServiceRunning = false
-        currentStatus = .stopped
     }
     
     private func killOrphanedProcesses() {
