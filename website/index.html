@@ -149,6 +149,7 @@
           <a itemprop="url" href="/#features" class="nav-link"><span itemprop="name">功能特性</span></a>
           <a itemprop="url" href="/#playground" class="nav-link"><span itemprop="name">交互演练</span></a>
           <a itemprop="url" href="/#install" class="nav-link"><span itemprop="name">安装指南</span></a>
+          <a itemprop="url" href="/changelog.html" class="nav-link"><span itemprop="name">更新日志</span></a>
           <a itemprop="url" href="/#faq" class="nav-link"><span itemprop="name">FAQ</span></a>
           <a itemprop="url" href="https://github.com/ox01024/MacHead-Feedback/issues" target="_blank" rel="noopener" class="nav-link github-btn">
             <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
@@ -719,6 +720,51 @@
               <h3 class="step-title">配置系统防误触授权</h3>
               <p class="step-desc">如果您希望合盖成为服务器后自动无视并屏蔽一切物理键盘和触控板的误触误按，请按照软件首次运行时的指引，开启系统授权即可。</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Changelog Preview Section -->
+      <section id="changelog" class="changelog-section scroll-effect">
+        <div class="container container-narrow">
+          <div class="section-header text-left" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <h2 class="section-title">更新日志</h2>
+              <p class="section-subtitle">了解 MacHead 的最新功能演进与版本修复历史。</p>
+            </div>
+            <a href="/changelog.html" class="btn btn-secondary btn-md">完整更新日志</a>
+          </div>
+
+          <!-- Homepage Preview (Latest 2 Releases, No per-item download buttons) -->
+          <div class="changelog-feed">
+            <article class="changelog-entry">
+              <div class="changelog-meta">
+                <time class="changelog-date">2026-08-09</time>
+                <span class="changelog-version-tag">v0.1.19</span>
+              </div>
+              <div class="changelog-body">
+                <h3 class="changelog-title">原生集成 FRP 内网穿透与后台线程重载</h3>
+                <ul class="changelog-bullets">
+                  <li>原生集成 FRP 内网穿透 (frpc) 客户端，支持多隧道端口与自定义域名映射。</li>
+                  <li>新增快捷图形配置与自定义 TOML/INI 配置文件双模式支持。</li>
+                  <li>全面重构各监控服务重载机制为后台异步线程，消除配置测试时的界面卡顿。</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="changelog-entry">
+              <div class="changelog-meta">
+                <time class="changelog-date">2026-07-31</time>
+                <span class="changelog-version-tag">v0.1.18</span>
+              </div>
+              <div class="changelog-body">
+                <h3 class="changelog-title">哪吒 Agent 自更新死锁修复与临时锁清理</h3>
+                <ul class="changelog-bullets">
+                  <li>修复哪吒监控 Agent 自动更新锁导致的死锁无法建立连接问题。</li>
+                  <li>增加启动前的临时锁目录自动清理逻辑。</li>
+                </ul>
+              </div>
+            </article>
           </div>
         </div>
       </section>

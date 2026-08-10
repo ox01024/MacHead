@@ -513,3 +513,109 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('MacHead Web: Using fallback release metadata due to appcast fetch status:', err);
         });
 });
+
+    // 7. Landing Page Changelog Minimalist Feed Renderer (No Download Buttons)
+    const CHANGELOG_DATA = [
+        {
+            version: "0.1.19",
+            date: "2026-08-09",
+            title: "原生集成 FRP 内网穿透与后台线程重载",
+            bullets: [
+                "原生集成 FRP 内网穿透 (frpc) 客户端，支持多隧道端口与自定义域名映射。",
+                "新增快捷图形配置与自定义 TOML/INI 配置文件双模式支持。",
+                "全面重构各监控服务重载机制为后台异步线程，消除配置测试时的界面卡顿。",
+                "优化配置测试按钮逻辑，支持一键保存、测试与自动使能生效。"
+            ]
+        },
+        {
+            version: "0.1.18",
+            date: "2026-07-31",
+            title: "哪吒 Agent 自更新死锁修复与临时锁清理",
+            bullets: [
+                "修复哪吒监控 Agent 自动更新锁导致的死锁无法建立连接问题。",
+                "增加启动前的临时锁目录自动清理逻辑。"
+            ]
+        },
+        {
+            version: "0.1.17",
+            date: "2026-07-31",
+            title: "全新菜单栏状态面板与自适应动画",
+            bullets: [
+                "新增全新菜单栏状态控制面板，支持一键无头模式切换与硬件状态实时卡片。",
+                "优化非无头 MacBook 用户的初始默认预设，避免首次启动误切。",
+                "优化浮窗自适应动画与平滑交互。"
+            ]
+        },
+        {
+            version: "0.1.16",
+            date: "2026-07-28",
+            title: "哪吒监控实时连接指示器与错误诊断",
+            bullets: [
+                "增加哪吒监控实时连接状态指示器与智能错误诊断。",
+                "修复哪吒配置弹窗尺寸偏小被遮挡的问题。",
+                "优化配置修改体验，防止编辑输入时频繁断连重启。"
+            ]
+        },
+        {
+            version: "0.1.15",
+            date: "2026-07-27",
+            title: "隐私优先的遥测机制与 Cloudflare D1 分析",
+            bullets: [
+                "全面上线隐私优先的核心指标遥测与心跳机制。",
+                "优化了 Headless 模式与电池保护事件的统计记录。",
+                "接入 Cloudflare D1 数据库支撑全栈数据分析。"
+            ]
+        },
+        {
+            version: "0.1.14",
+            date: "2026-07-13",
+            title: "合盖防休眠守护与 Apple Silicon 传感器修复",
+            bullets: [
+                "实现了全新的“合盖后仍然保持运行”功能（防休眠与合盖守护）。",
+                "完美修复 Apple Silicon (M系列) 芯片下温度显示 0.0°C 以及物理风扇状态误报的 Bug。",
+                "重构输入设备保护页面为横向多选对齐卡片，移除全局设置冗余副标题描述。"
+            ]
+        },
+        {
+            version: "0.1.12",
+            date: "2026-07-10",
+            title: "局域网 Web 控制面板与物理性能看板",
+            bullets: [
+                "新增安全的局域网远程管理控制台，全面升级安全 Cookie 会话隔离鉴权与登录页。",
+                "物理性能看板升级，引入 CPU 核心物理温度、真实物理内存（RAM）使用量与 GPU 显存负载细节监控。"
+            ]
+        },
+        {
+            version: "0.1.0",
+            date: "2026-07-01",
+            title: "MacHead 首次发版发布",
+            bullets: [
+                "MacHead 首次发布！支持一键开启 macOS 无头 (Headless) 模式。",
+                "内置防休眠、按键与触控板物理防护。",
+                "提供 CLI 命令行工具与局域网 Web 控制台。"
+            ]
+        }
+    ];
+
+    const feedContainer = document.getElementById('changelog-feed');
+    if (feedContainer) {
+        const isHomepage = !window.location.pathname.includes('changelog.html');
+        const itemsToDisplay = isHomepage ? CHANGELOG_DATA.slice(0, 2) : CHANGELOG_DATA;
+
+        const html = itemsToDisplay.map(item => `
+            <article class="changelog-entry">
+                <div class="changelog-meta">
+                    <time class="changelog-date">${item.date}</time>
+                    <span class="changelog-version-tag">v${item.version}</span>
+                </div>
+                <div class="changelog-body">
+                    <h3 class="changelog-title">${item.title}</h3>
+                    <ul class="changelog-bullets">
+                        ${item.bullets.map(b => `<li>${b}</li>`).join('')}
+                    </ul>
+                </div>
+            </article>
+        `).join('');
+
+        feedContainer.innerHTML = html;
+    }

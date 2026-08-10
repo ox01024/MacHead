@@ -1,7 +1,7 @@
 {
-  "version": "0.1.18",
-  "build": 22,
-  "pubDate": "2026-07-31",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.18-macos-universal.dmg",
-  "releaseNotes": "1. 修复哪吒监控 Agent 自动更新锁导致的死锁无法建立连接问题； 2. 增加启动前的临时锁目录自动清理逻辑。"
+  "version": "0.1.19",
+  "build": 23,
+  "pubDate": "2026-08-09",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.19-macos-universal.dmg",
+  "releaseNotes": "1. 原生集成 FRP 内网穿透 (frpc) 客户端，支持多隧道端口与域名映射；\n2. 新增快捷配置与自定义 TOML/INI 配置文件双模式；\n3. 全面重构各监控服务重载为后台异步线程，消除配置测试时的界面卡顿；\n4. 优化配置测试按钮逻辑，支持一键保存、测试与自动使能生效。"
 }
