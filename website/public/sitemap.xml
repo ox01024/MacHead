@@ -36,4 +36,10 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://headlessmac.com/en/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://headlessmac.com/" />
   </url>
+  <url>
+    <loc>https://headlessmac.com/guides/macbook-ai-agent-server/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>
