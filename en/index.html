@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MacHead — Turn Your MacBook into a Headless Server (Free & Open Source)</title>
+    <meta name="description" content="Free, open-source macOS app that turns any MacBook — even one with a broken screen — into a headless server. Close the lid: display off, sleep handled, mic muted, battery guarded. Web console, CLI & remote access." />
+    <link rel="canonical" href="https://headlessmac.com/en/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://headlessmac.com/" />
+    <link rel="alternate" hreflang="en" href="https://headlessmac.com/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://headlessmac.com/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MacHead - Turn MacBook into Headless Server" />
+    <meta property="og:description" content="Free macOS tool to turn any MacBook (broken screen OK) into a silent headless server. Disable display, prevent sleep, guard battery. Apple Silicon + Intel." />
+    <meta property="og:url" content="https://headlessmac.com/en/" />
+    <meta property="og:site_name" content="MacHead" />
+    <meta property="og:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MacHead",
+      "url": "https://headlessmac.com/en/",
+      "downloadUrl": "https://releases.headlessmac.com/latest.dmg",
+      "softwareVersion": "0.1.24",
+      "operatingSystem": "macOS 12.0 or later",
+      "applicationCategory": "UtilitiesApplication",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "Free, open-source macOS menu-bar app that turns any MacBook — even one with a broken screen — into a headless server with a web console, CLI and remote access."
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Can I run MacHead on a MacBook with a broken screen?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Headless mode turns off the internal display and works with a virtual display, so a cracked or dead screen does not matter. You can do the one-time setup with an external monitor or via Screen Sharing." }
+        },
+        {
+          "@type": "Question",
+          "name": "Will a closed MacBook overheat or drain its battery as a server?",
+          "acceptedAnswer": { "@type": "Answer", "text": "MacHead includes a battery guard that restores normal sleep at low charge, plus temperature alerts. For 24/7 use, keep it plugged in on a hard, ventilated surface." }
+        },
+        {
+          "@type": "Question",
+          "name": "Does MacHead work on Intel Macs?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. MacHead supports both Apple Silicon and Intel MacBooks, on macOS 12 or later." }
+        },
+        {
+          "@type": "Question",
+          "name": "How is MacHead different from Amphetamine or caffeinate?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Amphetamine and caffeinate mainly block idle sleep; clamshell (lid-closed) sleep needs extra handling, and they leave the internal display and setup work to you. MacHead is a complete headless workstation mode: internal display off, lid-closed operation, virtual display, web console, CLI, and remote access via Cloudflare Tunnel, Microsoft Dev Tunnels or FRP." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is MacHead free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes — free and open source under the Apache-2.0 license. Source code: github.com/ox01024/MacHead." }
+        }
+      ]
+    }
+    </script>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; line-height: 1.6; }
+      main { max-width: 880px; margin: 0 auto; padding: 24px 20px 64px; }
+      header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 24px; }
+      header nav a { margin-left: 16px; text-decoration: none; }
+      h1 { font-size: 2.2rem; line-height: 1.25; margin: 24px 0 12px; }
+      .sub { font-size: 1.12rem; opacity: .85; margin-bottom: 28px; }
+      .cta { display: flex; gap: 12px; flex-wrap: wrap; margin: 28px 0 8px; }
+      .btn { display: inline-block; padding: 12px 22px; border-radius: 10px; text-decoration: none; font-weight: 600; border: 1px solid currentColor; }
+      .btn.primary { background: #2f6bff; color: #fff; border-color: #2f6bff; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 20px 0; }
+      .card { border: 1px solid rgba(127,127,127,.35); border-radius: 12px; padding: 16px 18px; }
+      .card h3 { margin: 0 0 6px; font-size: 1.02rem; }
+      .card p { margin: 0; opacity: .85; font-size: .95rem; }
+      h2 { margin-top: 44px; }
+      details { border-top: 1px solid rgba(127,127,127,.35); padding: 12px 0; }
+      summary { font-weight: 600; cursor: pointer; }
+      footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid rgba(127,127,127,.35); font-size: .9rem; opacity: .8; }
+      a { color: #2f6bff; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong>MacHead</strong>
+        <nav>
+          <a href="https://headlessmac.com/">中文</a>
+          <a href="https://github.com/ox01024/MacHead">GitHub</a>
+          <a href="https://headlessmac.com/changelog">Changelog</a>
+        </nav>
+      </header>
+
+      <h1>Turn your MacBook into a headless server</h1>
+      <p class="sub">MacHead is a free, open-source macOS menu-bar app that turns any MacBook — even one with a broken screen — into a quiet headless workstation. Open the lid, it's a laptop. Close it, it's a server.</p>
+
+      <div class="cta">
+        <a class="btn primary" href="https://releases.headlessmac.com/latest.dmg">Download for macOS</a>
+        <a class="btn" href="https://github.com/ox01024/MacHead">View on GitHub</a>
+      </div>
+      <p>Free &amp; open source (Apache-2.0) · Apple Silicon &amp; Intel · macOS 12+</p>
+
+      <h2>What it does</h2>
+      <div class="grid">
+        <div class="card"><h3>One-click headless mode</h3><p>Internal display off, clamshell sleep handled, virtual display when you need a GUI. No dummy HDMI plug, no pmset scripts.</p></div>
+        <div class="card"><h3>Broken-screen friendly</h3><p>A cracked or dead internal display is not a problem — headless mode never needs it. Give that MacBook a second life as a server.</p></div>
+        <div class="card"><h3>Battery &amp; thermal guard</h3><p>Restores normal sleep at low charge, watches temperature, and auto-mutes the microphone for always-on duty.</p></div>
+        <div class="card"><h3>Web console &amp; CLI</h3><p>Monitor CPU, memory, GPU and battery from a LAN web dashboard, or drive everything with the <code>machead</code> command-line tool.</p></div>
+        <div class="card"><h3>Remote access built in</h3><p>Reach your headless MacBook from anywhere via Cloudflare Tunnel, Microsoft Dev Tunnels or FRP — no port forwarding.</p></div>
+        <div class="card"><h3>Made for 24/7 agents &amp; homelabs</h3><p>Keep AI coding agents (Claude Code, Codex) running with the lid closed, or run a silent home server on a spare MacBook instead of buying a VPS.</p></div>
+      </div>
+
+      <h2>Who it's for</h2>
+      <div class="grid">
+        <div class="card"><h3>AI agent runners</h3><p>Long agent sessions die when the lid closes. MacHead keeps the machine awake, reachable and guarded overnight.</p></div>
+        <div class="card"><h3>Homelab &amp; self-hosters</h3><p>A spare MacBook is a low-power, UPS-backed (its own battery) server with a real Unix under the hood.</p></div>
+        <div class="card"><h3>Owners of broken MacBooks</h3><p>Screen repair can cost more than the machine is worth. As a headless server, it can serve for years.</p></div>
+      </div>
+
+      <h2>FAQ</h2>
+      <details><summary>Can I run MacHead on a MacBook with a broken screen?</summary><p>Yes. Headless mode turns off the internal display and works with a virtual display, so a cracked or dead screen does not matter. You can do the one-time setup with an external monitor or via Screen Sharing.</p></details>
+      <details><summary>Will a closed MacBook overheat or drain its battery as a server?</summary><p>MacHead includes a battery guard that restores normal sleep at low charge, plus temperature alerts. For 24/7 use, keep it plugged in on a hard, ventilated surface.</p></details>
+      <details><summary>Does MacHead work on Intel Macs?</summary><p>Yes. MacHead supports both Apple Silicon and Intel MacBooks, on macOS 12 or later.</p></details>
+      <details><summary>How is MacHead different from Amphetamine or caffeinate?</summary><p>Those mainly block idle sleep; clamshell (lid-closed) sleep needs extra handling, and they leave the display and setup work to you. MacHead is a complete headless workstation mode: display off, lid-closed operation, web console, CLI and remote access in one app.</p></details>
+      <details><summary>Is MacHead free?</summary><p>Yes — free and open source under the Apache-2.0 license.</p></details>
+
+      <div class="cta">
+        <a class="btn primary" href="https://releases.headlessmac.com/latest.dmg">Download MacHead</a>
+        <a class="btn" href="https://headlessmac.com/">中文官网</a>
+      </div>
+
+      <footer>
+        MacHead · Free &amp; open source (Apache-2.0) · <a href="https://github.com/ox01024/MacHead">github.com/ox01024/MacHead</a> · <a href="https://headlessmac.com/">headlessmac.com</a>
+      </footer>
+    </main>
+  </body>
+</html>
