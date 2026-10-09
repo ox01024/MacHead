@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>碎屏 MacBook 别扔：合盖改无头服务器完整指南 | MacHead</title>
+    <meta name="description" content="碎屏 MacBook 修屏不划算、卖掉不值钱？合盖改成 24 小时无头服务器：不用拆屏，关内屏、防休眠、电池守护、远程访问，一篇讲清完整步骤与注意事项。" />
+    <link rel="canonical" href="https://headlessmac.com/guides/broken-screen-macbook-server/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="碎屏 MacBook 别扔：合盖改无头服务器完整指南" />
+    <meta property="og:description" content="不用拆屏、不用假 HDMI：把碎屏或闲置 MacBook 合盖改成安静省电的 24 小时无头服务器。" />
+    <meta property="og:url" content="https://headlessmac.com/guides/broken-screen-macbook-server/" />
+    <meta property="og:site_name" content="MacHead" />
+    <meta property="og:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "碎屏 MacBook 别扔：合盖改无头服务器完整指南",
+      "description": "把碎屏或闲置 MacBook 合盖改造成 24 小时无头服务器的完整步骤：关内屏、防休眠、电池守护与远程访问。",
+      "inLanguage": "zh-CN",
+      "datePublished": "2026-10-09",
+      "dateModified": "2026-10-09",
+      "author": { "@type": "Organization", "name": "MacHead", "url": "https://headlessmac.com/" },
+      "publisher": { "@type": "Organization", "name": "MacHead", "url": "https://headlessmac.com/" },
+      "mainEntityOfPage": "https://headlessmac.com/guides/broken-screen-macbook-server/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "碎屏的 MacBook 不修，真的能当服务器用吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "可以。屏幕只是输出设备，CPU、内存、硬盘、网络都不受影响。用 MacHead 开启无头模式后内屏直接关闭并由虚拟显示接管，碎屏再也不需要亮起。首次配置借一块外接显示器或用另一台电脑「屏幕共享」完成即可。" }
+        },
+        {
+          "@type": "Question",
+          "name": "需要把碎屏拆下来吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "不需要。拆屏是国外玩家的一种玩法，但要拆排线、动天线，风险高且不可逆。合盖 + 软件关闭内屏的效果相同：屏幕不亮、不供电、不发热，机器本体保持完整，想恢复笔记本原状随时可以。" }
+        },
+        {
+          "@type": "Question",
+          "name": "MacBook 合盖长期运行会不会过热？",
+          "acceptedAnswer": { "@type": "Answer", "text": "合盖会略微影响散热，所以要放在通风的硬质表面上，不要塞进抽屉或压在杂物下。MacHead 带温度告警（可推送到 Bark / Telegram），异常升温会第一时间通知你。日常的 agent、下载、文件服务这类负载对 MacBook 来说很轻。" }
+        },
+        {
+          "@type": "Question",
+          "name": "长期插电合盖，电池会不会被「饿死」或鼓包？",
+          "acceptedAnswer": { "@type": "Answer", "text": "长期插电本身有系统级的电池健康管理。真正的风险是意外断电后机器继续防休眠、把电量耗尽导致电池过放。MacHead 的电池守护会在断电且电量低于安全阈值时自动恢复正常睡眠，避免电池被耗干。" }
+        },
+        {
+          "@type": "Question",
+          "name": "Intel 的老 MacBook（比如 2019 年以前）还能用吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "可以。MacHead 同时支持 Apple Silicon 与 Intel 机型，系统要求 macOS 12 或更高。老机器跑 AI agent（模型在云端）、下载、文件服务完全够用；只是风扇声和功耗会比 Apple Silicon 大一些。" }
+        },
+        {
+          "@type": "Question",
+          "name": "和再买一台 Mac mini 当服务器比，哪个划算？",
+          "acceptedAnswer": { "@type": "Answer", "text": "如果碎屏 MacBook 已经在你手里，改造成本为零，还自带电池当 UPS、合盖静音；Mac mini 要额外花钱且停电就关机。除非你明确需要一台长期服役的新主机，否则先把手里的碎屏机器用起来更划算。" }
+        }
+      ]
+    }
+    </script>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; margin: 0; line-height: 1.8; }
+      main { max-width: 760px; margin: 0 auto; padding: 24px 20px 64px; }
+      header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 16px; }
+      header nav a { margin-left: 16px; text-decoration: none; }
+      h1 { font-size: 1.9rem; line-height: 1.35; margin: 20px 0 10px; }
+      .meta { opacity: .7; font-size: .92rem; margin-bottom: 20px; }
+      h2 { margin-top: 40px; font-size: 1.3rem; }
+      h3 { margin-top: 26px; }
+      code { background: rgba(127,127,127,.15); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
+      .cta { border: 1px solid rgba(127,127,127,.35); border-radius: 12px; padding: 18px 20px; margin: 36px 0; }
+      .btn { display: inline-block; padding: 11px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; border: 1px solid currentColor; margin-right: 10px; margin-bottom: 8px; }
+      .btn.primary { background: #2f6bff; color: #fff; border-color: #2f6bff; }
+      details { border-top: 1px solid rgba(127,127,127,.35); padding: 12px 0; }
+      summary { font-weight: 600; cursor: pointer; }
+      footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid rgba(127,127,127,.35); font-size: .9rem; opacity: .8; }
+      a { color: #2f6bff; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong><a href="https://headlessmac.com/" style="text-decoration:none">MacHead</a></strong>
+        <nav>
+          <a href="https://headlessmac.com/">官网</a>
+          <a href="https://headlessmac.com/en/">English</a>
+          <a href="https://github.com/ox01024/MacHead">GitHub</a>
+        </nav>
+      </header>
+
+      <h1>碎屏 MacBook 别扔：合盖改无头服务器完整指南</h1>
+      <p class="meta">不用拆屏、不用假 HDMI，一台碎屏或闲置 MacBook 就是一台现成的 24 小时服务器。更新于 2026-10-09。</p>
+
+      <p>MacBook 屏幕碎了之后通常只有三条路：官方换屏总成，价格常常接近甚至超过这台老机器的残值；卖二手，碎屏直接砍价到骨头；扔抽屉里吃灰。其实还有第四条：<strong>屏幕坏了，不代表机器坏了</strong>。CPU、内存、硬盘、Wi-Fi 全都好好的，缺的只是一块显示屏——而服务器恰恰不需要显示屏。</p>
+
+      <p>这篇指南讲怎么把一台碎屏（或纯粹闲置）的 MacBook 合盖改造成一台安静、省电、24 小时在线的无头服务器：跑 AI agent、挂下载、做文件服务、跑你自己的小应用都行。办法分手工路线和工具路线两种，都讲，最后给一份注意事项清单。</p>
+
+      <h2>先说清三件事</h2>
+      <ul>
+        <li><strong>不用拆屏。</strong>国外有玩家把碎屏整个拆掉做成"无头主机"，但要动排线和天线，风险高、不可逆。合盖 + 软件关闭内屏，效果一样：屏幕不亮、不耗电、不发热，机器保持完整，想变回笔记本随时可以。</li>
+        <li><strong>首次配置需要一块临时的屏。</strong>借任意外接显示器，或者用另一台电脑的「屏幕共享」连进去配一次，之后永远不需要屏幕。</li>
+        <li><strong>它的定位是服务器。</strong>长期插电、合盖、放角落。所以放置通风、电池保护这些细节，后面都会讲到。</li>
+      </ul>
+
+      <h2>准备清单</h2>
+      <ul>
+        <li>碎屏或闲置 MacBook 一台（Apple Silicon 或 Intel，系统 macOS 12 或更高）</li>
+        <li>电源适配器（长期插电用）</li>
+        <li>一根网线 + 转接头（可选，Wi-Fi 也能跑，有线更稳）</li>
+        <li>外接显示器一台用于首次配置（或另一台电脑用屏幕共享）</li>
+      </ul>
+
+      <h2>手工路线：能走通，但有四个坑</h2>
+      <p>网上大多数教程是这个路子：外接显示器合盖（clamshell 模式）或者 <code>pmset</code> 命令防休眠，再配个保活小工具。实测下来会依次踩到这四个坑：</p>
+      <ol>
+        <li><strong>合盖就睡。</strong>macOS 的合盖睡眠（clamshell sleep）和闲置睡眠是两套机制，<code>caffeinate</code>、Amphetamine 这类保活工具只管后者。合盖几秒钟，服务全停。</li>
+        <li><strong>内屏关不掉。</strong>外接屏模式下内屏往往还在亮，或者需要买"假 HDMI 诱骗器"骗系统。不关内屏，碎屏白白耗电发热，还加速老化。</li>
+        <li><strong><code>pmset disablesleep</code> 是个裸开关。</strong>用管理员命令关掉全局睡眠确实能合盖运行，但它没有电池保护：哪天市电断了、排插被碰掉，机器会一直耗到电量见底，把电池"饿死"。</li>
+        <li><strong>远程进不去、出门看不见。</strong>SSH、屏幕共享要自己配，出了家门想看一眼服务状态，还得再折腾内网穿透。</li>
+      </ol>
+      <p>四个坑每一个都有解法，但加起来就是一套要长期伺候的组合拳。下面这条路线是把这套拳打包成一个开关。</p>
+
+      <h2>工具路线：用 MacHead 五步搞定</h2>
+      <p><a href="https://headlessmac.com/">MacHead</a> 是个免费开源的菜单栏小工具，专门做这件事。整个过程约十分钟：</p>
+      <h3>1. 安装</h3>
+      <p><a href="https://releases.headlessmac.com/latest.dmg">下载 DMG</a>，把 MacHead 拖进「应用程序」，打开后按提示授予权限。碎屏机器通过外接屏或屏幕共享完成这一步。</p>
+      <h3>2. 一键开启无头模式</h3>
+      <p>点一下菜单栏图标：内屏关闭（碎屏不再亮起、不再发热）、合盖不再休眠、内置键盘和触控板自动锁定防误触、麦克风物理静音——一台 24 小时开着的机器，不该是个开放的麦克风。</p>
+      <h3>3. 打开电池守护和温度告警</h3>
+      <p>电池守护的作用是：意外断电且电量低于安全阈值时，自动恢复正常睡眠，保住电池。温度告警可以推送到 Bark 或 Telegram，机器发烫你会第一时间知道。放置上记住一条：通风的硬桌面，不要放床上、不要塞抽屉。</p>
+      <h3>4. 配远程访问</h3>
+      <p>打开 Web 控制台（首次启动会随机生成管理密码，手机浏览器就能看 CPU、内存、电量，还能远程开关功能）；出门在外要连回来，启用内置的内网穿透——Cloudflare Tunnel、Microsoft Dev Tunnels、FRP 三选一，不用在路由器上开端口。已经在用哪吒监控、ServerStatus、Uptime Kuma 的可以直接接上。</p>
+      <h3>5. 把服务跑起来，合上盖子</h3>
+      <p>该装的服务照常装：AI 编程 agent 让它夜里自己干活、下载任务挂着、文件共享开起来。合上盖子，走人。机器安静地在角落运行，状态随时掏出手机就能看。</p>
+
+      <h2>碎屏机特别注意</h2>
+      <ul>
+        <li><strong>不要拆屏。</strong>Wi-Fi 和蓝牙天线在转轴附近，拆屏容易伤到；合盖方案完全不碰硬件，天线、排线都不动。</li>
+        <li><strong>碎屏有玻璃渣先处理。</strong>贴一层膜或把碎裂处贴好再合盖，别让玻璃屑掉进键盘。</li>
+        <li><strong>铰链松了就别反复开合。</strong>配好之后它就是个固定设备，找个角落放稳，平时用远程访问，不需要再打开盖子。</li>
+        <li><strong>老机器先换块电池再服役（如果已经鼓包）。</strong>鼓包电池不适合长期通电，先处理掉这个隐患。</li>
+      </ul>
+
+      <h2>改完能拿它干什么</h2>
+      <ul>
+        <li><strong>24 小时 AI agent 主机</strong>：合盖跑 Claude Code、Codex 这类 agent，晚上派活、早上收结果，不用再为它开一台云服务器。具体玩法见英文版指南 <a href="/guides/macbook-ai-agent-server/">Turn Your Old MacBook into a 24/7 AI Agent Server</a>。</li>
+        <li><strong>下载机与文件服务</strong>：安静、省电、自带电池防断电，天生适合挂PT、做家庭文件共享。</li>
+        <li><strong>自托管小服务</strong>：博客、监控面板、自动化脚本、软路由旁路——macOS 是完整的 Unix 环境，Docker 和各类运行时都齐全。</li>
+        <li><strong>开发测试机</strong>：一台常年在线的 Mac，跑 CI、做 iOS 构建、远程开发都合适。</li>
+      </ul>
+
+      <h2>常见问题</h2>
+      <details><summary>碎屏不修，真的能当服务器用吗？</summary><p>可以。屏幕只是输出设备，机器的其他部分不受影响。无头模式下内屏直接关闭、由虚拟显示接管，首次配置借一块外接屏或用屏幕共享完成，之后再也不需要屏幕。</p></details>
+      <details><summary>需要把碎屏拆下来吗？</summary><p>不需要。拆屏要动排线和天线，风险高且不可逆；合盖 + 软件关内屏效果相同，机器保持完整，随时能恢复成笔记本。</p></details>
+      <details><summary>合盖长期运行会不会过热？</summary><p>合盖略微影响散热，放在通风的硬质表面即可。MacHead 有温度告警（Bark / Telegram 推送），日常 agent、下载这类轻负载基本不用担心。</p></details>
+      <details><summary>电池会不会被"饿死"？</summary><p>长期插电有系统级电池健康管理；真正的风险是断电后防休眠把电耗尽。MacHead 的电池守护会在低电量时自动恢复正常睡眠，避免过放。</p></details>
+      <details><summary>Intel 的老机器还行吗？</summary><p>行。Apple Silicon 与 Intel 都支持，系统 macOS 12+。老机器跑云端模型的 agent、下载、文件服务完全够用，只是风扇声和功耗大一些。</p></details>
+      <details><summary>和买一台 Mac mini 比呢？</summary><p>手里的碎屏机器改造成本为零，还自带电池当 UPS；Mac mini 要额外花钱且停电即关机。除非明确需要一台全新主机长期服役，先把手里的机器用起来更划算。</p></details>
+
+      <div class="cta">
+        <p><strong>现在开始：</strong>MacHead 免费开源（Apache-2.0），支持 Apple Silicon 与 Intel，macOS 12+。</p>
+        <a class="btn primary" href="https://releases.headlessmac.com/latest.dmg">下载 MacHead</a>
+        <a class="btn" href="https://github.com/ox01024/MacHead">GitHub</a>
+        <a class="btn" href="https://headlessmac.com/">官网首页</a>
+      </div>
+
+      <footer>
+        MacHead · <a href="https://headlessmac.com/">headlessmac.com</a> · <a href="https://headlessmac.com/en/">English</a> · <a href="https://headlessmac.com/changelog">更新日志</a>
+      </footer>
+    </main>
+  </body>
+</html>
