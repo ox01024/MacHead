@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amphetamine Alternative for Lid-Closed MacBooks: MacHead vs pmset vs Keep-Awake Apps | MacHead</title>
+    <meta name="description" content="Amphetamine and caffeinate stop idle sleep — but a closed lid is a different sleep. Honest comparison of Amphetamine, KeepingYouAwake, pmset disablesleep, dummy HDMI plugs and MacHead for running a MacBook as a 24/7 headless server." />
+    <link rel="canonical" href="https://headlessmac.com/guides/amphetamine-alternative/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Amphetamine vs pmset vs MacHead: Keeping a MacBook Awake with the Lid Closed" />
+    <meta property="og:description" content="Keep-awake apps solve idle sleep. A lid-closed server is a different problem. An honest comparison of the options." />
+    <meta property="og:url" content="https://headlessmac.com/guides/amphetamine-alternative/" />
+    <meta property="og:site_name" content="MacHead" />
+    <meta property="og:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Amphetamine vs pmset vs MacHead: Keeping a MacBook Awake with the Lid Closed",
+      "description": "An honest comparison of keep-awake apps, manual pmset settings, dummy HDMI plugs and MacHead for running a MacBook as a lid-closed headless server.",
+      "inLanguage": "en",
+      "datePublished": "2026-10-09",
+      "dateModified": "2026-10-09",
+      "author": { "@type": "Organization", "name": "MacHead", "url": "https://headlessmac.com/en/" },
+      "publisher": { "@type": "Organization", "name": "MacHead", "url": "https://headlessmac.com/en/" },
+      "mainEntityOfPage": "https://headlessmac.com/guides/amphetamine-alternative/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why doesn't Amphetamine keep my MacBook awake with the lid closed?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Amphetamine blocks idle sleep with power assertions. Closing the lid triggers clamshell sleep, a separate lower-level mechanism that assertions do not cover. Amphetamine offers a closed-display mode with caveats and helper components, but it is designed around keeping a Mac awake for tasks — not around turning off the internal display and running the machine as a headless server with remote access and battery protection." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is 'pmset disablesleep' safe to leave on?",
+          "acceptedAnswer": { "@type": "Answer", "text": "It works, but it is a global, sticky switch with no safeguards: if power is unplugged, the Mac will keep running until the battery is empty, which can deep-drain it. You also have to remember to revert it before using the laptop normally again. It is fine for a supervised afternoon, risky as a permanent 24/7 setting." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is a dummy HDMI plug a good solution?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A dummy plug (a few dollars) fakes an external display so clamshell mode engages — a legitimate trick, and the only hardware item on this list. Downsides: the Mac renders a desktop for a display nobody sees, it occupies a port, and you still need separate solutions for battery protection, remote access and monitoring." }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I just use Amphetamine with an external display in clamshell mode?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes — if you have a working screen, an external monitor, power and peripherals, clamshell mode plus a keep-awake app is a perfectly good desk setup. The headless-server approach earns its keep when there is no working display (broken screen), no room for a monitor, or the machine must run unattended for weeks." }
+        },
+        {
+          "@type": "Question",
+          "name": "What if my MacBook's screen is broken?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Then keep-awake apps and clamshell-with-monitor setups are mostly off the table. A headless tool like MacHead turns the internal display off entirely and works through a virtual display, web console and tunnels instead. See the broken-screen setup guide on headlessmac.com." }
+        }
+      ]
+    }
+    </script>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; line-height: 1.7; }
+      main { max-width: 760px; margin: 0 auto; padding: 24px 20px 64px; }
+      header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 16px; }
+      header nav a { margin-left: 16px; text-decoration: none; }
+      h1 { font-size: 1.95rem; line-height: 1.3; margin: 20px 0 10px; }
+      .meta { opacity: .7; font-size: .92rem; margin-bottom: 20px; }
+      h2 { margin-top: 40px; font-size: 1.35rem; }
+      h3 { margin-top: 28px; }
+      table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: .93rem; }
+      th, td { border: 1px solid rgba(127,127,127,.4); padding: 7px 9px; text-align: left; vertical-align: top; }
+      code { background: rgba(127,127,127,.15); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
+      .verdict { border: 1px solid rgba(127,127,127,.35); border-radius: 12px; padding: 16px 20px; margin: 24px 0; }
+      .cta { border: 1px solid rgba(127,127,127,.35); border-radius: 12px; padding: 18px 20px; margin: 36px 0; }
+      .btn { display: inline-block; padding: 11px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; border: 1px solid currentColor; margin-right: 10px; margin-bottom: 8px; }
+      .btn.primary { background: #2f6bff; color: #fff; border-color: #2f6bff; }
+      details { border-top: 1px solid rgba(127,127,127,.35); padding: 12px 0; }
+      summary { font-weight: 600; cursor: pointer; }
+      footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid rgba(127,127,127,.35); font-size: .9rem; opacity: .8; }
+      a { color: #2f6bff; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong><a href="https://headlessmac.com/en/" style="text-decoration:none">MacHead</a></strong>
+        <nav>
+          <a href="https://headlessmac.com/">中文</a>
+          <a href="https://headlessmac.com/en/">English</a>
+          <a href="https://github.com/ox01024/MacHead">GitHub</a>
+        </nav>
+      </header>
+
+      <h1>Amphetamine vs pmset vs MacHead: keeping a MacBook awake with the lid closed</h1>
+      <p class="meta">An honest comparison — different tools solve different sleeps. Updated 2026-10-09.</p>
+
+      <p>Most "keep my Mac awake" questions are really two different questions wearing one coat:</p>
+      <ul>
+        <li><strong>"Don't fall asleep during this task"</strong> — a download, a render, a long build, a presentation. The lid stays open; you just need idle sleep blocked for a while.</li>
+        <li><strong>"Run as a server with the lid closed, 24/7"</strong> — no display, no desk setup, weeks of unattended operation, reachable from your phone.</li>
+      </ul>
+      <p>For the first question, Amphetamine and friends are excellent and this article will happily recommend them. For the second, they solve only the first layer of the problem — because closing the lid triggers <em>clamshell sleep</em>, a separate, lower-level mechanism that keep-awake assertions don't cover. Here's every realistic option, compared fairly.</p>
+
+      <div class="verdict">
+        <strong>The short version</strong>
+        <ul>
+          <li>Task-length keep-awake → <strong>Amphetamine</strong> (or free, simple <strong>KeepingYouAwake</strong>)</li>
+          <li>Free, manual, supervised → <strong>caffeinate</strong> / <strong>pmset</strong></li>
+          <li>Desk setup with a real monitor → clamshell mode + any keep-awake app</li>
+          <li>Lid-closed 24/7 server, broken screen, remote access → <strong>MacHead</strong> (full disclosure: that's us — the comparison below is still honest)</li>
+        </ul>
+      </div>
+
+      <h2>The contenders</h2>
+
+      <h3>caffeinate (built into macOS)</h3>
+      <p>Apple's own command-line tool. <code>caffeinate -i</code> blocks idle sleep while it runs; free, zero install, scriptable. But it's a terminal command you babysit, and like every assertion-based tool it does not survive a closed lid on a machine without an external display setup. Best for: a one-off long task from the terminal.</p>
+
+      <h3>Amphetamine (App Store)</h3>
+      <p>The polished GUI keep-awake app: sessions, schedules, triggers (apps, disks, downloads), and years of refinement. For keeping a Mac awake during work, it's the one to beat. Its limits show up in the server scenario: it's built around awake-ness, not headless operation — no internal-display management as a server feature, no web console, no tunnels, no battery-guard logic for unattended weeks. Its closed-display mode comes with caveats and helper components, and still assumes a machine you'd normally sit at. Best for: power users keeping a working Mac awake, lid open.</p>
+
+      <h3>KeepingYouAwake (open source)</h3>
+      <p>A tiny, free menu-bar wrapper around caffeinate with a timer. Lovely for what it is — and what it is, is idle-sleep blocking only. No lid-closed operation, no server tooling. Best for: "stay awake for the next two hours," nothing more.</p>
+
+      <h3>pmset disablesleep (manual)</h3>
+      <p><code>sudo pmset -a disablesleep 1</code> is the raw system lever the lid-closed guides reach for. It genuinely works with the lid shut — and it's a global, sticky switch with no safeguards: lose mains power and the machine runs the battery into the ground; system updates and forgetfulness can leave it on (or off) at the wrong time; reverting is another sudo you must remember. Best for: a supervised test, not a permanent setting.</p>
+
+      <h3>Dummy HDMI plug</h3>
+      <p>A ~$5 dongle that pretends to be a monitor, unlocking clamshell mode without a real display. A legitimate trick — the only hardware on this list. But the Mac now renders a desktop nobody sees, a port is occupied, and battery protection, remote access, and monitoring are still unsolved problems you get to solve separately. Best for: a dedicated machine on a desk where a fake display is harmless.</p>
+
+      <h3>MacHead (open source, ours)</h3>
+      <p>MacHead starts from the other end: it's not a keep-awake app, it's a headless workstation mode. One click turns the internal display off, handles lid-closed operation, locks the built-in keyboard/trackpad, and mutes the mic. Around that core it wraps the things a server needs and the options above lack: a battery guard that restores normal sleep at low charge (the pmset failure mode, designed out), temperature alerts, a LAN web console with a generated admin password, remote access via Cloudflare Tunnel / Dev Tunnels / FRP, and monitoring integrations (ServerStatus, Uptime Kuma). It also works when the internal screen is broken — the case where every alternative above runs out of road. The honest trade-offs: it's a younger, smaller project than Amphetamine, and if you only need "awake for an hour," it's more tool than you need.</p>
+
+      <h2>Side by side</h2>
+      <table>
+        <tr><th>Capability</th><th>caffeinate</th><th>Amphetamine</th><th>KeepingYouAwake</th><th>pmset manual</th><th>Dummy plug</th><th>MacHead</th></tr>
+        <tr><td>Blocks idle sleep</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>—</td><td>Yes</td></tr>
+        <tr><td>Runs with lid closed (no real display)</td><td>No</td><td>Partial, with caveats</td><td>No</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+        <tr><td>Turns internal display off</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No (renders fake one)</td><td>Yes</td></tr>
+        <tr><td>Works with a broken screen</td><td>No</td><td>No</td><td>No</td><td>Partial</td><td>Partial</td><td>Yes</td></tr>
+        <tr><td>Battery guard (low-charge sleep)</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Remote access built in</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td><td>Yes (3 tunnel options)</td></tr>
+        <tr><td>Web console / monitoring</td><td>No</td><td>No</td><td>No</td><td>No</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Price</td><td>Free (built-in)</td><td>Free + IAP</td><td>Free</td><td>Free</td><td>~$5</td><td>Free</td></tr>
+        <tr><td>Open source</td><td>No</td><td>No</td><td>Yes</td><td>—</td><td>—</td><td>Yes (Apache-2.0)</td></tr>
+      </table>
+
+      <h2>So which should you pick?</h2>
+      <ul>
+        <li><strong>You use your Mac daily and just hate sleep timers:</strong> Amphetamine. It's the best tool for that job, full stop.</li>
+        <li><strong>You need one long task to finish:</strong> <code>caffeinate -i</code> in a terminal, or KeepingYouAwake if you prefer a menu bar.</li>
+        <li><strong>You have a desk, a monitor, and a working screen:</strong> clamshell mode with power and peripherals, plus any keep-awake app, is a fine server-ish setup.</li>
+        <li><strong>The machine's job is to be a server — lid closed, possibly broken-screen, unattended for weeks, reachable from anywhere:</strong> that's the headless case, and it's what <a href="https://headlessmac.com/en/">MacHead</a> is built for. Our full setup walkthroughs: <a href="/guides/macbook-ai-agent-server/">24/7 AI agent server guide</a> and the <a href="/guides/broken-screen-macbook-server/">broken-screen MacBook guide (中文)</a>.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <details><summary>Why doesn't Amphetamine keep my MacBook awake with the lid closed?</summary><p>Amphetamine blocks idle sleep via power assertions; a closing lid triggers clamshell sleep, a lower-level mechanism assertions don't cover. Its closed-display mode exists with caveats, but the app is designed around keeping a Mac awake for tasks — not display-off headless serving with battery protection and remote access.</p></details>
+      <details><summary>Is <code>pmset disablesleep</code> safe to leave on?</summary><p>It works, but it's a global sticky switch with no safeguards: on battery it will drain the pack completely, and you must remember to revert it. Fine supervised; risky as a permanent 24/7 setting.</p></details>
+      <details><summary>Is a dummy HDMI plug worth it?</summary><p>It's a legitimate, cheap trick to unlock clamshell mode. Downsides: a fake desktop being rendered, an occupied port, and battery/remote/monitoring still unsolved.</p></details>
+      <details><summary>Can I just use Amphetamine with an external display?</summary><p>Yes — with a working screen, monitor, power and peripherals, clamshell + keep-awake is a perfectly good desk setup. Headless tooling matters when there's no working display or the machine must run unattended.</p></details>
+      <details><summary>What if the screen is already broken?</summary><p>Then most options above are off the table. MacHead turns the internal display off entirely and works through a virtual display, web console and tunnels — see the broken-screen guide.</p></details>
+
+      <div class="cta">
+        <p><strong>Running a lid-closed server?</strong> MacHead is free and open source (Apache-2.0), Apple Silicon &amp; Intel, macOS 12+.</p>
+        <a class="btn primary" href="https://releases.headlessmac.com/latest.dmg">Download MacHead</a>
+        <a class="btn" href="https://github.com/ox01024/MacHead">GitHub</a>
+        <a class="btn" href="/guides/macbook-ai-agent-server/">Read the agent-server guide</a>
+      </div>
+
+      <footer>
+        MacHead · <a href="https://headlessmac.com/en/">headlessmac.com/en</a> · <a href="https://headlessmac.com/">中文官网</a> · <a href="https://headlessmac.com/changelog">Changelog</a>
+      </footer>
+    </main>
+  </body>
+</html>
