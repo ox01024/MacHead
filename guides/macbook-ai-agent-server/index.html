@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Turn Your Old MacBook into a 24/7 AI Agent Server — Complete Guide | MacHead</title>
+    <meta name="description" content="A spare or broken-screen MacBook beats a $30/mo VPS for running AI agents like Claude Code around the clock. Complete setup guide: lid-closed operation without a dummy HDMI plug, battery-safe, remote access included." />
+    <link rel="canonical" href="https://headlessmac.com/guides/macbook-ai-agent-server/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Turn Your Old MacBook into a 24/7 AI Agent Server" />
+    <meta property="og:description" content="Your drawer MacBook is a free, silent AI agent server. Lid-closed setup guide — no dummy HDMI plug, no pmset scripts, battery-safe." />
+    <meta property="og:url" content="https://headlessmac.com/guides/macbook-ai-agent-server/" />
+    <meta property="og:site_name" content="MacHead" />
+    <meta property="og:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Turn Your Old MacBook into a 24/7 AI Agent Server",
+      "description": "Complete guide to running AI agents 24/7 on a spare or broken-screen MacBook with the lid closed — no dummy HDMI plug, battery-safe, with remote access.",
+      "datePublished": "2026-10-09",
+      "dateModified": "2026-10-09",
+      "author": { "@type": "Organization", "name": "MacHead", "url": "https://headlessmac.com/en/" },
+      "publisher": { "@type": "Organization", "name": "MacHead", "url": "https://headlessmac.com/en/" },
+      "mainEntityOfPage": "https://headlessmac.com/guides/macbook-ai-agent-server/"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Can I run an AI agent on a MacBook with a broken screen?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. A broken screen does not affect the rest of the machine. With a headless tool like MacHead, the internal display is turned off and a virtual display is used instead, so the cracked panel is never needed. Do the one-time setup over Screen Sharing or with a temporary external monitor." }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does my Mac still sleep with the lid closed even after pmset or caffeinate?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Caffeinate and keep-awake apps block idle sleep, but closing the lid triggers a separate clamshell sleep at a lower level. The manual levers are a dummy HDMI display plug or 'pmset -a disablesleep' (a global, sticky setting you must remember to revert). MacHead wraps the lid-closed behavior with battery and thermal safeguards instead of leaving a raw system switch on." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it safe to run a MacBook with the lid closed 24/7?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes, with two precautions: keep it plugged in on a hard, ventilated surface (a closed lid reduces airflow), and use a battery guard that restores normal sleep at low charge so the battery is not deep-drained if power is lost. MacHead includes both a battery guard and temperature alerts." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need Ethernet, or is Wi-Fi OK for a headless MacBook server?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Wi-Fi works, but a wired connection is more reliable for something that must stay reachable 24/7. On USB-C MacBooks you will need a USB-to-Ethernet adapter. For agent workloads, also consider a tunnel (e.g. Cloudflare Tunnel) so you can reach the machine from anywhere without port forwarding." }
+        },
+        {
+          "@type": "Question",
+          "name": "How much RAM do I need to run an AI agent on a Mac?",
+          "acceptedAnswer": { "@type": "Answer", "text": "16GB on Apple Silicon comfortably handles agent runtimes plus semantic memory search and parallel sub-agents. Even an 8GB machine runs cloud-API agents (Claude Code, Codex) fine, since the model itself runs remotely — local RAM matters most for local models and tooling." }
+        },
+        {
+          "@type": "Question",
+          "name": "MacBook, VPS or Raspberry Pi — which is best for a 24/7 AI agent?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A VPS wins if you need a public static IP and zero home-network fuss, but costs $20–40/month for enough RAM. A Raspberry Pi is cheap and sips power but is slow and RAM-limited. A spare MacBook costs $0/month, has far more CPU/RAM, runs macOS tooling natively, and its battery doubles as a built-in UPS — if you already own one, it is usually the best agent server you can get for free." }
+        }
+      ]
+    }
+    </script>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; line-height: 1.7; }
+      main { max-width: 760px; margin: 0 auto; padding: 24px 20px 64px; }
+      header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 16px; }
+      header nav a { margin-left: 16px; text-decoration: none; }
+      h1 { font-size: 2rem; line-height: 1.3; margin: 20px 0 10px; }
+      .meta { opacity: .7; font-size: .92rem; margin-bottom: 20px; }
+      h2 { margin-top: 40px; font-size: 1.35rem; }
+      h3 { margin-top: 26px; }
+      table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: .95rem; }
+      th, td { border: 1px solid rgba(127,127,127,.4); padding: 8px 10px; text-align: left; vertical-align: top; }
+      code { background: rgba(127,127,127,.15); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
+      .cta { border: 1px solid rgba(127,127,127,.35); border-radius: 12px; padding: 18px 20px; margin: 36px 0; }
+      .btn { display: inline-block; padding: 11px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; border: 1px solid currentColor; margin-right: 10px; }
+      .btn.primary { background: #2f6bff; color: #fff; border-color: #2f6bff; }
+      details { border-top: 1px solid rgba(127,127,127,.35); padding: 12px 0; }
+      summary { font-weight: 600; cursor: pointer; }
+      footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid rgba(127,127,127,.35); font-size: .9rem; opacity: .8; }
+      a { color: #2f6bff; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong><a href="https://headlessmac.com/en/" style="text-decoration:none">MacHead</a></strong>
+        <nav>
+          <a href="https://headlessmac.com/">中文</a>
+          <a href="https://headlessmac.com/en/">English</a>
+          <a href="https://github.com/ox01024/MacHead">GitHub</a>
+        </nav>
+      </header>
+
+      <h1>Turn Your Old MacBook into a 24/7 AI Agent Server</h1>
+      <p class="meta">A complete setup guide — lid closed, screen off, battery safe. Updated 2026-10-09.</p>
+
+      <p>If you run AI coding agents — Claude Code, Codex, OpenClaw, a Telegram bot of your own — you have felt the pain: a long session dies the moment you close the laptop lid, and the Mac goes to sleep mid-task. The usual fix is a VPS, but a VPS with enough RAM runs $20–40 a month, adds latency to every tool call, and holds your API keys on someone else's disk.</p>
+
+      <p>There is probably a better server already in your drawer. A spare MacBook — even one with a broken screen — has more CPU and RAM than a small cloud instance, runs your macOS tooling natively, is silent, and its battery doubles as a built-in UPS. This guide sets one up as a 24/7 agent server. You can do it the manual way, but we'll use <a href="https://headlessmac.com/en/">MacHead</a>, a free open-source app that replaces the fiddly parts (clamshell sleep, dummy display plugs, keep-awake hacks) with one click.</p>
+
+      <h2>What you need</h2>
+      <ul>
+        <li>A MacBook you don't use as your daily driver — any Apple Silicon or Intel model on macOS 12+, broken screen welcome</li>
+        <li>Its power adapter (24/7 duty means staying plugged in)</li>
+        <li>Network: Wi-Fi works; a USB-to-Ethernet adapter is more reliable</li>
+        <li>For a broken-screen machine: an external monitor for the one-time setup, or another Mac for Screen Sharing</li>
+        <li>Your agent of choice installed (Claude Code, Codex, etc.)</li>
+      </ul>
+
+      <h2>Why a closed MacBook sleeps — and why caffeinate isn't enough</h2>
+      <p>macOS has two different sleeps. <em>Idle sleep</em> is what <code>caffeinate</code> and keep-awake apps block. <em>Clamshell sleep</em> fires when you close the lid, at a lower level, and it pauses everything — agent, network, tunnels — within seconds. A keep-awake assertion does not stop it.</p>
+      <p>The manual workarounds are a dummy HDMI plug (so macOS thinks a monitor is attached) or <code>sudo pmset -a disablesleep 1</code> — a global, sticky switch with no battery protection that you must remember to turn off. Both work; both are exactly the kind of thing that bites you at 3 a.m. when the battery dies or an update resets your settings.</p>
+
+      <h2>The manual setup (what most guides tell you)</h2>
+      <ol>
+        <li>Set sleep to never in System Settings, then fight clamshell sleep separately with pmset or a dummy plug</li>
+        <li>Install a keep-awake app for idle sleep on top of that</li>
+        <li>Enable SSH and a remote desktop tool (RustDesk, Screen Sharing) for GUI prompts</li>
+        <li>Write launchd plists so your agent restarts on crash and on boot</li>
+        <li>Set up a tunnel or Tailscale for access away from home</li>
+        <li>Remember to revert the pmset changes before travelling with the laptop again</li>
+      </ol>
+      <p>None of this is hard, exactly — it's just six separate things to babysit forever. That is the gap MacHead fills.</p>
+
+      <h2>The MacHead setup (about 10 minutes)</h2>
+      <h3>1. Install</h3>
+      <p><a href="https://releases.headlessmac.com/latest.dmg">Download MacHead</a> (free, Apache-2.0), open the DMG and drag it into Applications. Launch it and grant the permissions it asks for. A broken screen is fine from here on — everything works headless.</p>
+      <h3>2. Turn on headless mode</h3>
+      <p>One click in the menu bar: the internal display turns off (no more glowing, heat-wasting panel), clamshell sleep is handled, the built-in keyboard and trackpad lock so nothing brushes against them, and the microphone auto-mutes — a machine that listens 24/7 shouldn't be an open mic.</p>
+      <h3>3. Turn on the guards</h3>
+      <p>Enable the battery guard (if power is lost and charge drops below a safe threshold, normal sleep resumes so the battery isn't deep-drained) and temperature alerts. Put the MacBook on a hard, ventilated surface — a closed lid reduces airflow, so not on a bed or in a bag.</p>
+      <h3>4. Make it reachable</h3>
+      <p>Open the web console (MacHead generates a random admin password on first launch) to watch CPU / memory / battery from your phone. For access away from home, enable one of the built-in tunnels — Cloudflare Tunnel, Microsoft Dev Tunnels or FRP — no port forwarding, nothing exposed raw to the internet. Monitoring hooks (ServerStatus, Uptime Kuma) are there if you already run them.</p>
+      <h3>5. Start your agent, close the lid</h3>
+      <p>Install your agent as usual, start it (tmux if you like), and close the lid. It keeps running. Check in from your phone over the tunnel, approve what needs approving, and let it work overnight.</p>
+
+      <h2>MacBook vs VPS vs Raspberry Pi for agents</h2>
+      <table>
+        <tr><th></th><th>Spare MacBook</th><th>VPS</th><th>Raspberry Pi</th></tr>
+        <tr><td>Cost</td><td>$0/month (already yours)</td><td>$20–40/month for usable RAM</td><td>~$50–80 once</td></tr>
+        <tr><td>Performance</td><td>Apple Silicon CPU, 8–32GB unified memory</td><td>Shared vCPU, plan-dependent</td><td>Slow; 4–8GB</td></tr>
+        <tr><td>Local models &amp; tooling</td><td>Native macOS, Metal acceleration</td><td>Linux, usually no GPU</td><td>Linux ARM, limited</td></tr>
+        <tr><td>Power outage</td><td>Battery = built-in UPS</td><td>Datacenter UPS</td><td>Dies without a UPS</td></tr>
+        <tr><td>Your keys &amp; code</td><td>Stay in your house</td><td>On a third-party disk</td><td>Stay in your house</td></tr>
+        <tr><td>Best when</td><td>You own a spare Mac</td><td>You need a public static IP</td><td>Power draw is the top priority</td></tr>
+      </table>
+
+      <h2>Running notes from experience</h2>
+      <ul>
+        <li><strong>Plug in, always.</strong> Battery-only lid-closed running works, but for overnight agent runs mains power is the safe choice.</li>
+        <li><strong>Auto-start on login</strong> means the machine comes back by itself after updates and reboots — enable it once.</li>
+        <li><strong>It's still a laptop.</strong> Turn headless mode off and the internal display, keyboard and normal sleep all come back. Nothing to uninstall.</li>
+      </ul>
+
+      <h2>FAQ</h2>
+      <details><summary>Can I run an AI agent on a MacBook with a broken screen?</summary><p>Yes. A broken screen doesn't affect the rest of the machine. Headless mode turns the internal display off and uses a virtual display, so the cracked panel is never needed. Do the one-time setup over Screen Sharing or with a temporary external monitor.</p></details>
+      <details><summary>Why does my Mac still sleep with the lid closed even after pmset or caffeinate?</summary><p>Caffeinate blocks idle sleep; lid closing triggers clamshell sleep at a lower level. The manual levers are a dummy HDMI plug or <code>pmset -a disablesleep</code>, a global sticky setting with no battery protection. MacHead wraps lid-closed operation with battery and thermal safeguards instead.</p></details>
+      <details><summary>Is it safe to run a MacBook with the lid closed 24/7?</summary><p>Yes, with two precautions: keep it plugged in on a hard, ventilated surface, and use a battery guard that restores normal sleep at low charge. MacHead includes the guard and temperature alerts.</p></details>
+      <details><summary>Do I need Ethernet, or is Wi-Fi OK?</summary><p>Wi-Fi works, but wired is more reliable for a machine that must stay reachable. On USB-C MacBooks you'll need an adapter. A tunnel like Cloudflare Tunnel makes it reachable from anywhere without port forwarding.</p></details>
+      <details><summary>How much RAM do I need?</summary><p>16GB comfortably handles agents plus memory search and parallel sub-agents. 8GB is fine for cloud-API agents like Claude Code, since the model runs remotely — local RAM matters most for local models and tooling.</p></details>
+      <details><summary>MacBook, VPS or Pi — which should I pick?</summary><p>A VPS if you need a public static IP; a Pi if power draw rules everything; a spare MacBook if you already own one — it's the strongest agent server that costs $0 a month.</p></details>
+
+      <div class="cta">
+        <p><strong>Get started:</strong> MacHead is free and open source (Apache-2.0), for Apple Silicon &amp; Intel on macOS 12+.</p>
+        <a class="btn primary" href="https://releases.headlessmac.com/latest.dmg">Download MacHead</a>
+        <a class="btn" href="https://github.com/ox01024/MacHead">GitHub</a>
+        <a class="btn" href="https://headlessmac.com/en/">What is MacHead?</a>
+      </div>
+
+      <footer>
+        MacHead · <a href="https://headlessmac.com/en/">headlessmac.com/en</a> · <a href="https://headlessmac.com/">中文官网</a> · <a href="https://headlessmac.com/changelog">Changelog</a>
+      </footer>
+    </main>
+  </body>
+</html>
