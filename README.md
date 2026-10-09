@@ -18,6 +18,8 @@
   <img src="https://img.shields.io/badge/license-Apache%202.0-green.svg" alt="License: Apache 2.0" />
 </p>
 
+**English** — MacHead is a free, open-source macOS menu-bar app that turns any MacBook — even one with a broken screen — into a headless server. Close the lid and it keeps working: internal display off, clamshell sleep handled, microphone muted, battery guarded. Includes a web console, a CLI (`machead`), remote access via Cloudflare Tunnel / Microsoft Dev Tunnels / FRP, and monitoring integrations (ServerStatus, Uptime Kuma). Apple Silicon & Intel, macOS 12+.
+
 <p align="center">
   <img src="website/public/machead_console.jpg" width="720" alt="MacHead 远程控制台与偏好设置：实时监控 CPU/内存/GPU/电池,远程管理无头工作站" />
 </p>
