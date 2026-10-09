@@ -8,16 +8,63 @@
     <!-- SEO Meta Tags -->
     <title>MacHead：碎屏 MacBook 变身无头服务器（免费开源）</title>
     <meta name="description" content="免费开源的 macOS 工具：让闲置/碎屏 MacBook 合盖变身无头服务器，关闭内屏、静音麦克风、防误触、电池守护。Free, open-source, Apple Silicon + Intel." />
-    <meta name="keywords" content="MacHead, macbook headless mode, macbook headless server, broken screen macbook server, disable macbook internal display, macbook clamshell server, turn macbook into server, macbook 无头模式, macbook 碎屏改造服务器, 合盖不休眠, macOS headless, homelab macbook, SkyLight API, 软路由" />
     <link rel="canonical" href="https://headlessmac.com/" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="theme-color" content="#fbf9fa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14120b" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" href="./logo.png" />
     <link rel="alternate" hreflang="zh-CN" href="https://headlessmac.com/" />
-    <link rel="alternate" hreflang="en" href="https://headlessmac.com/" />
+    <link rel="alternate" hreflang="en" href="https://headlessmac.com/en/" />
     <link rel="alternate" hreflang="x-default" href="https://headlessmac.com/" />
     <script src="./telemetry.js" defer></script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MacHead",
+      "url": "https://headlessmac.com/",
+      "downloadUrl": "https://releases.headlessmac.com/latest.dmg",
+      "softwareVersion": "0.1.24",
+      "operatingSystem": "macOS 12.0 or later",
+      "applicationCategory": "UtilitiesApplication",
+      "license": "https://www.apache.org/licenses/LICENSE-2.0",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "免费开源的 macOS 工具：让闲置或碎屏 MacBook 合盖变身无头服务器，关闭内屏、防休眠、静音麦克风、电池守护，带 Web 控制台与远程访问。"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "碎屏的 MacBook 能用 MacHead 当服务器吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "可以。MacHead 的无头模式会关闭内屏并以虚拟显示工作，内屏损坏不影响当服务器使用；首次配置可通过外接显示器或屏幕共享完成。" }
+        },
+        {
+          "@type": "Question",
+          "name": "MacBook 合盖运行会不会过热或伤电池？",
+          "acceptedAnswer": { "@type": "Answer", "text": "MacHead 带电池守护：电量过低时自动恢复正常睡眠，并有温度告警。无头服务器建议接电源使用，合盖时把机器放在通风的硬质表面上。" }
+        },
+        {
+          "@type": "Question",
+          "name": "Intel 的 MacBook 可以用吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "可以。MacHead 同时支持 Apple Silicon 与 Intel 机型，系统要求 macOS 12 或更高版本。" }
+        },
+        {
+          "@type": "Question",
+          "name": "MacHead 和 Amphetamine、caffeinate 有什么区别？",
+          "acceptedAnswer": { "@type": "Answer", "text": "Amphetamine 与 caffeinate 主要解决闲置休眠，合盖触发的 clamshell 睡眠仍需额外处理。MacHead 是完整的无头工作站模式：关闭内屏、处理合盖睡眠、虚拟显示、Web 控制台、CLI 与远程访问（Cloudflare Tunnel / Dev Tunnels / FRP）一体。" }
+        },
+        {
+          "@type": "Question",
+          "name": "MacHead 收费吗？",
+          "acceptedAnswer": { "@type": "Answer", "text": "免费且开源，基于 Apache-2.0 许可证发布，源码在 GitHub（ox01024/MacHead）。" }
+        }
+      ]
+    }
+    </script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:locale" content="zh_CN" />

@@ -1,7 +1,7 @@
 {
-  "version": "0.1.23",
-  "build": 27,
-  "pubDate": "2026-09-23",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.23-macos-universal.dmg",
-  "releaseNotes": "1. 局域网 Web 控制面板支持自定义服务端口，并提供特权端口与范围实时校验；2. 偏好设置面板与快捷菜单栏动态显示并复制自定义端口访问地址；3. Microsoft Dev Tunnels 与 FRP 内网穿透服务规则自动同步自定义 Web 端口；4. 新增 macOS 原生远程管理感知（SSH 22 / VNC 5900 / SMB 445 端口状态）；5. 提供专属快捷命令与一键复制功能（如 ssh user@ip、vnc://ip、smb://ip），并支持一键直达系统共享设置。"
+  "version": "0.1.24",
+  "build": 28,
+  "pubDate": "2026-10-07",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.24-macos-universal.dmg",
+  "releaseNotes": "1. 全面支持 macOS 12 (Monterey)，最低系统要求由 macOS 13 降至 macOS 12，老款 Intel MacBook 也能合盖变身无头服务器；2. 开机自启动在 macOS 12 上改用系统登录项机制，升级系统后自动无缝迁移；3. 偏好设置侧边栏与图标渐变等界面细节在 macOS 12 上完整还原。"
 }
