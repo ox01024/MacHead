@@ -1,7 +1,7 @@
 {
-  "version": "0.1.24",
-  "build": 28,
-  "pubDate": "2026-10-07",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.24-macos-universal.dmg",
-  "releaseNotes": "1. 全面支持 macOS 12 (Monterey)，最低系统要求由 macOS 13 降至 macOS 12，老款 Intel MacBook 也能合盖变身无头服务器；2. 开机自启动在 macOS 12 上改用系统登录项机制，升级系统后自动无缝迁移；3. 偏好设置侧边栏与图标渐变等界面细节在 macOS 12 上完整还原。"
+  "version": "0.1.25",
+  "build": 29,
+  "pubDate": "2026-10-14",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.25-macos-universal.dmg",
+  "releaseNotes": "1. 修复开启「启动时自动进入无头模式」后，系统重启或退出重开时内置屏幕未自动屏蔽的问题；2. 修复开机早期外接显示器尚未就绪或无外接屏场景下，断开内屏回调误触发安全恢复点亮内屏的问题；3. 增强内置屏断开与恢复的可靠性：支持登录初期显示服务繁忙时自动重试与配置事务清理。"
 }
