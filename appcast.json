@@ -1,7 +1,7 @@
 {
-  "version": "0.1.25",
-  "build": 29,
-  "pubDate": "2026-10-14",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.25-macos-universal.dmg",
-  "releaseNotes": "1. 修复开启「启动时自动进入无头模式」后，系统重启或退出重开时内置屏幕未自动屏蔽的问题；2. 修复开机早期外接显示器尚未就绪或无外接屏场景下，断开内屏回调误触发安全恢复点亮内屏的问题；3. 增强内置屏断开与恢复的可靠性：支持登录初期显示服务繁忙时自动重试与配置事务清理。"
+  "version": "0.1.26",
+  "build": 30,
+  "pubDate": "2026-10-25",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.26-macos-universal.dmg",
+  "releaseNotes": "1. 新增 MacHead Cloud 云端远程控制台 (dash.headlessmac.com)，支持 GitHub / Google 账号一键免码绑定 Mac 设备；2. 新增 Happy Eyeballs 三轨自适应传输引擎（本机 Loopback 直连、局域网 WebRTC P2P 直连、跨网 Tailcat WireGuard E2EE 端到端加密隧道）；3. 新增多标签 Web 远程终端、远程文件管理器（支持拖拽上传与 UTF-8/GB18030 在线代码编辑）及远程硬件遥测与无头模式控制看板。"
 }
