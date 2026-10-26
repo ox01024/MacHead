@@ -34,7 +34,7 @@
         if (!target) return;
         const href = target.getAttribute('href') || '';
 
-        if (href.includes('.dmg')) {
+        if (href.includes('.dmg') || href === '/download' || href.endsWith('/download')) {
           sendTelemetry({
             event: 'click_download',
             download_url: href
