@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Meta Tags -->
+    <title>MacHead Changelog | Release History &amp; Product Updates</title>
+    <meta name="description" content="Explore the full release history of MacHead, including MacHead Cloud Console, Tailcat WireGuard E2EE remote terminal, smart battery charge limiting, and headless display management." />
+    <link rel="canonical" href="https://headlessmac.com/en/changelog" />
+    <link rel="alternate" hreflang="zh-CN" href="https://headlessmac.com/changelog" />
+    <link rel="alternate" hreflang="en" href="https://headlessmac.com/en/changelog" />
+    <link rel="alternate" hreflang="x-default" href="https://headlessmac.com/changelog" />
+    <meta name="theme-color" content="#fbf9fa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14120b" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="MacHead Changelog" />
+    <meta property="og:description" content="Release history and product updates for MacHead." />
+    <meta property="og:url" content="https://headlessmac.com/en/changelog" />
+    <meta property="og:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <script type="module" crossorigin src="/assets/main-BA5aiulJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/main-BCfav-Wz.css">
+  </head>
+  <body>
+    <!-- Header Navigation -->
+    <header class="navbar">
+      <div class="nav-container">
+        <a href="/en/" class="nav-logo">
+          <img src="/logo.png" alt="MacHead Logo" class="logo-img" width="22" height="22" />
+          <span class="logo-text">MacHead</span>
+        </a>
+        <nav class="nav-links" id="nav-links">
+          <a href="/en/#features" class="nav-link"><span>Features</span></a>
+          <a href="/en/#playground" class="nav-link"><span>Playground</span></a>
+          <a href="/en/#install" class="nav-link"><span>Quick Start</span></a>
+          <a href="https://dash.headlessmac.com" target="_blank" rel="noopener" class="nav-link"><span>Cloud Console</span></a>
+          <a href="/en/changelog" class="nav-link active"><span>Changelog</span></a>
+          <a href="/en/#faq" class="nav-link"><span>FAQ</span></a>
+          <a href="https://github.com/ox01024/MacHead" target="_blank" rel="noopener" class="nav-link github-btn">
+            <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </nav>
+        <div class="nav-actions">
+          <div class="lang-switcher" role="navigation" aria-label="Language switcher">
+            <svg class="lang-globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <a href="/changelog?lang=zh" class="lang-switcher-link" data-set-lang="zh">中文</a>
+            <a href="/en/changelog?lang=en" class="lang-switcher-link active" data-set-lang="en" aria-current="page">EN</a>
+          </div>
+          <a href="/download" class="btn btn-primary btn-sm js-download-link" id="download-header-link">Download DMG</a>
+          <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-links">
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main style="padding-top: 84px;">
+      <section class="changelog-section" style="border-top: none;">
+        <div class="container container-narrow">
+          <div class="section-header text-left">
+            <h1 class="section-title" style="font-size: 36px;">Changelog</h1>
+            <p class="section-subtitle">Feature evolution, security updates, and release history for MacHead.</p>
+          </div>
+
+          <div class="changelog-feed" id="changelog-feed"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container footer-container">
+        <div class="footer-left">
+          <div class="footer-logo">
+            <img src="/logo.png" alt="MacHead Logo" class="footer-logo-img" width="20" height="20" loading="lazy" />
+            <span>MacHead</span>
+          </div>
+          <p class="footer-tagline">Enterprise-Grade MacBook Headless Server Manager</p>
+        </div>
+        <div class="footer-right">
+          <div class="footer-links-group">
+            <span class="group-title">Open Source &amp; Community</span>
+            <a href="https://github.com/ox01024/MacHead/issues" target="_blank" rel="noopener">Issue Tracker &amp; Feedback</a>
+            <a href="https://github.com/ox01024/MacHead/discussions" target="_blank" rel="noopener">Community Discussions</a>
+            <a href="/changelog?lang=zh" data-set-lang="zh">中文更新日志</a>
+          </div>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <p>&copy; 2026 MacHead Project. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>

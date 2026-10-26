@@ -4,143 +4,698 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MacHead — Turn Your MacBook into a Headless Server (Free & Open Source)</title>
-    <meta name="description" content="Free, open-source macOS app that turns any MacBook — even one with a broken screen — into a headless server. Close the lid: display off, sleep handled, mic muted, battery guarded. Web console, CLI & remote access." />
+
+    <!-- SEO Meta Tags -->
+    <title>MacHead — Turn Any MacBook into a Headless Server (Free &amp; Open Source)</title>
+    <meta name="description" content="Enterprise-grade open-source macOS utility that transforms any MacBook — even with a broken screen — into a silent, cool headless server. SkyLight display power-off, smart battery guard, mic privacy lock, and E2EE remote console." />
     <link rel="canonical" href="https://headlessmac.com/en/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="theme-color" content="#fbf9fa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14120b" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="alternate" hreflang="zh-CN" href="https://headlessmac.com/" />
     <link rel="alternate" hreflang="en" href="https://headlessmac.com/en/" />
     <link rel="alternate" hreflang="x-default" href="https://headlessmac.com/" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <script src="/telemetry.js" defer></script>
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="zh_CN" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="MacHead - Turn MacBook into Headless Server" />
-    <meta property="og:description" content="Free macOS tool to turn any MacBook (broken screen OK) into a silent headless server. Disable display, prevent sleep, guard battery. Apple Silicon + Intel." />
+    <meta property="og:title" content="MacHead — Turn Any MacBook into a Headless Server" />
+    <meta property="og:description" content="Free, open-source macOS utility to run any MacBook (broken screen OK) as a silent, cool lid-closed server. True SkyLight display cutoff, battery guard, and E2EE cloud console." />
     <meta property="og:url" content="https://headlessmac.com/en/" />
     <meta property="og:site_name" content="MacHead" />
     <meta property="og:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "MacHead",
-      "url": "https://headlessmac.com/en/",
-      "downloadUrl": "https://releases.headlessmac.com/latest.dmg",
-      "softwareVersion": "0.1.24",
-      "operatingSystem": "macOS 12.0 or later",
-      "applicationCategory": "UtilitiesApplication",
-      "license": "https://www.apache.org/licenses/LICENSE-2.0",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "description": "Free, open-source macOS menu-bar app that turns any MacBook — even one with a broken screen — into a headless server with a web console, CLI and remote access."
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Can I run MacHead on a MacBook with a broken screen?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes. Headless mode turns off the internal display and works with a virtual display, so a cracked or dead screen does not matter. You can do the one-time setup with an external monitor or via Screen Sharing." }
+    <meta property="og:image:width" content="1360" />
+    <meta property="og:image:height" content="1224" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="MacHead macOS app preferences and headless server dashboard" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MacHead — Turn Any MacBook into a Headless Server" />
+    <meta name="twitter:description" content="Broken MacBook screen? Turn it into a silent, cool headless server with MacHead. Free, open-source, zero dependencies. Apple Silicon + Intel." />
+    <meta name="twitter:image" content="https://headlessmac.com/machead_hero_v0.1.14.png" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json" id="schema-json-ld">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "MacHead",
+        "alternateName": ["MacHead Headless Server Manager"],
+        "operatingSystem": "macOS 12.0+",
+        "applicationCategory": "UtilityApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0.00",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
         },
-        {
-          "@type": "Question",
-          "name": "Will a closed MacBook overheat or drain its battery as a server?",
-          "acceptedAnswer": { "@type": "Answer", "text": "MacHead includes a battery guard that restores normal sleep at low charge, plus temperature alerts. For 24/7 use, keep it plugged in on a hard, ventilated surface." }
-        },
-        {
-          "@type": "Question",
-          "name": "Does MacHead work on Intel Macs?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes. MacHead supports both Apple Silicon and Intel MacBooks, on macOS 12 or later." }
-        },
-        {
-          "@type": "Question",
-          "name": "How is MacHead different from Amphetamine or caffeinate?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Amphetamine and caffeinate mainly block idle sleep; clamshell (lid-closed) sleep needs extra handling, and they leave the internal display and setup work to you. MacHead is a complete headless workstation mode: internal display off, lid-closed operation, virtual display, web console, CLI, and remote access via Cloudflare Tunnel, Microsoft Dev Tunnels or FRP." }
-        },
-        {
-          "@type": "Question",
-          "name": "Is MacHead free?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Yes — free and open source under the Apache-2.0 license. Source code: github.com/ox01024/MacHead." }
+        "description": "Free, lightweight macOS tool that transforms any MacBook into a headless server. Disables internal display via SkyLight API, auto-mutes microphone, prevents clamshell sleep, and protects battery health.",
+        "inLanguage": "en",
+        "downloadUrl": "https://headlessmac.com/download",
+        "installUrl": "https://headlessmac.com/en/",
+        "screenshot": "https://headlessmac.com/machead_hero_v0.1.14.png",
+        "softwareVersion": "0.1.27",
+        "processorRequirements": "Apple Silicon (M1/M2/M3/M4) or Intel x86_64",
+        "license": "https://www.apache.org/licenses/LICENSE-2.0",
+        "publisher": {
+          "@type": "Organization",
+          "name": "MacHead Project",
+          "url": "https://headlessmac.com/en/",
+          "logo": "https://headlessmac.com/logo.png"
         }
-      ]
-    }
+      }
     </script>
-    <style>
-      :root { color-scheme: light dark; }
-      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; line-height: 1.6; }
-      main { max-width: 880px; margin: 0 auto; padding: 24px 20px 64px; }
-      header { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 24px; }
-      header nav a { margin-left: 16px; text-decoration: none; }
-      h1 { font-size: 2.2rem; line-height: 1.25; margin: 24px 0 12px; }
-      .sub { font-size: 1.12rem; opacity: .85; margin-bottom: 28px; }
-      .cta { display: flex; gap: 12px; flex-wrap: wrap; margin: 28px 0 8px; }
-      .btn { display: inline-block; padding: 12px 22px; border-radius: 10px; text-decoration: none; font-weight: 600; border: 1px solid currentColor; }
-      .btn.primary { background: #2f6bff; color: #fff; border-color: #2f6bff; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 20px 0; }
-      .card { border: 1px solid rgba(127,127,127,.35); border-radius: 12px; padding: 16px 18px; }
-      .card h3 { margin: 0 0 6px; font-size: 1.02rem; }
-      .card p { margin: 0; opacity: .85; font-size: .95rem; }
-      h2 { margin-top: 44px; }
-      details { border-top: 1px solid rgba(127,127,127,.35); padding: 12px 0; }
-      summary { font-weight: 600; cursor: pointer; }
-      footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid rgba(127,127,127,.35); font-size: .9rem; opacity: .8; }
-      a { color: #2f6bff; }
-    </style>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Can I use a MacBook with a broken screen as a headless server?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. MacHead logically disconnects and powers off the internal display via the macOS SkyLight framework, allowing your MacBook to run silently with the lid closed and no external monitor attached."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does MacHead differ from macOS Clamshell Mode, Amphetamine, or caffeinate?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Native macOS Clamshell Mode requires an external display, while caffeinate and Amphetamine only prevent idle sleep without cutting internal display power. MacHead combines true SkyLight display power-off, clamshell sleep prevention, built-in keyboard/trackpad lockout, microphone mute, smart battery charge limiting, and E2EE remote management."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does MacHead support both Apple Silicon and Intel MacBooks?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. MacHead ships as a Universal macOS binary supporting Apple Silicon (M1, M2, M3, M4) and Intel Macs running macOS 12.0 Monterey or later."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is MacHead free and open source?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, MacHead is 100% free and open source under the Apache-2.0 license."
+            }
+          }
+        ]
+      }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+    </noscript>
+    <script type="module" crossorigin src="/assets/main-BA5aiulJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/main-BCfav-Wz.css">
   </head>
   <body>
-    <main>
-      <header>
-        <strong>MacHead</strong>
-        <nav>
-          <a href="https://headlessmac.com/">中文</a>
-          <a href="https://github.com/ox01024/MacHead">GitHub</a>
-          <a href="/guides/macbook-ai-agent-server/">Guide</a>
-          <a href="https://headlessmac.com/changelog">Changelog</a>
+    <!-- Header Navigation -->
+    <header class="navbar">
+      <div class="nav-container">
+        <a href="/en/" class="nav-logo" id="nav-logo-link">
+          <img src="/logo.png" alt="MacHead Logo" class="logo-img" width="22" height="22" />
+          <span class="logo-text">MacHead</span>
+        </a>
+        <nav class="nav-links" id="nav-links" itemscope itemtype="https://schema.org/SiteNavigationElement">
+          <a itemprop="url" href="/en/#features" class="nav-link"><span itemprop="name">Features</span></a>
+          <a itemprop="url" href="/en/#playground" class="nav-link"><span itemprop="name">Playground</span></a>
+          <a itemprop="url" href="/en/#install" class="nav-link"><span itemprop="name">Quick Start</span></a>
+          <a itemprop="url" href="https://dash.headlessmac.com" target="_blank" rel="noopener" class="nav-link"><span itemprop="name">Cloud Console</span></a>
+          <a itemprop="url" href="/en/changelog" class="nav-link"><span itemprop="name">Changelog</span></a>
+          <a itemprop="url" href="/en/#faq" class="nav-link"><span itemprop="name">FAQ</span></a>
+          <a itemprop="url" href="https://github.com/ox01024/MacHead" target="_blank" rel="noopener" class="nav-link github-btn">
+            <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+            <span itemprop="name">GitHub</span>
+          </a>
         </nav>
-      </header>
-
-      <h1>Turn your MacBook into a headless server</h1>
-      <p class="sub">MacHead is a free, open-source macOS menu-bar app that turns any MacBook — even one with a broken screen — into a quiet headless workstation. Open the lid, it's a laptop. Close it, it's a server.</p>
-
-      <div class="cta">
-        <a class="btn primary" href="/download">Download for macOS</a>
-        <a class="btn" href="https://github.com/ox01024/MacHead">View on GitHub</a>
+        <div class="nav-actions">
+          <div class="lang-switcher" role="navigation" aria-label="Language switcher">
+            <svg class="lang-globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <a href="/?lang=zh" class="lang-switcher-link" data-set-lang="zh">中文</a>
+            <a href="/en/?lang=en" class="lang-switcher-link active" data-set-lang="en" aria-current="page">EN</a>
+          </div>
+          <a href="/download" class="btn btn-primary btn-sm js-download-link" id="download-header-link">Download DMG</a>
+          <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-links">
+            <span class="menu-bar"></span>
+            <span class="menu-bar"></span>
+          </button>
+        </div>
       </div>
-      <p>Free &amp; open source (Apache-2.0) · Apple Silicon &amp; Intel · macOS 12+</p>
+    </header>
 
-      <h2>What it does</h2>
-      <div class="grid">
-        <div class="card"><h3>One-click headless mode</h3><p>Internal display off, clamshell sleep handled, virtual display when you need a GUI. No dummy HDMI plug, no pmset scripts.</p></div>
-        <div class="card"><h3>Broken-screen friendly</h3><p>A cracked or dead internal display is not a problem — headless mode never needs it. Give that MacBook a second life as a server.</p></div>
-        <div class="card"><h3>Battery &amp; thermal guard</h3><p>Restores normal sleep at low charge, watches temperature, and auto-mutes the microphone for always-on duty.</p></div>
-        <div class="card"><h3>Web console &amp; CLI</h3><p>Monitor CPU, memory, GPU and battery from a LAN web dashboard, or drive everything with the <code>machead</code> command-line tool.</p></div>
-        <div class="card"><h3>Remote access built in</h3><p>Reach your headless MacBook from anywhere via Cloudflare Tunnel, Microsoft Dev Tunnels or FRP — no port forwarding.</p></div>
-        <div class="card"><h3>Made for 24/7 agents &amp; homelabs</h3><p>Keep AI coding agents (Claude Code, Codex) running with the lid closed, or run a silent home server on a spare MacBook instead of buying a VPS.</p></div>
-      </div>
+    <!-- Main Content -->
+    <main>
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="container hero-container">
+          <div class="hero-content">
+            <div class="hero-badge animate-fade-in">
+              <span class="badge-dot"></span>
+              <span class="badge-text">v0.1.27 Universal · Apple Silicon &amp; Intel</span>
+            </div>
+            <h1 class="hero-title animate-slide-up">
+              Turn Your MacBook Into a Headless Server.<br/>
+              <span class="highlight-text">Silent. Cool. Always On.</span>
+            </h1>
+            <p class="hero-desc animate-slide-up-delay">
+              MacHead is a lightweight, zero-dependency native macOS utility. It logically powers off the internal display at the system level for true lid-closed operation—preventing heat buildup and panel wear while guarding battery health and muting your microphone.
+            </p>
+            <div class="hero-actions animate-slide-up-delay2">
+              <a href="/download" class="btn btn-primary btn-lg js-download-link" id="download-hero-link">
+                <svg class="apple-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 22C7.79 22.05 6.8 20.68 5.96 19.47C4.25 17 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.1 16.67C20.08 16.74 19.67 18.11 18.71 19.5M15.97 4.17C16.63 3.37 17.07 2.28 16.95 1C15.98 1.04 14.81 1.65 14.11 2.47C13.5 3.17 12.97 4.28 13.12 5.5C14.2 5.58 15.3 4.97 15.97 4.17Z"></path>
+                </svg>
+                Download for macOS (.dmg)
+              </a>
+              <a href="https://dash.headlessmac.com" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">
+                Open Cloud Console
+              </a>
+            </div>
+          </div>
 
-      <h2>Who it's for</h2>
-      <div class="grid">
-        <div class="card"><h3>AI agent runners</h3><p>Long agent sessions die when the lid closes. MacHead keeps the machine awake, reachable and guarded overnight.</p></div>
-        <div class="card"><h3>Homelab &amp; self-hosters</h3><p>A spare MacBook is a low-power, UPS-backed (its own battery) server with a real Unix under the hood.</p></div>
-        <div class="card"><h3>Owners of broken MacBooks</h3><p>Screen repair can cost more than the machine is worth. As a headless server, it can serve for years.</p></div>
-      </div>
+          <div class="hero-visual animate-fade-in-delay">
+            <div class="visual-scene">
+              <img src="/machead_web_dash_v0.1.14.png" srcset="/machead_web_dash_v0.1.14_sm.png 354w, /machead_web_dash_v0.1.14_md.png 709w, /machead_web_dash_v0.1.14.png 2186w" sizes="(max-width: 968px) 62vw, 425px" alt="MacHead Web Console hardware monitoring dashboard" class="screenshot-back" width="2186" height="3156" fetchpriority="high" loading="eager" decoding="async" />
+              <img src="/machead_hero_v0.1.14.png" srcset="/machead_hero_v0.1.14_sm.png 512w, /machead_hero_v0.1.14_md.png 1024w, /machead_hero_v0.1.14.png 1360w" sizes="(max-width: 968px) 42vw, 285px" alt="MacHead macOS preferences window" class="screenshot-front" width="1360" height="1224" fetchpriority="high" loading="eager" decoding="async" />
+              <div class="scene-glow"></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <h2>FAQ</h2>
-      <details><summary>Can I run MacHead on a MacBook with a broken screen?</summary><p>Yes. Headless mode turns off the internal display and works with a virtual display, so a cracked or dead screen does not matter. You can do the one-time setup with an external monitor or via Screen Sharing.</p></details>
-      <details><summary>Will a closed MacBook overheat or drain its battery as a server?</summary><p>MacHead includes a battery guard that restores normal sleep at low charge, plus temperature alerts. For 24/7 use, keep it plugged in on a hard, ventilated surface.</p></details>
-      <details><summary>Does MacHead work on Intel Macs?</summary><p>Yes. MacHead supports both Apple Silicon and Intel MacBooks, on macOS 12 or later.</p></details>
-      <details><summary>How is MacHead different from Amphetamine or caffeinate?</summary><p>Those mainly block idle sleep; clamshell (lid-closed) sleep needs extra handling, and they leave the display and setup work to you. MacHead is a complete headless workstation mode: display off, lid-closed operation, web console, CLI and remote access in one app.</p></details>
-      <details><summary>Is MacHead free?</summary><p>Yes — free and open source under the Apache-2.0 license.</p></details>
+      <!-- Key Features Bento Grid Section -->
+      <section id="features" class="features-section scroll-effect">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Purpose-Built for 24/7 Lid-Closed Operation</h2>
+            <p class="section-subtitle">Engineered from the display controller up to protect your MacBook's thermal envelope, battery longevity, and physical privacy.</p>
+          </div>
 
-      <div class="cta">
-        <a class="btn primary" href="/download">Download MacHead</a>
-        <a class="btn" href="https://headlessmac.com/">中文官网</a>
-      </div>
+          <div class="bento-grid">
+            <!-- Bento Box 1: Internal Display Cutoff -->
+            <div class="bento-card bento-w2">
+              <div class="bento-icon-box text-purple">
+                <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div class="bento-content">
+                <h3 class="bento-title">True Internal Display Power-Off</h3>
+                <p class="bento-desc">Instead of merely dimming brightness, MacHead invokes macOS SkyLight APIs to logically disconnect and cut power to the built-in panel. This eliminates GPU scanout overhead and prevents trapped heat from degrading or yellowing your screen under a closed lid.</p>
+              </div>
+            </div>
 
-      <footer>
-        MacHead · Free &amp; open source (Apache-2.0) · <a href="https://github.com/ox01024/MacHead">github.com/ox01024/MacHead</a> · <a href="https://headlessmac.com/">headlessmac.com</a>
-      </footer>
+            <!-- Bento Box 2: Mic Privacy Lock -->
+            <div class="bento-card">
+              <div class="bento-icon-box text-cyan">
+                <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h6m-1-17a3 3 0 013 3v7a3 3 0 01-3 3H8a3 3 0 01-3-3V7a3 3 0 013-3z" />
+                </svg>
+              </div>
+              <div class="bento-content">
+                <h3 class="bento-title">Hardware-Level Microphone Mute</h3>
+                <p class="bento-desc">An always-on server shouldn't be an open microphone in your home or office. Whenever Headless Mode engages, MacHead automatically mutes the built-in audio input across the system.</p>
+              </div>
+            </div>
+
+            <!-- Bento Box 3: Smart Battery Guard -->
+            <div class="bento-card">
+              <div class="bento-icon-box text-pink">
+                <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div class="bento-content">
+                <h3 class="bento-title">Smart Battery &amp; Charge Limit Guard</h3>
+                <p class="bento-desc">Cap charging between 50% and 90% to prevent battery swelling on 24/7 AC power. If mains power fails, built-in UPS logic automatically restores system sleep below your safety threshold to prevent deep discharge.</p>
+              </div>
+            </div>
+
+            <!-- Bento Box 4: Input Lockout -->
+            <div class="bento-card bento-w2 bento-split">
+              <div class="bento-split-left">
+                <div class="bento-icon-box text-indigo">
+                  <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586l6.879-6.879A6 6 0 0121 9z" />
+                  </svg>
+                </div>
+                <div class="bento-content">
+                  <h3 class="bento-title">Built-In Keyboard &amp; Trackpad Lockout</h3>
+                  <p class="bento-desc">When the lid is closed or stacked in a rack, slight pressure can trigger phantom keystrokes. MacHead intercepts and blocks internal keyboard and trackpad events in Headless Mode while keeping external USB and Bluetooth peripherals fully responsive.</p>
+                </div>
+              </div>
+              <div class="bento-split-right">
+                <div class="bento-screenshot-wrapper">
+                  <img src="/machead_hero_v0.1.14.png" srcset="/machead_hero_v0.1.14_sm.png 512w, /machead_hero_v0.1.14_md.png 1024w, /machead_hero_v0.1.14.png 1360w" sizes="(max-width: 968px) 88vw, 330px" alt="MacHead preferences window showing input lockout controls" class="bento-screenshot" width="1360" height="1224" loading="lazy" decoding="async" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Bento Box 5: Cloud & LAN Web Console -->
+            <div class="bento-card bento-w2 bento-split">
+              <div class="bento-split-left">
+                <div class="bento-icon-box text-emerald">
+                  <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                  </svg>
+                </div>
+                <div class="bento-content">
+                  <h3 class="bento-title">E2EE Cloud Console &amp; LAN Dashboard</h3>
+                  <p class="bento-desc">Connect from any browser via <strong>MacHead Cloud (dash.headlessmac.com)</strong> with Happy Eyeballs 3-track transport (Loopback, LAN WebRTC P2P, and WireGuard E2EE). Access multi-tab web terminals, remote file management, and live CPU/RAM/GPU/thermal telemetry.</p>
+                </div>
+              </div>
+              <div class="bento-split-right">
+                <div class="bento-screenshot-wrapper">
+                  <img src="/machead_web_dash_v0.1.14.png" srcset="/machead_web_dash_v0.1.14_sm.png 354w, /machead_web_dash_v0.1.14_md.png 709w, /machead_web_dash_v0.1.14.png 2186w" sizes="(max-width: 968px) 88vw, 330px" alt="MacHead Web Console hardware monitoring and remote controls" class="bento-screenshot" width="2186" height="3156" loading="lazy" decoding="async" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Bento Box 6: Adaptive Hot-Plug Guard -->
+            <div class="bento-card">
+              <div class="bento-icon-box text-violet">
+                <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div class="bento-content">
+                <h3 class="bento-title">Adaptive Display Hot-Plug Recovery</h3>
+                <p class="bento-desc">Automatically detects external monitor disconnections and immediately restores your built-in display to prevent black-screen lockouts—then seamlessly re-enters Headless Mode when reconnected.</p>
+              </div>
+            </div>
+
+            <!-- Bento Box 7: Native Tunneling & Fleet Telemetry -->
+            <div class="bento-card bento-w2">
+              <div class="bento-icon-box text-cyan">
+                <svg class="feature-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div class="bento-content">
+                <h3 class="bento-title">Native Tunneling &amp; Fleet Monitoring</h3>
+                <p class="bento-desc">Ships with built-in clients for Cloudflare Tunnel, Microsoft Dev Tunnels, FRP (frpc), Nezha Monitoring, and ServerStatus. Expose services securely without router port forwarding and monitor your entire Mac homelab fleet in real time.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Playground Section -->
+      <section id="playground" class="playground-section scroll-effect">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Interactive Playground</h2>
+            <p class="section-subtitle">Experience the MacHead CLI and Web Remote Console right in your browser—no installation required.</p>
+          </div>
+
+          <div class="playground-tabs-container">
+            <div class="playground-tabs">
+              <button class="tab-btn active" data-tab="cli">
+                <span class="tab-dot dot-green"></span>
+                MacHead CLI Terminal
+              </button>
+              <button class="tab-btn" data-tab="web">
+                <span class="tab-dot dot-purple"></span>
+                Web Console Simulator
+              </button>
+            </div>
+
+            <div class="playground-panels">
+              <!-- CLI Panel -->
+              <div class="tab-panel active" id="panel-cli">
+                <div class="terminal-window">
+                  <div class="terminal-header">
+                    <div class="window-buttons">
+                      <span class="win-btn win-btn-close"></span>
+                      <span class="win-btn win-btn-min"></span>
+                      <span class="win-btn win-btn-max"></span>
+                    </div>
+                    <div class="window-title">zsh - machead --help</div>
+                  </div>
+                  <div class="terminal-body" id="cli-console">
+                    <div class="terminal-line"><span class="prompt">$</span> <span class="input-cmd">machead status</span></div>
+                    <div class="terminal-output">Mode: NORMAL (Active Screen)<br/>WebServer: RUNNING (http://192.168.100.131:8080)<br/>Sleep Prevention: DISABLED<br/>Power Source: AC Power (Battery 100%)</div>
+                    <div class="terminal-line"><span class="prompt">$</span> <span class="cursor-blink">_</span></div>
+                  </div>
+                  <div class="terminal-footer">
+                    <span class="footer-hint">Click a command below to run it:</span>
+                    <div class="terminal-triggers">
+                      <button class="cli-cmd-btn" data-cmd="status">machead status</button>
+                      <button class="cli-cmd-btn" data-cmd="enable">machead enable</button>
+                      <button class="cli-cmd-btn" data-cmd="disable">machead disable</button>
+                      <button class="cli-cmd-btn" data-cmd="sleep-prevent">machead sleep prevent</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Web Panel -->
+              <div class="tab-panel" id="panel-web">
+                <div class="web-mockup" id="web-mockup-wrapper" data-mock-theme="light">
+                  <div class="web-mockup-header">
+                    <div class="web-mockup-address">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; color: var(--color-text-main);">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                      http://192.168.100.131:8080
+                    </div>
+                  </div>
+                  <div class="web-mockup-body" style="font-family: var(--font-sans); padding: 24px; transition: background-color 0.3s, color 0.3s;">
+
+                    <!-- 1. Login Simulator Screen -->
+                    <div id="web-mockup-login" class="web-mockup-login" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; text-align: center;">
+                      <span style="font-size: 32px; font-family: var(--font-serif); margin-bottom: 8px;"></span>
+                      <h4 style="font-size: 16px; font-weight: 600; margin: 0 0 6px 0; font-family: var(--font-sans); color: var(--color-text-main);">MacHead Remote Console</h4>
+                      <p style="font-size: 12px; color: var(--color-text-muted); margin: 0 0 20px 0;">Enter your security password to unlock the dashboard</p>
+
+                      <div id="web-login-error" style="display: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #ff453a; background: rgba(255, 69, 58, 0.1); border: 1px solid rgba(255, 69, 58, 0.2); margin-bottom: 16px; width: 100%; max-width: 240px; text-align: left;">
+                        Invalid password, please try again
+                      </div>
+
+                      <form id="web-login-form" style="width: 100%; max-width: 240px; display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                          <input type="password" id="web-login-pass" placeholder="Password (e.g. admin)" style="width: 100%; box-sizing: border-box; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 6px; padding: 10px 14px; font-size: 13px; color: var(--color-text-main); outline: none; transition: border-color 0.2s;" required>
+                        </div>
+                        <button type="submit" style="width: 100%; background: var(--color-btn-primary-bg); color: var(--color-btn-primary-text); border: none; border-radius: 999px; padding: 10px 16px; font-size: 12.5px; font-weight: 500; cursor: pointer;">
+                          Unlock Console
+                        </button>
+                      </form>
+                      <div style="margin-top: 16px; font-size: 11px; color: var(--color-text-muted);">
+                        Demo Hint: Type <code>admin</code> and press Enter
+                      </div>
+                    </div>
+
+                    <!-- 2. Authenticated Dashboard Screen -->
+                    <div id="web-mockup-dashboard" class="web-mockup-dashboard" style="display: none;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--color-border);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="font-size: 20px; font-family: var(--font-serif); color: var(--color-text-main);"></span>
+                          <h3 style="font-family: var(--font-serif); font-size: 15px; font-weight: 400; color: var(--color-text-main); margin: 0;">MacHead Remote Console</h3>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <button class="cli-cmd-btn" id="web-mockup-theme-toggle" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-bg-card); color: var(--color-text-main); cursor: pointer; font-family: var(--font-sans);">
+                            Dark Mode
+                          </button>
+                          <button class="cli-cmd-btn" id="web-mockup-logout" style="padding: 4px 8px; font-size: 10px; border-radius: 4px; border: 1px solid var(--color-border); background: var(--color-bg-card); color: var(--color-text-main); cursor: pointer; display: flex; align-items: center; gap: 3px; font-family: var(--font-sans);">
+                            <span>Lock</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div id="web-mock-alert-box" style="margin-bottom: 14px;">
+                        <div class="web-alert warning" style="display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 8px 12px; border-radius: 4px; border: 1px solid rgba(224, 169, 109, 0.2); background: rgba(224, 169, 109, 0.08); color: var(--color-text-main);">
+                          <span>⚠️</span>
+                          <span>Running in Headless Server Mode (Internal display powered off)</span>
+                        </div>
+                      </div>
+
+                      <!-- Hardware Gauges Card -->
+                      <div class="web-dash-card">
+                        <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 12px; display: flex; justify-content: space-between;">
+                          <span>Hardware Load &amp; Telemetry</span>
+                          <span style="font-family: var(--font-sans); font-size: 10px; color: var(--color-text-muted);" id="web-hardware-peaks">Peak - CPU: 28% | RAM: 16%</span>
+                        </div>
+                        <div class="gauge-container" style="display: flex; justify-content: space-around; padding: 6px 0; gap: 12px;">
+                          <div class="gauge-card" style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                            <svg width="68" height="68" viewBox="0 0 80 80">
+                              <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(128,128,128,0.12)" stroke-width="5"></circle>
+                              <circle cx="40" cy="40" r="28" fill="none" stroke="#42b883" stroke-width="5" stroke-dasharray="175.9" stroke-dashoffset="126.6" stroke-linecap="round" transform="rotate(-90 40 40)" id="mock-cpu-circle" style="transition: stroke-dashoffset 0.8s ease;"></circle>
+                              <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-cpu-val">28%</text>
+                            </svg>
+                            <div class="gauge-label" style="font-size: 10px; font-weight: 500; margin-top: 2px;">CPU Load</div>
+                            <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-cpu-temp">Temp: 48.2 °C</div>
+                            <svg class="sparkline" viewBox="0 0 160 30" preserveAspectRatio="none" style="width: 100%; max-width: 90px; height: 18px; margin-top: 6px; border-bottom: 1px solid var(--color-border);">
+                              <path id="web-cpu-spark-fill" fill="#42b883" fill-opacity="0.12" d=""></path>
+                              <path id="web-cpu-spark-line" fill="none" stroke="#42b883" stroke-width="1.2" d=""></path>
+                            </svg>
+                          </div>
+
+                          <div class="gauge-card" style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                            <svg width="68" height="68" viewBox="0 0 80 80">
+                              <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(128,128,128,0.12)" stroke-width="5"></circle>
+                              <circle cx="40" cy="40" r="28" fill="none" stroke="#007aff" stroke-width="5" stroke-dasharray="175.9" stroke-dashoffset="147.7" stroke-linecap="round" transform="rotate(-90 40 40)" id="mock-ram-circle" style="transition: stroke-dashoffset 0.8s ease;"></circle>
+                              <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-ram-val">16%</text>
+                            </svg>
+                            <div class="gauge-label" style="font-size: 10px; font-weight: 500; margin-top: 2px;">Memory</div>
+                            <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-ram-details">Used: 8.12 GB / 32.0 GB</div>
+                            <svg class="sparkline" viewBox="0 0 160 30" preserveAspectRatio="none" style="width: 100%; max-width: 90px; height: 18px; margin-top: 6px; border-bottom: 1px solid var(--color-border);">
+                              <path id="web-ram-spark-fill" fill="#007aff" fill-opacity="0.12" d=""></path>
+                              <path id="web-ram-spark-line" fill="none" stroke="#007aff" stroke-width="1.2" d=""></path>
+                            </svg>
+                          </div>
+
+                          <div class="gauge-card" style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+                            <svg width="68" height="68" viewBox="0 0 80 80">
+                              <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(128,128,128,0.12)" stroke-width="5"></circle>
+                              <circle cx="40" cy="40" r="28" fill="none" stroke="#af52de" stroke-width="5" stroke-dasharray="175.9" stroke-dashoffset="175.9" stroke-linecap="round" transform="rotate(-90 40 40)" id="mock-gpu-circle" style="transition: stroke-dashoffset 0.8s ease;"></circle>
+                              <text x="40" y="45" text-anchor="middle" style="font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-text-main);" id="web-gpu-val">8%</text>
+                            </svg>
+                            <div class="gauge-label" style="font-size: 10px; font-weight: 500; margin-top: 2px;">GPU Core</div>
+                            <div style="font-size: 9px; color: var(--color-text-muted); margin-top: 2px;" id="web-gpu-vram">VRAM: 0.85 GB / 16.0 GB</div>
+                            <svg class="sparkline" viewBox="0 0 160 30" preserveAspectRatio="none" style="width: 100%; max-width: 90px; height: 18px; margin-top: 6px; border-bottom: 1px solid var(--color-border);">
+                              <path id="web-gpu-spark-fill" fill="#af52de" fill-opacity="0.12" d=""></path>
+                              <path id="web-gpu-spark-line" fill="none" stroke="#af52de" stroke-width="1.2" d=""></path>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Network Card -->
+                      <div class="web-dash-card" style="margin-top: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                          <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main);">Network Throughput</div>
+                          <div style="font-size: 9px; color: var(--color-text-muted);">
+                            <span id="web-rx-peak">↓ Peak: 124.0 KB/s</span> &nbsp;|&nbsp; <span id="web-tx-peak">↑ Peak: 12.0 KB/s</span>
+                          </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                          <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #42b883;"></span>
+                            <span style="font-size: 10.5px; color: var(--color-text-muted);">Inbound</span>
+                            <span style="font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums;" id="web-net-rx">↓ 64.2 KB/s</span>
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #007aff;"></span>
+                            <span style="font-size: 10.5px; color: var(--color-text-muted);">Outbound</span>
+                            <span style="font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums;" id="web-net-tx">↑ 4.1 KB/s</span>
+                          </div>
+                        </div>
+                        <svg class="sparkline" viewBox="0 0 320 35" preserveAspectRatio="none" style="width: 100%; height: 28px; border-bottom: 1px solid var(--color-border);">
+                          <path id="web-rx-spark-fill" fill="#42b883" fill-opacity="0.12" d=""></path>
+                          <path id="web-rx-spark-line" fill="none" stroke="#42b883" stroke-width="1.2" d=""></path>
+                          <path id="web-tx-spark-fill" fill="#007aff" fill-opacity="0.12" d=""></path>
+                          <path id="web-tx-spark-line" fill="none" stroke="#007aff" stroke-width="1.2" d=""></path>
+                        </svg>
+                      </div>
+
+                      <!-- Controls Card -->
+                      <div class="web-dash-card" style="margin-top: 16px; padding: 16px;">
+                        <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 12px;">Remote Device Controls</div>
+
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">MacBook Headless Mode</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">Power off internal display to operate as a standalone headless server.</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-headless-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
+                        </div>
+
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">Prevent Idle &amp; Clamshell Sleep</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">Keep system awake continuously when the lid is closed.</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-sleep-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
+                        </div>
+
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">Lock Built-In Keyboard &amp; Trackpad</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">Ignore built-in keyboard and trackpad inputs while in Headless Mode.</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-kbd-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
+                        </div>
+
+                        <div class="web-toggle-row">
+                          <div>
+                            <div class="control-label" style="font-weight: 500; font-size: 11.5px;">Mute Built-In Microphone</div>
+                            <div class="control-desc" style="font-size: 9.5px; color: var(--color-text-muted); margin-top: 2px;">Automatically mute internal microphone input in Headless Mode.</div>
+                          </div>
+                          <label class="switch-mini">
+                            <input type="checkbox" id="web-mic-toggle" checked>
+                            <span class="slider-mini"></span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Installation & Quick Start Section -->
+      <section id="install" class="install-section scroll-effect">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Up and Running in Three Steps</h2>
+            <p class="section-subtitle">Zero complex scripts or kernel extensions—ready out of the box in under a minute.</p>
+          </div>
+
+          <div class="install-steps">
+            <div class="step-card">
+              <div class="step-num">01</div>
+              <h3 class="step-title">Download &amp; Install MacHead</h3>
+              <p class="step-desc">Download the Universal DMG installer and drag the MacHead icon into your Applications folder.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-num">02</div>
+              <h3 class="step-title">Launch from the Menu Bar</h3>
+              <p class="step-desc">Open MacHead to reveal the menu bar icon. Toggle Headless Mode, configure battery charge limits, or bind your MacHead Cloud account in one click.</p>
+            </div>
+
+            <div class="step-card">
+              <div class="step-num">03</div>
+              <h3 class="step-title">Enable Input &amp; Sleep Guards</h3>
+              <p class="step-desc">Grant Accessibility permission if you want automatic keyboard and trackpad lockout when the lid closes, then close the lid and let your server run.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Changelog Preview Section -->
+      <section id="changelog" class="changelog-section scroll-effect">
+        <div class="container container-narrow">
+          <div class="section-header text-left" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <h2 class="section-title">Changelog</h2>
+              <p class="section-subtitle">Latest feature releases, security hardening, and platform improvements.</p>
+            </div>
+            <a href="/en/changelog" class="btn btn-secondary btn-md">View Full Changelog</a>
+          </div>
+
+          <div class="changelog-feed" id="changelog-feed"></div>
+        </div>
+      </section>
+
+      <!-- Call To Action Section -->
+      <section class="cta-section scroll-effect">
+        <div class="container">
+          <div class="cta-card">
+            <h2 class="cta-title">Give Your MacBook a Second Life Today</h2>
+            <p class="cta-desc">MacHead is 100% free and open source under the Apache-2.0 license, built natively for Apple Silicon and Intel Macs.</p>
+            <div class="cta-actions">
+              <a href="/download" class="btn btn-primary btn-lg js-download-link" id="download-cta-link">Download macOS Universal DMG v0.1.27</a>
+              <a href="https://github.com/ox01024/MacHead" target="_blank" rel="noopener" class="btn btn-secondary btn-lg">Star on GitHub</a>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
+
+    <!-- FAQ Section (Pure English) -->
+    <section class="faq-section scroll-effect" id="faq">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-subtitle">Everything you need to know about running your MacBook as a headless server.</p>
+        </div>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary class="faq-question">Can I use a MacBook with a cracked or broken screen as a server?</summary>
+            <p class="faq-answer">Yes! MacHead logically powers off the internal display via the macOS SkyLight framework and manages virtual display state, so a damaged internal panel is never needed. You can complete the one-time setup using an external monitor or macOS Screen Sharing.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">How does MacHead disable the internal display compared to turning brightness down?</summary>
+            <p class="faq-answer">Lowering brightness only dims the backlight while the display pipeline stays active. MacHead cuts off the internal display signal at the SkyLight system level, stopping panel power draw and eliminating heat buildup under a closed lid.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">How is MacHead different from Clamshell Mode, Amphetamine, or caffeinate?</summary>
+            <p class="faq-answer">Native macOS Clamshell Mode requires an external display attached at all times, while caffeinate and Amphetamine only prevent idle sleep. MacHead is a complete headless server suite: display-off operation without dummy HDMI plugs, built-in keyboard/trackpad lockout, microphone mute, smart battery charge limiting (50%–90%), and an E2EE web terminal.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">Will running my MacBook 24/7 with the lid closed overheat or damage the battery?</summary>
+            <p class="faq-answer">MacHead includes a Smart Charge Limit (50%–90%) to prevent battery swelling on continuous AC power, plus a low-battery UPS guard that restores normal sleep if power is lost. Real-time CPU and battery thermal alerts can also notify you via Bark or Telegram.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">Does MacHead work on both Apple Silicon and Intel Macs?</summary>
+            <p class="faq-answer">Yes. MacHead ships as a Universal binary supporting all Apple Silicon (M1, M2, M3, M4) and Intel-based MacBooks running macOS Monterey (12.0) or later.</p>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">Is MacHead free and open source?</summary>
+            <p class="faq-answer">Yes, MacHead is completely free and open source under the Apache-2.0 license. Cloud terminal sessions use WireGuard end-to-end encryption (E2EE) with native password gating, and anonymous telemetry can be toggled off at any time in Preferences.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container footer-container">
+        <div class="footer-left">
+          <div class="footer-logo">
+            <img src="/logo.png" alt="MacHead Logo" class="footer-logo-img" width="20" height="20" loading="lazy" />
+            <span>MacHead</span>
+          </div>
+          <p class="footer-tagline">Enterprise-Grade MacBook Headless Server Manager</p>
+        </div>
+        <div class="footer-right">
+          <div class="footer-links-group">
+            <span class="group-title">Product</span>
+            <a href="https://dash.headlessmac.com" target="_blank" rel="noopener">MacHead Cloud Console</a>
+            <a href="/en/changelog">Release Changelog</a>
+            <a href="/download" class="js-download-link">Download for macOS</a>
+          </div>
+          <div class="footer-links-group">
+            <span class="group-title">Open Source &amp; Community</span>
+            <a href="https://github.com/ox01024/MacHead" target="_blank" rel="noopener">GitHub Repository</a>
+            <a href="https://github.com/ox01024/MacHead/issues" target="_blank" rel="noopener">Issue Tracker &amp; Feedback</a>
+            <a href="https://github.com/ox01024/MacHead/discussions" target="_blank" rel="noopener">Community Discussions</a>
+          </div>
+          <div class="footer-links-group">
+            <span class="group-title">Guides &amp; Locale</span>
+            <a href="/guides/macbook-ai-agent-server/">24/7 AI Agent Server Guide</a>
+            <a href="/guides/amphetamine-alternative/">Amphetamine Alternative Guide</a>
+            <a href="/?lang=zh" data-set-lang="zh">简体中文 (Chinese)</a>
+          </div>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <p>&copy; 2026 MacHead Project. All rights reserved.</p>
+        <p>Disclaimer: macOS and Studio Display are trademarks of Apple Inc., registered in the U.S. and other countries.</p>
+      </div>
+    </footer>
   </body>
 </html>

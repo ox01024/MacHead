@@ -2,7 +2,7 @@
 <html lang="zh-CN" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="./logo.png" />
+    <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- SEO Meta Tags -->
@@ -12,11 +12,11 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="theme-color" content="#fbf9fa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#14120b" media="(prefers-color-scheme: dark)" />
-    <link rel="apple-touch-icon" href="./logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="alternate" hreflang="zh-CN" href="https://headlessmac.com/" />
     <link rel="alternate" hreflang="en" href="https://headlessmac.com/en/" />
     <link rel="alternate" hreflang="x-default" href="https://headlessmac.com/" />
-    <script src="./telemetry.js" defer></script>
+    <script src="/telemetry.js" defer></script>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -123,58 +123,10 @@
         "name": "MacHead",
         "alternateName": "HeadlessMac",
         "url": "https://headlessmac.com/",
-        "inLanguage": ["zh-CN", "en"]
+        "inLanguage": "zh-CN"
       }
     </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "Can I use a MacBook with a broken screen as a server?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes! MacHead lets you turn any MacBook — even one with a cracked or broken screen — into a headless server. It logically disables the internal display using macOS SkyLight API, so you can close the lid and run it as a silent, cool server without any external monitor."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "How does MacHead disable the MacBook's internal display?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "MacHead uses Apple's native SkyLight framework private API to logically cut off the internal display signal at the system level. This is not simply turning down brightness — it completely stops the display from receiving power, preventing heat buildup under the closed lid."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Does MacHead work on both Apple Silicon and Intel Macs?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes, MacHead ships as a Universal binary that natively supports both Apple Silicon (M1, M2, M3, M4) and Intel-based Macs running macOS Monterey (12.0) or later."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Is MacHead free and open source?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes, MacHead is 100% free under the Apache 2.0 license. Telemetry is anonymous and fully optional — you can turn it off in preferences at any time. The web dashboard only operates on your local network (LAN)."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "碎屏的 MacBook 还能当服务器用吗？",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "可以！MacHead 可以将任何 MacBook（包括碎屏的）变成无头服务器。它通过 macOS SkyLight API 在逻辑层彻底关闭内置屏幕，合盖即可安静、低温运行，无需外接显示器。"
-            }
-          }
-        ]
-      }
-    </script>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -183,33 +135,42 @@
     <noscript>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
     </noscript>
-    <script type="module" crossorigin src="./assets/main-CIIjFwRs.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/main-BzJKCtae.css">
+    <script type="module" crossorigin src="/assets/main-BA5aiulJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/main-BCfav-Wz.css">
   </head>
   <body>
     <!-- Header Navigation -->
     <header class="navbar">
       <div class="nav-container">
-        <a href="#" class="nav-logo" id="nav-logo-link">
-          <img src="./logo.png" alt="MacHead Logo" class="logo-img" width="22" height="22" />
+        <a href="/" class="nav-logo" id="nav-logo-link">
+          <img src="/logo.png" alt="MacHead Logo" class="logo-img" width="22" height="22" />
           <span class="logo-text">MacHead</span>
         </a>
         <nav class="nav-links" id="nav-links" itemscope itemtype="https://schema.org/SiteNavigationElement">
           <a itemprop="url" href="/#features" class="nav-link"><span itemprop="name">功能特性</span></a>
           <a itemprop="url" href="/#playground" class="nav-link"><span itemprop="name">交互演练</span></a>
           <a itemprop="url" href="/#install" class="nav-link"><span itemprop="name">安装指南</span></a>
-          <a itemprop="url" href="https://dash.headlessmac.com" target="_blank" rel="noopener" class="nav-link"><span itemprop="name">控制台 Dash</span></a>
+          <a itemprop="url" href="https://dash.headlessmac.com" target="_blank" rel="noopener" class="nav-link"><span itemprop="name">云端控制台</span></a>
           <a itemprop="url" href="/changelog" class="nav-link"><span itemprop="name">更新日志</span></a>
-          <a itemprop="url" href="/#faq" class="nav-link"><span itemprop="name">FAQ</span></a>
+          <a itemprop="url" href="/#faq" class="nav-link"><span itemprop="name">常见问题</span></a>
           <a itemprop="url" href="https://github.com/ox01024/MacHead/issues" target="_blank" rel="noopener" class="nav-link github-btn">
             <svg class="github-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
             </svg>
-            <span itemprop="name">反馈与社区</span>
+            <span itemprop="name">开源与反馈</span>
           </a>
         </nav>
         <div class="nav-actions">
-          <a href="/download" class="btn btn-primary btn-sm js-download-link" id="download-header-link">下载 Universal DMG</a>
+          <div class="lang-switcher" role="navigation" aria-label="语言切换">
+            <svg class="lang-globe-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <a href="/?lang=zh" class="lang-switcher-link active" data-set-lang="zh" aria-current="page">中文</a>
+            <a href="/en/?lang=en" class="lang-switcher-link" data-set-lang="en">EN</a>
+          </div>
+          <a href="/download" class="btn btn-primary btn-sm js-download-link" id="download-header-link">下载安装包</a>
           <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="nav-links">
             <span class="menu-bar"></span>
             <span class="menu-bar"></span>
@@ -250,8 +211,8 @@
           
           <div class="hero-visual animate-fade-in-delay">
             <div class="visual-scene">
-              <img src="./machead_web_dash_v0.1.14.png" srcset="machead_web_dash_v0.1.14_sm.png 354w, machead_web_dash_v0.1.14_md.png 709w, machead_web_dash_v0.1.14.png 2186w" sizes="(max-width: 968px) 62vw, 425px" alt="MacHead 局域网远程控制台仪表盘截图" class="screenshot-back" width="2186" height="3156" fetchpriority="high" loading="eager" decoding="async" />
-              <img src="./machead_hero_v0.1.14.png" srcset="machead_hero_v0.1.14_sm.png 512w, machead_hero_v0.1.14_md.png 1024w, machead_hero_v0.1.14.png 1360w" sizes="(max-width: 968px) 42vw, 285px" alt="MacHead macOS 偏好设置窗口截图" class="screenshot-front" width="1360" height="1224" fetchpriority="high" loading="eager" decoding="async" />
+              <img src="/machead_web_dash_v0.1.14.png" srcset="/machead_web_dash_v0.1.14_sm.png 354w, /machead_web_dash_v0.1.14_md.png 709w, /machead_web_dash_v0.1.14.png 2186w" sizes="(max-width: 968px) 62vw, 425px" alt="MacHead 局域网远程控制台仪表盘截图" class="screenshot-back" width="2186" height="3156" fetchpriority="high" loading="eager" decoding="async" />
+              <img src="/machead_hero_v0.1.14.png" srcset="/machead_hero_v0.1.14_sm.png 512w, /machead_hero_v0.1.14_md.png 1024w, /machead_hero_v0.1.14.png 1360w" sizes="(max-width: 968px) 42vw, 285px" alt="MacHead macOS 偏好设置窗口截图" class="screenshot-front" width="1360" height="1224" fetchpriority="high" loading="eager" decoding="async" />
               <div class="scene-glow"></div>
             </div>
           </div>
@@ -321,7 +282,7 @@
               </div>
               <div class="bento-split-right">
                 <div class="bento-screenshot-wrapper">
-                  <img src="./machead_hero_v0.1.14.png" srcset="machead_hero_v0.1.14_sm.png 512w, machead_hero_v0.1.14_md.png 1024w, machead_hero_v0.1.14.png 1360w" sizes="(max-width: 968px) 88vw, 330px" alt="MacHead 偏好设置面板：输入设备防误触选项" class="bento-screenshot" width="1360" height="1224" loading="lazy" decoding="async" />
+                  <img src="/machead_hero_v0.1.14.png" srcset="/machead_hero_v0.1.14_sm.png 512w, /machead_hero_v0.1.14_md.png 1024w, /machead_hero_v0.1.14.png 1360w" sizes="(max-width: 968px) 88vw, 330px" alt="MacHead 偏好设置面板：输入设备防误触选项" class="bento-screenshot" width="1360" height="1224" loading="lazy" decoding="async" />
                 </div>
               </div>
             </div>
@@ -341,7 +302,7 @@
               </div>
               <div class="bento-split-right">
                 <div class="bento-screenshot-wrapper">
-                  <img src="./machead_web_dash_v0.1.14.png" srcset="machead_web_dash_v0.1.14_sm.png 354w, machead_web_dash_v0.1.14_md.png 709w, machead_web_dash_v0.1.14.png 2186w" sizes="(max-width: 968px) 88vw, 330px" alt="MacHead 局域网控制台：硬件监控与远程开关" class="bento-screenshot" width="2186" height="3156" loading="lazy" decoding="async" />
+                  <img src="/machead_web_dash_v0.1.14.png" srcset="/machead_web_dash_v0.1.14_sm.png 354w, /machead_web_dash_v0.1.14_md.png 709w, /machead_web_dash_v0.1.14.png 2186w" sizes="(max-width: 968px) 88vw, 330px" alt="MacHead 局域网控制台：硬件监控与远程开关" class="bento-screenshot" width="2186" height="3156" loading="lazy" decoding="async" />
                 </div>
               </div>
             </div>
@@ -409,7 +370,7 @@
                   </div>
                   <div class="terminal-body" id="cli-console">
                     <div class="terminal-line"><span class="prompt">$</span> <span class="input-cmd">machead status</span></div>
-                    <div class="terminal-output">Mode: NORMAL (Active Screen)<br/>WebServer: RUNNING (http://192.168.100.131:8080)<br/>Sleep Prevention: DISABLED<br/>Power Source: AC Power (Battery 100%)</div>
+                    <div class="terminal-output">运行模式: 正常显示 (内置屏幕已点亮)<br/>Web 控制台: 运行中 (http://192.168.100.131:8080)<br/>合盖防休眠: 未启用<br/>当前电源: 交流电源 (电池 100%)</div>
                     <div class="terminal-line"><span class="prompt">$</span> <span class="cursor-blink">_</span></div>
                   </div>
                   <div class="terminal-footer">
@@ -589,7 +550,7 @@
                           <div style="font-family: var(--font-serif); font-size: 13.5px; color: var(--color-text-main); margin-bottom: 6px;">温控与元数据</div>
                           <table class="web-meta-table">
                             <tr>
-                              <td class="label">运行时间 (Uptime)</td>
+                              <td class="label">持续运行时间</td>
                               <td class="val" id="web-uptime-val" style="display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
                                 <span style="display: inline-block; width: 5px; height: 5px; background: #42b883; border-radius: 50%;"></span>
                                 <span>3小时 12分钟</span>
@@ -599,7 +560,7 @@
                               <td class="label">系统热阻压力</td>
                               <td class="val" style="display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
                                 <span style="display: inline-block; width: 5px; height: 5px; background: #42b883; border-radius: 50%;" id="web-thermal-dot"></span>
-                                <span id="web-thermal-val">Nominal</span>
+                                <span id="web-thermal-val">正常</span>
                               </td>
                             </tr>
                             <tr>
@@ -608,7 +569,7 @@
                             </tr>
                             <tr>
                               <td class="label">合盖与外接屏</td>
-                              <td class="val" id="web-lid-val">💻 合盖 (Clamshell)</td>
+                              <td class="val" id="web-lid-val">💻 合盖状态</td>
                             </tr>
                           </table>
                         </div>
@@ -786,32 +747,32 @@
           </div>
 
           <!-- Homepage Preview (Latest 2 Releases, No per-item download buttons) -->
-          <div class="changelog-feed">
+          <div class="changelog-feed" id="changelog-feed">
             <article class="changelog-entry">
               <div class="changelog-meta">
-                <time class="changelog-date">2026-08-09</time>
-                <span class="changelog-version-tag">v0.1.19</span>
+                <time class="changelog-date">2026-10-25</time>
+                <span class="changelog-version-tag">v0.1.27</span>
               </div>
               <div class="changelog-body">
-                <h3 class="changelog-title">原生集成 FRP 内网穿透与后台线程重载</h3>
+                <h3 class="changelog-title">MacHead Cloud 云端控制台、三轨 E2EE 远程终端与全链路安全加固</h3>
                 <ul class="changelog-bullets">
-                  <li>原生集成 FRP 内网穿透 (frpc) 客户端，支持多隧道端口与自定义域名映射。</li>
-                  <li>新增快捷图形配置与自定义 TOML/INI 配置文件双模式支持。</li>
-                  <li>全面重构各监控服务重载机制为后台异步线程，消除配置测试时的界面卡顿。</li>
+                  <li>新增 MacHead Cloud 云端远程控制台 (dash.headlessmac.com)，支持 GitHub / Google 账号 PKCE 安全绑定与免码一键直连。</li>
+                  <li>新增 Happy Eyeballs 三轨自适应传输引擎：本机 Loopback 零延迟直连、局域网 WebRTC P2P 直连、跨网 Tailcat WireGuard E2EE 端到端加密隧道。</li>
+                  <li>新增多标签 Web 远程终端、远程文件管理器与远程硬件遥测看板。</li>
                 </ul>
               </div>
             </article>
 
             <article class="changelog-entry">
               <div class="changelog-meta">
-                <time class="changelog-date">2026-07-31</time>
-                <span class="changelog-version-tag">v0.1.18</span>
+                <time class="changelog-date">2026-10-14</time>
+                <span class="changelog-version-tag">v0.1.25</span>
               </div>
               <div class="changelog-body">
-                <h3 class="changelog-title">哪吒 Agent 自更新死锁修复与临时锁清理</h3>
+                <h3 class="changelog-title">重启或退出后开机自动进入无头模式修复</h3>
                 <ul class="changelog-bullets">
-                  <li>修复哪吒监控 Agent 自动更新锁导致的死锁无法建立连接问题。</li>
-                  <li>增加启动前的临时锁目录自动清理逻辑。</li>
+                  <li>修复重启系统或重新打开应用后无法自动恢复无头模式屏蔽内屏的问题。</li>
+                  <li>优化开机自启与显示器状态接管时序。</li>
                 </ul>
               </div>
             </article>
@@ -834,37 +795,37 @@
       </section>
     </main>
 
-    <!-- FAQ Section for SEO (bilingual crawlable content) -->
+    <!-- FAQ Section (Pure Chinese) -->
     <section class="faq-section scroll-effect" id="faq">
       <div class="container">
         <div class="section-header">
-          <h2 class="section-title">常见问题 FAQ</h2>
-          <p class="section-subtitle">Frequently Asked Questions about MacHead</p>
+          <h2 class="section-title">常见问题解答</h2>
+          <p class="section-subtitle">关于 MacHead 合盖无头服务器模式的常见疑问与解答</p>
         </div>
         <div class="faq-list">
           <details class="faq-item" open>
-            <summary class="faq-question">Can I use a MacBook with a broken screen as a server?</summary>
-            <p class="faq-answer">Yes! MacHead lets you turn any MacBook — even one with a cracked or broken screen — into a headless server. It logically disables the internal display using macOS SkyLight API, so you can close the lid and run it as a silent, cool server without any external monitor. Perfect for homelab setups, home automation, or repurposing old MacBooks.</p>
+            <summary class="faq-question">碎屏或内屏损坏的 MacBook 还能用 MacHead 当服务器吗？</summary>
+            <p class="faq-answer">完全可以！MacHead 通过 macOS 底层 SkyLight 框架在逻辑层彻底关闭内置屏幕，合盖即可安静、低温地作为无头服务器常年运行，完全不依赖物理内屏。首次安装配置只需临时借用外接显示器或通过 macOS「屏幕共享」即可完成。</p>
           </details>
           <details class="faq-item">
-            <summary class="faq-question">碎屏的 MacBook 还能当服务器用吗？</summary>
-            <p class="faq-answer">可以！MacHead 可以将任何 MacBook（包括碎屏的）变成无头服务器。它通过 macOS SkyLight API 在逻辑层彻底关闭内置屏幕，合盖即可安静、低温运行，无需外接显示器。非常适合家庭实验室、智能家居或旧 MacBook 再利用。</p>
+            <summary class="faq-question">MacHead 是如何彻底关闭内置屏幕的？与调低亮度有什么区别？</summary>
+            <p class="faq-answer">单纯把屏幕亮度调到最低时，面板与显卡输出仍在持续工作并产生热量。MacHead 调用 Apple 原生 SkyLight 框架接口在系统级切断内置显示器信号与背光供电，彻底消除合盖状态下的内屏积热与老化泛黄风险。</p>
           </details>
           <details class="faq-item">
-            <summary class="faq-question">How does MacHead disable the MacBook's internal display?</summary>
-            <p class="faq-answer">MacHead uses Apple's native SkyLight framework private API to logically cut off the internal display signal at the system level. This is not simply turning down brightness — it completely stops the display from receiving power, preventing heat buildup under the closed lid. This approach is safer and more thorough than clamshell mode workarounds.</p>
+            <summary class="faq-question">MacHead 和 macOS 原生合盖模式（Clamshell Mode）及 caffeinate 有什么区别？</summary>
+            <p class="faq-answer">macOS 原生合盖模式强制要求连接外接显示器与电源才能工作；而 caffeinate 或 Amphetamine 仅阻止空闲休眠，无法单独切断内屏供电。MacHead 提供完整的一体化无头工作站方案：免外屏合盖运行、内屏逻辑断电、麦克风自动静音、内置键鼠防误触、防鼓包限充以及端到端加密远程终端。</p>
           </details>
           <details class="faq-item">
-            <summary class="faq-question">Does MacHead work on Apple Silicon and Intel Macs?</summary>
-            <p class="faq-answer">Yes, MacHead ships as a Universal binary that natively supports both Apple Silicon (M1, M2, M3, M4) and Intel-based Macs running macOS Monterey (12.0) or later. Download once, run on any Mac.</p>
+            <summary class="faq-question">长期合盖运行会不会导致机器过热或电池鼓包？</summary>
+            <p class="faq-answer">MacHead 内置全景电池守护与防鼓包充电上限（支持 50%～90% 限充调节），长期插电可有效延缓电池老化；当意外断电且电量低于安全阈值时会自动恢复系统休眠防止过放，并支持 CPU/电池温度实时监测与 Bark / Telegram 告警推送。</p>
           </details>
           <details class="faq-item">
-            <summary class="faq-question">Is MacHead free? Does it collect any data?</summary>
-            <p class="faq-answer">MacHead is 100% free with an MIT open-source license. It runs entirely offline with zero telemetry or tracking. The built-in web dashboard only operates on your local network (LAN) and never phones home.</p>
+            <summary class="faq-question">支持 Apple Silicon (M1/M2/M3/M4) 和 Intel 芯片的 MacBook 吗？</summary>
+            <p class="faq-answer">支持。MacHead 采用 Universal 通用二进制打包，原生支持 Apple Silicon（M1 / M2 / M3 / M4 全系列）与 Intel 架构的 MacBook，系统要求为 macOS Monterey (12.0) 及更高版本。</p>
           </details>
           <details class="faq-item">
-            <summary class="faq-question">MacHead 和合盖模式 (Clamshell Mode) 有什么区别？</summary>
-            <p class="faq-answer">macOS 原生的合盖模式需要外接显示器才能工作，且内置屏幕仍然在通电发热。MacHead 的 Headless 模式从逻辑层彻底切断内屏信号，无需外接显示器即可合盖运行，同时自动静音麦克风、防止休眠、屏蔽内置键盘和触控板误触，是真正为服务器场景设计的解决方案。</p>
+            <summary class="faq-question">MacHead 收费吗？是否安全可靠？</summary>
+            <p class="faq-answer">MacHead 完全免费并以 Apache-2.0 开源协议发布。云端远程终端采用基于 WireGuard 的端到端加密（E2EE）与原生口令门禁保护，匿名统计开关亦可随时在偏好设置中一键关闭。</p>
           </details>
         </div>
       </div>
@@ -875,29 +836,34 @@
       <div class="container footer-container">
         <div class="footer-left">
           <div class="footer-logo">
-            <img src="./logo.png" alt="MacHead Logo" class="footer-logo-img" width="20" height="20" loading="lazy" />
+            <img src="/logo.png" alt="MacHead Logo" class="footer-logo-img" width="20" height="20" loading="lazy" />
             <span>MacHead</span>
           </div>
-          <p class="footer-tagline">MacBook Headless Server Manager | 合盖无头模式管理器</p>
+          <p class="footer-tagline">专业级 MacBook 合盖无头服务器管理器</p>
         </div>
         <div class="footer-right">
           <div class="footer-links-group">
-            <span class="group-title">项目与社区</span>
-            <a href="https://github.com/ox01024/MacHead/issues" target="_blank" rel="noopener">报告问题与 Bug (Issues)</a>
-            <a href="https://github.com/ox01024/MacHead/issues" target="_blank" rel="noopener">提交功能请求 (Requests)</a>
-            <a href="https://github.com/ox01024/MacHead/discussions" target="_blank" rel="noopener">讨论区与社区 (Discussions)</a>
+            <span class="group-title">产品与服务</span>
+            <a href="https://dash.headlessmac.com" target="_blank" rel="noopener">MacHead Cloud 云端控制台</a>
+            <a href="/changelog">版本更新日志</a>
+            <a href="/download" class="js-download-link">下载 macOS 安装包</a>
           </div>
           <div class="footer-links-group">
-            <span class="group-title">使用指南</span>
+            <span class="group-title">开源与社区</span>
+            <a href="https://github.com/ox01024/MacHead" target="_blank" rel="noopener">GitHub 源码仓库</a>
+            <a href="https://github.com/ox01024/MacHead/issues" target="_blank" rel="noopener">问题反馈与功能建议</a>
+            <a href="https://github.com/ox01024/MacHead/discussions" target="_blank" rel="noopener">社区交流讨论区</a>
+          </div>
+          <div class="footer-links-group">
+            <span class="group-title">文档与语言</span>
             <a href="/guides/broken-screen-macbook-server/">碎屏 MacBook 改无头服务器指南</a>
-            <a href="/guides/macbook-ai-agent-server/">AI Agent Server Guide (EN)</a>
-            <a href="/guides/amphetamine-alternative/">Amphetamine Alternative Guide (EN)</a>
+            <a href="/en/?lang=en" data-set-lang="en">English (International)</a>
           </div>
         </div>
       </div>
       <div class="container footer-bottom">
-        <p>&copy; 2026 MacHead Project. All rights reserved.</p>
-        <p>Disclaimer: macOS and Studio Display are trademarks of Apple Inc., registered in the U.S. and other countries.</p>
+        <p>&copy; 2026 MacHead Project. 保留所有权利。</p>
+        <p>声明：macOS 与 Studio Display 为 Apple Inc. 在美国及其他国家/地区的注册商标。</p>
       </div>
     </footer>
   </body>
