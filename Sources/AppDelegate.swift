@@ -139,9 +139,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Auto-enable headless mode on launch if enabled in preferences
         let autoEnable = UserDefaults.standard.bool(forKey: "AutoEnableHeadlessOnLaunch")
         if autoEnable {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.controller.enableHeadlessMode()
-                self.updateIcon()
+            NSLog("MacHead: 偏好设置中已开启「启动时自动进入无头模式」，启动自适应就绪监听队列...")
+            controller.startLaunchAdaptiveReadyQueue(timeout: 8.0, pollInterval: 0.5) { [weak self] in
+                self?.updateIcon()
             }
         }
 

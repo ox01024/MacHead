@@ -44,6 +44,15 @@ final class DisplayManager {
         return displays
     }
 
+    /// 单次枚举当前处于活动（正在渲染桌面）的显示器列表（CGGetActiveDisplayList）
+    func activeDisplayIDs() -> [CGDirectDisplayID]? {
+        var count: UInt32 = 0
+        guard CGGetActiveDisplayList(0, nil, &count) == .success else { return nil }
+        var displays = [CGDirectDisplayID](repeating: 0, count: Int(count))
+        guard CGGetActiveDisplayList(count, &displays, &count) == .success else { return nil }
+        return displays
+    }
+
     /// 检查是否为虚拟/软件显示屏（如系统在无物理显示器时创建的 unkn virt，或远程工具生成的虚拟屏）
     static func isVirtualDisplay(_ displayID: CGDirectDisplayID) -> Bool {
         let vendor = CGDisplayVendorNumber(displayID)
@@ -54,6 +63,13 @@ final class DisplayManager {
 
     /// 获取当前或缓存的内置显示器 ID；返回 nil 表示既不在线也无缓存
     var builtInDisplayID: CGDirectDisplayID? {
+        // 优先在当前活动显示器列表中查找
+        if let id = activeDisplayIDs()?.first(where: { CGDisplayIsBuiltin($0) != 0 }) {
+            persistBuiltInID(id)
+            return id
+        }
+
+        // 其次在在线显示器列表中查找（Intel 平台内屏被断开时仍在此列表中）
         if let id = onlineDisplayIDs()?.first(where: { CGDisplayIsBuiltin($0) != 0 }) {
             persistBuiltInID(id)
             return id
@@ -71,7 +87,32 @@ final class DisplayManager {
         return nil
     }
 
-    /// 检查内置显示器是否当前在线（通过系统在线显示器权威列表验证，在线时顺带刷新缓存）
+    /// 检查内置显示器是否当前处于活动状态（正常点亮并在桌面中绘制）
+    var isBuiltInActive: Bool {
+        if let active = activeDisplayIDs() {
+            // 1. 如果 activeDisplayIDs 包含已知/缓存的内置显示器 ID，则判定为活动
+            if let id = builtInDisplayID, active.contains(id) {
+                return true
+            }
+            // 2. 如果 activeDisplayIDs 中有任一显示器通过硬件标志判定为内置屏，则判定为活动并缓存
+            if let id = active.first(where: { CGDisplayIsBuiltin($0) != 0 }) {
+                persistBuiltInID(id)
+                return true
+            }
+            // activeDisplayIDs 查询成功且列表中明确不含内置屏，说明内置屏已处于未活动状态
+            return false
+        }
+
+        // 仅在 activeDisplayIDs() 无法获取（返回 nil）的极端系统异常下，降级核验 CGDisplayIsActive
+        // 注意：CGDisplayIsActive 遇错可能返回 -1，必须严格核验 == 1
+        if let id = builtInDisplayID, CGDisplayIsActive(id) == 1 {
+            return true
+        }
+
+        return false
+    }
+
+    /// 检查内置显示器是否物理在线（包括低功耗睡眠或已被软件断开但总线仍连通的状态）
     var isBuiltInOnline: Bool {
         guard let online = onlineDisplayIDs(),
               let id = online.first(where: { CGDisplayIsBuiltin($0) != 0 }) else { return false }
@@ -85,9 +126,17 @@ final class DisplayManager {
         UserDefaults.standard.set(Int(id), forKey: "BuiltInDisplayID")
     }
 
+    /// 触发一次轻量级空提交，刷新 WindowServer 的显示拓扑图，清除休眠唤醒或插拔后的未决合成器状态
+    func recommitDisplayConfiguration() {
+        var configRef: CGDisplayConfigRef? = nil
+        if CGBeginDisplayConfiguration(&configRef) == .success {
+            _ = CGCompleteDisplayConfiguration(configRef, .forSession)
+        }
+    }
+
     // MARK: - 内置屏断开/恢复
 
-    /// 断开内置显示器（已离线时为幂等空操作）
+    /// 断开内置显示器（已处于非活动状态时为幂等空操作）
     func disconnectBuiltIn(retriesRemaining: Int = 5) {
         guard HeadlessModeController.shared.isHeadlessModeEnabled else { return }
 
@@ -96,8 +145,13 @@ final class DisplayManager {
             return
         }
 
-        guard let id = onlineDisplayIDs()?.first(where: { CGDisplayIsBuiltin($0) != 0 }) else {
-            NSLog("MacHead: 内置显示屏不在线，无需重复断开")
+        guard isBuiltInActive else {
+            NSLog("MacHead: 内置显示屏未处于活动状态，无需重复断开")
+            return
+        }
+
+        guard let id = builtInDisplayID else {
+            NSLog("MacHead: 未能获取内置显示屏 ID，跳过断开")
             return
         }
         persistBuiltInID(id)
@@ -128,13 +182,12 @@ final class DisplayManager {
     }
 
     /// 重新连接内置显示器
-    func reconnectBuiltIn(retriesRemaining: Int = 5) {
+    func reconnectBuiltIn(retriesRemaining: Int = 5, force: Bool = true) {
         guard !HeadlessModeController.shared.isHeadlessModeEnabled else { return }
 
-        // 如果内屏已在权威在线列表中，无需重复开启
-        if let online = onlineDisplayIDs(),
-           let id = online.first(where: { CGDisplayIsBuiltin($0) != 0 }) {
-            NSLog("MacHead: 内置显示屏 ID: %d 已处于在线状态", id)
+        // 如果非强制执行，且内屏已在活动列表中（已正常点亮绘制），则无需重复开启
+        if !force && isBuiltInActive {
+            NSLog("MacHead: 内置显示屏已处于活动状态，无需重复开启")
             return
         }
 
@@ -143,7 +196,7 @@ final class DisplayManager {
             return
         }
 
-        // 内屏离线时使用缓存 ID；无缓存时按 Apple Silicon 惯例以 ID 1 兜底（仅此恢复路径需要猜测）
+        // 内屏未活动时使用缓存 ID；无缓存时按 Apple Silicon 惯例以 ID 1 兜底（仅此恢复路径需要猜测）
         let id: CGDirectDisplayID
         if let cached = builtInDisplayID {
             id = cached
@@ -152,7 +205,11 @@ final class DisplayManager {
             id = CGDirectDisplayID(1)
         }
 
-        NSLog("MacHead: 正在重新连接内置显示屏 ID: %d (剩余重试: %d)", id, retriesRemaining)
+        NSLog("MacHead: 正在重新连接内置显示屏 ID: %d (剩余重试: %d, force: %d)", id, retriesRemaining, force ? 1 : 0)
+
+        // 提交配置前先执行一次轻量空提交，刷新 WindowServer 显示图，防止合成器处于挂起或脱节状态
+        recommitDisplayConfiguration()
+
         var configRef: CGDisplayConfigRef? = nil
         let beginErr = CGBeginDisplayConfiguration(&configRef)
         if beginErr == .success {
@@ -160,20 +217,23 @@ final class DisplayManager {
             if configureErr == 0 {
                 let completeErr = CGCompleteDisplayConfiguration(configRef, .permanently)
                 NSLog("MacHead: 启用内置屏结果 - 设定: %d, 提交: %d", configureErr, completeErr.rawValue)
-                if completeErr == .success { return }
-                CGCancelDisplayConfiguration(configRef)
+                if completeErr == .success {
+                    if isBuiltInActive { return }
+                } else {
+                    CGCancelDisplayConfiguration(configRef)
+                }
             } else {
                 NSLog("MacHead: 启用内置屏设定失败: %d", configureErr)
                 CGCancelDisplayConfiguration(configRef)
             }
-            NSLog("MacHead: 提交启用显示配置未成功，将在 0.2 秒后重试...")
+            NSLog("MacHead: 提交启用显示配置未生效或内屏尚未活动，将在 0.2 秒后重试...")
         } else {
             NSLog("MacHead: CGBeginDisplayConfiguration 失败: %d", beginErr.rawValue)
         }
 
         guard retriesRemaining > 0 else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            self.reconnectBuiltIn(retriesRemaining: retriesRemaining - 1)
+            self.reconnectBuiltIn(retriesRemaining: retriesRemaining - 1, force: false)
         }
     }
 }
