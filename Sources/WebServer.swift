@@ -140,7 +140,7 @@ final class WebServer {
                         let cookieHeader = "Set-Cookie: session=\(self.sessionToken); Path=/; HttpOnly; SameSite=Strict"
                         self.sendRedirect(to: "/", extraHeaders: [cookieHeader], connection: connection)
                     } else {
-                        self.sendResponse(html: self.getLoginHTML(error: "密码错误，请重新输入"), connection: connection)
+                        self.sendResponse(html: self.getLoginHTML(errorZh: "密码错误，请重新输入", errorEn: "Incorrect password. Please try again."), connection: connection)
                     }
                 }
                 return
@@ -437,12 +437,12 @@ final class WebServer {
         
         var parts: [String] = []
         if days > 0 {
-            parts.append("\(days)天")
+            parts.append(L("\(days)天", "\(days)d"))
         }
         if hours > 0 || days > 0 {
-            parts.append("\(hours)小时")
+            parts.append(L("\(hours)小时", "\(hours)h"))
         }
-        parts.append("\(minutes)分钟")
+        parts.append(L("\(minutes)分钟", "\(minutes)m"))
         return parts.joined(separator: " ")
     }
     
@@ -543,6 +543,7 @@ final class WebServer {
           "microphoneMuted": \(MediaDeviceManager.shared.isMuted),
           "batteryCapacity": \(battery.currentCapacity),
           "isCharging": \(battery.isCharging),
+          "isCharged": \(battery.isCharged),
           "powerState": "\(battery.powerState)",
           "cpuUsage": \(cpu),
           "cpuTemp": \(cpuTemp),
@@ -558,6 +559,7 @@ final class WebServer {
           "diskTotalGB": \(disk.totalGB),
           "diskPercent": \(disk.percent),
           "uptime": "\(uptime)",
+          "uptimeSeconds": \(Int(ProcessInfo.processInfo.systemUptime)),
           "thermalState": "\(thermal)",
           "batteryHealth": \(battery.batteryHealth),
           "batteryCycleCount": \(battery.cycleCount),
@@ -589,7 +591,8 @@ final class WebServer {
           "sshEnabled": \(RemoteSharingService.shared.isSSHRunning),
           "vncEnabled": \(RemoteSharingService.shared.isVNCRunning),
           "smbEnabled": \(RemoteSharingService.shared.isSMBRunning),
-          "systemUser": "\(RemoteSharingService.shared.currentUser)"
+          "systemUser": "\(RemoteSharingService.shared.currentUser)",
+          "appLanguage": "\(LocalizationManager.shared.effectiveLanguageCode)"
         }
         """
     }
@@ -793,12 +796,16 @@ final class WebServer {
             .replacingOccurrences(of: "'", with: "&#39;")
     }
 
-    private func getLoginHTML(error: String? = nil) -> String {
-        let safeError = error.map { escapeHTML($0) }
+    private func getLoginHTML(errorZh: String? = nil, errorEn: String? = nil) -> String {
+        let safeZh = errorZh.map { escapeHTML($0) }
+        let safeEn = errorEn.map { escapeHTML($0) }
+        let defaultMsg = safeZh ?? safeEn
         if let resourcePath = Bundle.main.path(forResource: "Login", ofType: "html"),
            var html = try? String(contentsOfFile: resourcePath, encoding: .utf8) {
-            if let safeError = safeError {
-                let errorDiv = "<div class=\"error-msg\">\(safeError)</div>"
+            if let defaultMsg = defaultMsg {
+                let zhAttr = safeZh ?? defaultMsg
+                let enAttr = safeEn ?? defaultMsg
+                let errorDiv = "<div class=\"error-msg\" id=\"error-msg\" data-zh=\"\(zhAttr)\" data-en=\"\(enAttr)\">\(zhAttr)</div>"
                 html = html.replacingOccurrences(of: "<!-- ERROR_PLACEHOLDER -->", with: errorDiv)
             } else {
                 html = html.replacingOccurrences(of: "<!-- ERROR_PLACEHOLDER -->", with: "")
@@ -824,7 +831,7 @@ final class WebServer {
         <body>
             <div class="card">
                 <h2>MacHead Console Login</h2>
-                \(safeError != nil ? "<div class=\"error\">\(safeError!)</div>" : "")
+                \(defaultMsg != nil ? "<div class=\"error\">\(defaultMsg!)</div>" : "")
                 <form method="POST" action="/login">
                     <label>Password</label>
                     <input type="password" name="password" autofocus required>

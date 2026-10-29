@@ -20,12 +20,12 @@ enum PreferenceTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .general: return "常规设置"
-        case .power: return "电池"
-        case .hardware: return "硬件与外设"
-        case .integrations: return "监控与通知"
-        case .tunneling: return "内网穿透"
-        case .status: return "显示器与状态"
+        case .general: return L("常规设置", "General")
+        case .power: return L("电池", "Battery")
+        case .hardware: return L("硬件与外设", "Hardware & Peripherals")
+        case .integrations: return L("监控与通知", "Monitoring & Alerts")
+        case .tunneling: return L("内网穿透", "Tunneling")
+        case .status: return L("显示器与状态", "Displays & Status")
         }
     }
 
@@ -149,6 +149,7 @@ struct PreferencesView: View {
     @State private var isAccessibilityTrusted = AXIsProcessTrusted()
 
     // Hardware & Battery metrics watchers
+    @ObservedObject private var l10n = LocalizationManager.shared
     @ObservedObject private var smc = SMCManager.shared
     @ObservedObject private var battery = BatteryManager.shared
     @ObservedObject private var remoteSharing = RemoteSharingService.shared
@@ -172,10 +173,10 @@ struct PreferencesView: View {
 
     private var nezhaStatusBadgeText: String {
         switch nezhaStatus {
-        case .connected: return "已连接"
-        case .connecting: return "连接中..."
-        case .error: return "连接失败"
-        case .stopped: return "已停用"
+        case .connected: return L("已连接", "Connected")
+        case .connecting: return L("连接中...", "Connecting...")
+        case .error: return L("连接失败", "Failed")
+        case .stopped: return L("已停用", "Disabled")
         }
     }
 
@@ -216,10 +217,10 @@ struct PreferencesView: View {
 
     private var frpStatusBadgeText: String {
         switch frpStatus {
-        case .connected: return "已连接"
-        case .connecting: return "连接中..."
-        case .error: return "连接失败"
-        case .stopped: return "已停用"
+        case .connected: return L("已连接", "Connected")
+        case .connecting: return L("连接中...", "Connecting...")
+        case .error: return L("连接失败", "Failed")
+        case .stopped: return L("已停用", "Disabled")
         }
     }
 
@@ -232,7 +233,7 @@ struct PreferencesView: View {
     @State private var overheatAlertEnabled = UserDefaults.standard.bool(forKey: "overheatAlertEnabled")
     @State private var overheatThreshold = UserDefaults.standard.double(forKey: "overheatThreshold") == 0 ? 85.0 : UserDefaults.standard.double(forKey: "overheatThreshold")
 
-    
+
 
 
         @State private var devTunnelEnabled = UserDefaults.standard.bool(forKey: "devTunnelEnabled")
@@ -266,10 +267,10 @@ struct PreferencesView: View {
 
     private var devTunnelStatusBadgeText: String {
         switch devTunnelStatus {
-        case .connected: return "已连接"
-        case .connecting: return "连接中..."
-        case .error: return "连接失败"
-        case .stopped: return "已停用"
+        case .connected: return L("已连接", "Connected")
+        case .connecting: return L("连接中...", "Connecting...")
+        case .error: return L("连接失败", "Failed")
+        case .stopped: return L("已停用", "Disabled")
         }
     }
 
@@ -292,10 +293,10 @@ struct PreferencesView: View {
 
     private var cloudflareStatusBadgeText: String {
         switch cloudflareStatus {
-        case .connected: return "已连接"
-        case .connecting: return "连接中..."
-        case .error: return "连接失败"
-        case .stopped: return "已停用"
+        case .connected: return L("已连接", "Connected")
+        case .connecting: return L("连接中...", "Connecting...")
+        case .error: return L("连接失败", "Failed")
+        case .stopped: return L("已停用", "Disabled")
         }
     }
 
@@ -461,7 +462,7 @@ struct PreferencesView: View {
                                         HStack(spacing: 6) {
                                             Image(systemName: "arrow.up.right.circle.fill")
                                                 .foregroundColor(.green)
-                                            Text("打开 Dash 控制台")
+                                            Text(L("打开 Dash 控制台", "Open Dash Console"))
                                                 .font(.caption)
                                             Spacer()
                                         }
@@ -479,7 +480,7 @@ struct PreferencesView: View {
                                         HStack(spacing: 6) {
                                             Image(systemName: "rectangle.portrait.and.arrow.right")
                                                 .foregroundColor(.red)
-                                            Text("退出账号")
+                                            Text(L("退出账号", "Sign Out"))
                                                 .font(.caption)
                                                 .foregroundColor(.red)
                                             Spacer()
@@ -499,12 +500,12 @@ struct PreferencesView: View {
                                 ProgressView()
                                     .scaleEffect(0.55)
                                     .frame(width: 20, height: 20)
-                                Text("等待授权...")
+                                Text(L("等待授权...", "Waiting for Auth..."))
                                     .font(.system(size: 12, weight: .medium))
                                     .foregroundColor(.secondary)
                                     .lineLimit(1)
                                 Spacer(minLength: 0)
-                                Button("取消") {
+                                Button(L("取消", "Cancel")) {
                                     TailcatService.shared.cancelBrowserAuth()
                                 }
                                 .font(.system(size: 11))
@@ -523,7 +524,7 @@ struct PreferencesView: View {
                                         .foregroundColor(.secondary)
                                         .frame(width: 24, height: 24)
 
-                                    Text("登录账号")
+                                    Text(L("登录账号", "Sign In"))
                                         .font(.system(size: 13, weight: .medium))
                                         .foregroundColor(.primary)
                                         .lineLimit(1)
@@ -572,8 +573,20 @@ struct PreferencesView: View {
                         
                         switch selectedTab {
                         case .general:
-                            SettingsCard(title: "启动与运行") {
-                                SettingsRow("开机自启动") {
+                            SettingsCard(title: L("启动与运行", "Startup & General")) {
+                                SettingsRow(L("界面语言", "Interface Language"), subtitle: L("支持跟随系统地区语言或手动固定中英文显示", "Follow system locale or manually choose Chinese / English")) {
+                                    Picker("", selection: $l10n.selectedLanguage) {
+                                        ForEach(AppLanguage.allCases) { lang in
+                                            Text(lang.displayName).tag(lang)
+                                        }
+                                    }
+                                    .pickerStyle(.menu)
+                                    .frame(width: 140)
+                                }
+
+                                Divider().padding(.horizontal, 16)
+
+                                SettingsRow(L("开机自启动", "Launch at Login")) {
                                     Toggle("", isOn: Binding(
                                         get: { self.launchAtLogin },
                                         set: { newValue in
@@ -587,7 +600,7 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("启动时自动进入无头模式") {
+                                SettingsRow(L("启动时自动进入无头模式", "Auto-Enable Headless Mode on Launch")) {
                                     Toggle("", isOn: $autoEnableOnLaunch)
                                         .toggleStyle(.switch)
                                         .labelsHidden()
@@ -595,7 +608,7 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("启用 machead 命令行工具") {
+                                SettingsRow(L("启用 machead 命令行工具", "Enable 'machead' CLI Tool")) {
                                     Toggle("", isOn: $cliToolEnabled)
                                         .toggleStyle(.switch)
                                         .labelsHidden()
@@ -610,16 +623,19 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("匿名使用统计") {
+                                SettingsRow(L("匿名使用统计", "Anonymous Usage Telemetry")) {
                                     Toggle("", isOn: $telemetryEnabled)
                                         .toggleStyle(.switch)
                                         .labelsHidden()
                                 }
-                                .help("帮助我们改进 MacHead：仅发送随机匿名 ID、系统与应用版本及功能开关状态，不含任何个人信息，可随时关闭。")
+                                .help(L(
+                                    "帮助我们改进 MacHead：仅发送随机匿名 ID、系统与应用版本及功能开关状态，不含任何个人信息，可随时关闭。",
+                                    "Help improve MacHead: sends only a random anonymous ID, macOS & app versions, and feature flags. No personal data is collected."
+                                ))
                             }
-                            
-                            SettingsCard(title: "局域网远程控制") {
-                                SettingsRow("启用局域网 Web 控制面板") {
+
+                            SettingsCard(title: L("局域网远程控制", "LAN Remote Control")) {
+                                SettingsRow(L("启用局域网 Web 控制面板", "Enable LAN Web Control Panel")) {
                                     HStack(spacing: 12) {
                                         Toggle("", isOn: Binding(
                                             get: { self.enableWebServer },
@@ -637,7 +653,7 @@ struct PreferencesView: View {
                                         .toggleStyle(.switch)
                                         .labelsHidden()
 
-                                        Button("设定...") {
+                                        Button(L("设定...", "Configure...")) {
                                             self.webServerPort = String(WebServer.shared.currentPort)
                                             self.webServerIP = WebServer.shared.getLocalIPAddress()
                                             self.showWebServerConfig = true
@@ -646,7 +662,7 @@ struct PreferencesView: View {
                                 }
 
                                 if enableWebServer {
-                                    SettingsRow("访问地址") {
+                                    SettingsRow(L("访问地址", "Access URL")) {
                                         HStack(spacing: 8) {
                                             Text(verbatim: "http://\(webServerIP):\(WebServer.shared.portString)")
                                                 .font(.system(.caption, design: .monospaced))
@@ -662,14 +678,14 @@ struct PreferencesView: View {
                                                     .font(.caption)
                                             }
                                             .buttonStyle(.borderless)
-                                            .help("复制访问地址")
+                                            .help(L("复制访问地址", "Copy Access URL"))
                                         }
                                     }
                                 }
                             }
 
-                            SettingsCard(title: "macOS 原生远程管理感知") {
-                                SettingsRow("SSH 远程登录", subtitle: "端口 22 · 字符终端") {
+                            SettingsCard(title: L("macOS 原生远程管理感知", "macOS Native Remote Sharing")) {
+                                SettingsRow(L("SSH 远程登录", "SSH Remote Login"), subtitle: L("端口 22 · 字符终端", "Port 22 · Terminal Shell")) {
                                     HStack(spacing: 8) {
                                         serviceStatusBadge(isActive: remoteSharing.isSSHRunning)
 
@@ -686,7 +702,7 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("屏幕共享 (VNC)", subtitle: "端口 5900 · 远程桌面") {
+                                SettingsRow(L("屏幕共享 (VNC)", "Screen Sharing (VNC)"), subtitle: L("端口 5900 · 远程桌面", "Port 5900 · Remote Desktop")) {
                                     HStack(spacing: 8) {
                                         serviceStatusBadge(isActive: remoteSharing.isVNCRunning)
 
@@ -703,7 +719,7 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("文件共享 (SMB)", subtitle: "端口 445 · 局域网访达与文件挂载") {
+                                SettingsRow(L("文件共享 (SMB)", "File Sharing (SMB)"), subtitle: L("端口 445 · 局域网访达与文件挂载", "Port 445 · Finder & Network Mount")) {
                                     HStack(spacing: 8) {
                                         serviceStatusBadge(isActive: remoteSharing.isSMBRunning)
 
@@ -720,7 +736,7 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("系统共享管理", subtitle: "开启或关闭服务请前往 macOS 系统设置") {
+                                SettingsRow(L("系统共享管理", "System Sharing Settings"), subtitle: L("开启或关闭服务请前往 macOS 系统设置", "Enable or disable sharing services in macOS System Settings")) {
                                     HStack(spacing: 8) {
                                         Button(action: {
                                             remoteSharing.refresh()
@@ -729,9 +745,9 @@ struct PreferencesView: View {
                                                 .font(.caption)
                                         }
                                         .buttonStyle(.borderless)
-                                        .help("刷新端口监听状态")
+                                        .help(L("刷新端口监听状态", "Refresh listening port status"))
 
-                                        Button("配置系统共享...") {
+                                        Button(L("配置系统共享...", "System Sharing...")) {
                                             remoteSharing.openSystemSharingSettings()
                                         }
                                     }
@@ -747,11 +763,11 @@ struct PreferencesView: View {
 
                                     VStack(alignment: .leading, spacing: 2) {
                                         HStack(spacing: 6) {
-                                            Text("正在以电池 UPS 模式运行")
+                                            Text(L("正在以电池 UPS 模式运行", "Running in Battery UPS Mode"))
                                                 .font(.system(size: 13, weight: .bold))
                                                 .foregroundColor(.primary)
 
-                                            Text("无人值守供电中")
+                                            Text(L("无人值守供电中", "Unattended Power"))
                                                 .font(.system(size: 10, weight: .semibold))
                                                 .foregroundColor(.orange)
                                                 .padding(.horizontal, 6)
@@ -759,7 +775,10 @@ struct PreferencesView: View {
                                                 .background(Capsule().fill(Color.orange.opacity(0.18)))
                                         }
 
-                                        Text("外部市电已中断 · 预计还可支撑运行约 \(battery.timeRemainingFormatted) · 放电功率 \(String(format: "%.1f", battery.powerWatts))W")
+                                        Text(L(
+                                            "外部市电已中断 · 预计还可支撑运行约 \(battery.timeRemainingFormatted) · 放电功率 \(String(format: "%.1f", battery.powerWatts))W",
+                                            "AC power interrupted · Est. runtime \(battery.timeRemainingFormatted) · Discharge \(String(format: "%.1f", battery.powerWatts))W"
+                                        ))
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
@@ -782,8 +801,8 @@ struct PreferencesView: View {
                             // 区块一：电源与运行控制策略 (全部开关集中排列)
                             // ═══════════════════════════════════════════════════════════
 
-                            SettingsCard(title: "供电与运行策略") {
-                                SettingsRow("防止空闲睡眠", subtitle: "阻止系统在无人操作时自动进入睡眠") {
+                            SettingsCard(title: L("供电与运行策略", "Power & Runtime Policy")) {
+                                SettingsRow(L("防止空闲睡眠", "Prevent Idle Sleep"), subtitle: L("阻止系统在无人操作时自动进入睡眠", "Prevent macOS from automatically sleeping when idle")) {
                                     Toggle("", isOn: Binding(
                                         get: { self.preventIdleSleep },
                                         set: { newValue in
@@ -797,7 +816,7 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("合盖后仍然保持运行状态", subtitle: "合盖时维持系统活跃，无缝充当常驻服务器") {
+                                SettingsRow(L("合盖后仍然保持运行状态", "Keep Running on Lid Close"), subtitle: L("合盖时维持系统活跃，无缝充当常驻服务器", "Keep system awake with lid closed for always-on server operation")) {
                                     Toggle("", isOn: Binding(
                                         get: { self.keepRunningOnLidClose },
                                         set: { newValue in
@@ -810,8 +829,8 @@ struct PreferencesView: View {
                                 }
                             }
 
-                            SettingsCard(title: "长期插电防鼓包养护 (Charge Limit)") {
-                                SettingsRow("启用充电上限保护", subtitle: "到达指定上限后暂停充电，延缓电池高压与长期发热鼓包") {
+                            SettingsCard(title: L("长期插电防鼓包养护 (Charge Limit)", "Battery Charge Limit & Protection")) {
+                                SettingsRow(L("启用充电上限保护", "Enable Charge Limit Protection"), subtitle: L("到达指定上限后暂停充电，延缓电池高压与长期发热鼓包", "Pause charging at threshold to prevent high-voltage stress and swelling")) {
                                     HStack(spacing: 8) {
                                         Toggle("", isOn: $battery.customLimitEnabled)
                                             .toggleStyle(.switch)
@@ -822,7 +841,13 @@ struct PreferencesView: View {
                                 if battery.customLimitEnabled {
                                     Divider().padding(.horizontal, 16)
 
-                                    SettingsRow("充电上限阈值", subtitle: "达到 \(battery.customLimitThreshold)% 时停止充电，降至 \(max(20, battery.customLimitThreshold - 5))% 时恢复补电 (Sailing Mode)") {
+                                    SettingsRow(
+                                        L("充电上限阈值", "Charge Limit Threshold"),
+                                        subtitle: L(
+                                            "达到 \(battery.customLimitThreshold)% 时停止充电，降至 \(max(20, battery.customLimitThreshold - 5))% 时恢复补电 (Sailing Mode)",
+                                            "Stops charging at \(battery.customLimitThreshold)%, resumes at \(max(20, battery.customLimitThreshold - 5))% (Sailing Mode)"
+                                        )
+                                    ) {
                                         HStack(spacing: 10) {
                                             Slider(value: Binding(
                                                 get: { Double(self.battery.customLimitThreshold) },
@@ -839,21 +864,26 @@ struct PreferencesView: View {
 
                                     Divider().padding(.horizontal, 16)
 
-                                    SettingsRow("底层 SMC 控充权限", subtitle: battery.isPrivilegedHelperConfigured ? "已建立静默控充通道，后台控充时无需反复输入密码" : "老系统自主截断充电电流需配置免密权限 (仅需授权一次)") {
+                                    SettingsRow(
+                                        L("底层 SMC 控充权限", "SMC Charge Control Permission"),
+                                        subtitle: battery.isPrivilegedHelperConfigured
+                                            ? L("已建立静默控充通道，后台控充时无需反复输入密码", "Passwordless SMC channel active for background charge control")
+                                            : L("老系统自主截断充电电流需配置免密权限 (仅需授权一次)", "One-time admin authorization required for background SMC charge control")
+                                    ) {
                                         HStack(spacing: 8) {
                                             if battery.isPrivilegedHelperConfigured {
-                                                Text("已授权 (静默生效)")
+                                                Text(L("已授权 (静默生效)", "Authorized (Silent)"))
                                                     .font(.system(size: 12, weight: .medium))
                                                     .foregroundColor(.green)
 
-                                                Button("移除授权") {
+                                                Button(L("移除授权", "Revoke")) {
                                                     _ = BatteryManager.shared.removePrivilegedAccess()
                                                 }
                                                 .buttonStyle(.plain)
                                                 .foregroundColor(.secondary)
                                                 .font(.system(size: 11))
                                             } else {
-                                                Button("配置免密授权 (仅需一次)...") {
+                                                Button(L("配置免密授权 (仅需一次)...", "Authorize (One-Time)...")) {
                                                     _ = BatteryManager.shared.requestPrivilegedAccess()
                                                 }
                                                 .buttonStyle(.plain)
@@ -866,7 +896,12 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("系统环境与策略模式", subtitle: battery.isSupportedNativeLimit ? "macOS 15+ 具备固件级限充能力" : "老款系统 (macOS 14/13/Intel) 无原生限充，完全依赖 MacHead 自主控制") {
+                                SettingsRow(
+                                    L("系统环境与策略模式", "System Environment & Policy"),
+                                    subtitle: battery.isSupportedNativeLimit
+                                        ? L("macOS 15+ 具备固件级限充能力", "macOS 15+ supports firmware-level charge limiting")
+                                        : L("老款系统 (macOS 14/13/Intel) 无原生限充，完全依赖 MacHead 自主控制", "Older macOS / Intel relies on MacHead SMC charge control")
+                                ) {
                                     HStack(spacing: 8) {
                                         HStack(spacing: 4) {
                                             Circle()
@@ -878,7 +913,7 @@ struct PreferencesView: View {
                                         }
 
                                         if battery.isSupportedNativeLimit {
-                                            Button("系统设置...") {
+                                            Button(L("系统设置...", "System Settings...")) {
                                                 BatteryManager.shared.openSystemBatterySettings()
                                             }
                                             .buttonStyle(.plain)
@@ -888,8 +923,8 @@ struct PreferencesView: View {
                                 }
                             }
 
-                            SettingsCard(title: "断电与休眠保护") {
-                                SettingsRow("启用低电量电池保护", subtitle: "断电且电量低于安全阈值时自动休眠，防止电池过放损坏") {
+                            SettingsCard(title: L("断电与休眠保护", "Power Outage & Hibernate Protection")) {
+                                SettingsRow(L("启用低电量电池保护", "Enable Low Battery Protection"), subtitle: L("断电且电量低于安全阈值时自动休眠，防止电池过放损坏", "Automatically sleep when battery drops below threshold during outage")) {
                                     HStack(spacing: 12) {
                                         Toggle("", isOn: Binding(
                                             get: { self.enableBatteryProtection },
@@ -902,7 +937,7 @@ struct PreferencesView: View {
                                         .toggleStyle(.switch)
                                         .labelsHidden()
 
-                                        Button("设定...") {
+                                        Button(L("设定...", "Configure...")) {
                                             self.showBatteryConfig = true
                                         }
                                     }
@@ -913,77 +948,80 @@ struct PreferencesView: View {
                             // 区块二：电池指标与健康监控看板 (全部信息读数集中排列)
                             // ═══════════════════════════════════════════════════════════
 
-                            SettingsCard(title: "实时电气指标") {
-                                SettingsRow("即时充放电功率") {
-                                    Text(battery.powerWatts > 0 ? String(format: "%.2f W", battery.powerWatts) : (battery.isCharging ? "充电中" : "0.00 W (直供)"))
+                            SettingsCard(title: L("实时电气指标", "Real-Time Electrical Telemetry")) {
+                                SettingsRow(L("即时充放电功率", "Real-Time Power")) {
+                                    Text(battery.powerWatts > 0 ? String(format: "%.2f W", battery.powerWatts) : (battery.isCharging ? L("充电中", "Charging") : L("0.00 W (直供)", "0.00 W (AC Direct)")))
                                         .fontWeight(.semibold)
                                         .foregroundColor(battery.isUPSActive ? .orange : (battery.isCharging ? .green : .primary))
                                 }
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("母线电压 / 实时电流") {
+                                SettingsRow(L("母线电压 / 实时电流", "Bus Voltage / Current")) {
                                     Text(String(format: "%.2f V / %d mA", battery.voltage, battery.amperage))
                                         .fontWeight(.medium)
                                 }
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("外接供电适配器") {
-                                    Text(battery.adapterWatts > 0 ? "\(battery.adapterWatts)W (\(battery.adapterName.isEmpty ? "交流适配器" : battery.adapterName))" : (battery.isUPSActive ? "未连接 (电池供电)" : "外接电源"))
+                                SettingsRow(L("外接供电适配器", "External Power Adapter")) {
+                                    Text(battery.adapterWatts > 0 ? "\(battery.adapterWatts)W (\(battery.adapterName.isEmpty ? L("交流适配器", "AC Adapter") : battery.adapterName))" : (battery.isUPSActive ? L("未连接 (电池供电)", "Disconnected (On Battery)") : L("外接电源", "AC Power")))
                                         .fontWeight(.medium)
                                 }
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("电源预估状态") {
-                                    Text(battery.timeRemainingFormatted.isEmpty ? "正常运行" : battery.timeRemainingFormatted)
+                                SettingsRow(L("电源预估状态", "Estimated Power Status")) {
+                                    Text(battery.timeRemainingFormatted.isEmpty ? L("正常运行", "Normal Operation") : battery.timeRemainingFormatted)
                                         .fontWeight(.medium)
                                         .foregroundColor(battery.isUPSActive ? .orange : .secondary)
                                 }
                             }
 
-                            SettingsCard(title: "电池健康与容量") {
-                                SettingsRow("当前剩余电量") {
+                            SettingsCard(title: L("电池健康与容量", "Battery Health & Capacity")) {
+                                SettingsRow(L("当前剩余电量", "Current Charge")) {
                                     HStack(spacing: 8) {
                                         Image(systemName: battery.isCharging ? "bolt.batteryblock.fill" : (battery.currentCapacity > 20 ? "battery.100" : "battery.25"))
                                             .foregroundColor(battery.isCharging ? .green : (battery.currentCapacity > 20 ? .blue : .orange))
-                                        Text("\(battery.currentCapacity)% (\(battery.powerState == "AC Power" ? "外接交流电" : "电池供电"))")
+                                        Text("\(battery.currentCapacity)% (\(battery.powerState == "AC Power" ? L("外接交流电", "AC Power") : L("电池供电", "Battery Power")))")
                                             .fontWeight(.medium)
                                     }
                                 }
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("最大可用容量 (mAh)") {
+                                SettingsRow(L("最大可用容量 (mAh)", "Max Capacity (mAh)")) {
                                     if battery.rawMaxCapacity > 0 {
-                                        Text("\(battery.rawCurrentCapacity) / \(battery.rawMaxCapacity) mAh (设计: \(battery.designCapacity) mAh)")
+                                        Text(L(
+                                            "\(battery.rawCurrentCapacity) / \(battery.rawMaxCapacity) mAh (设计: \(battery.designCapacity) mAh)",
+                                            "\(battery.rawCurrentCapacity) / \(battery.rawMaxCapacity) mAh (Design: \(battery.designCapacity) mAh)"
+                                        ))
                                             .fontWeight(.medium)
                                     } else {
-                                        Text("读取中...")
+                                        Text(L("读取中...", "Reading..."))
                                             .foregroundColor(.secondary)
                                     }
                                 }
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("电池健康度 (最大容量)") {
-                                    Text(battery.batteryHealth > 0 ? String(format: "%.1f%%", battery.batteryHealth) : "检测中")
+                                SettingsRow(L("电池健康度 (最大容量)", "Battery Health (Max Capacity)")) {
+                                    Text(battery.batteryHealth > 0 ? String(format: "%.1f%%", battery.batteryHealth) : L("检测中", "Detecting"))
                                         .fontWeight(.medium)
                                         .foregroundColor(battery.batteryHealth >= 80 ? .primary : .orange)
                                 }
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("充放电循环次数") {
-                                    Text("\(battery.cycleCount) 次")
+                                SettingsRow(L("充放电循环次数", "Cycle Count")) {
+                                    Text(L("\(battery.cycleCount) 次", "\(battery.cycleCount) cycles"))
                                         .fontWeight(.medium)
                                 }
 
                                 if battery.batteryTemperature > 0 {
                                     Divider().padding(.horizontal, 16)
 
-                                    SettingsRow("电池包温度") {
+                                    SettingsRow(L("电池包温度", "Battery Temperature")) {
                                         Text(String(format: "%.1f°C", battery.batteryTemperature))
                                             .fontWeight(.medium)
                                             .foregroundColor(battery.batteryTemperature > 38 ? .red : .primary)
@@ -992,10 +1030,10 @@ struct PreferencesView: View {
                             }
 
                         case .hardware:
-                            SettingsCard(title: "输入设备保护") {
-                                SettingsRow("禁用内置键盘") {
+                            SettingsCard(title: L("输入设备保护", "Input Device Protection")) {
+                                SettingsRow(L("禁用内置键盘", "Disable Built-in Keyboard")) {
                                     HStack(spacing: 16) {
-                                        Toggle("无头模式下", isOn: Binding(
+                                        Toggle(L("无头模式下", "In Headless Mode"), isOn: Binding(
                                             get: { self.disableKeyboardInHeadless },
                                             set: { newValue in
                                                 self.disableKeyboardInHeadless = newValue
@@ -1006,7 +1044,7 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.checkbox)
 
-                                        Toggle("外接键盘下", isOn: Binding(
+                                        Toggle(L("外接键盘下", "With External Keyboard"), isOn: Binding(
                                             get: { self.disableKeyboardWhenExtKeyConnected },
                                             set: { newValue in
                                                 self.disableKeyboardWhenExtKeyConnected = newValue
@@ -1021,9 +1059,9 @@ struct PreferencesView: View {
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("禁用内置触控板") {
+                                SettingsRow(L("禁用内置触控板", "Disable Built-in Trackpad")) {
                                     HStack(spacing: 16) {
-                                        Toggle("无头模式下", isOn: Binding(
+                                        Toggle(L("无头模式下", "In Headless Mode"), isOn: Binding(
                                             get: { self.disableTrackpadInHeadless },
                                             set: { newValue in
                                                 self.disableTrackpadInHeadless = newValue
@@ -1033,7 +1071,7 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.checkbox)
 
-                                        Toggle("外接鼠标下", isOn: Binding(
+                                        Toggle(L("外接鼠标下", "With External Mouse"), isOn: Binding(
                                             get: { self.disableTrackpadWhenExtMouseConnected },
                                             set: { newValue in
                                                 self.disableTrackpadWhenExtMouseConnected = newValue
@@ -1050,13 +1088,16 @@ struct PreferencesView: View {
                                         HStack(spacing: 4) {
                                             Image(systemName: "exclamationmark.triangle.fill")
                                                 .foregroundColor(.orange)
-                                            Text("未授权辅助功能权限")
+                                            Text(L("未授权辅助功能权限", "Accessibility Permission Required"))
                                                 .bold()
                                         }
-                                        Text("请在“系统设置 -> 隐私与安全性 -> 辅助功能”中允许 MacHead，以使屏蔽键盘功能生效。")
+                                        Text(L(
+                                            "请在“系统设置 -> 隐私与安全性 -> 辅助功能”中允许 MacHead，以使屏蔽键盘功能生效。",
+                                            "Please enable MacHead in 'System Settings -> Privacy & Security -> Accessibility' to allow built-in keyboard blocking."
+                                        ))
                                             .font(.caption)
                                             .foregroundColor(.secondary)
-                                        Button("去系统设置开启") {
+                                        Button(L("去系统设置开启", "Open System Settings")) {
                                             if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
                                                 NSWorkspace.shared.open(url)
                                             }
@@ -1069,15 +1110,15 @@ struct PreferencesView: View {
                                 }
                             }
 
-                            SettingsCard(title: "多媒体设备") {
-                                SettingsRow("内置麦克风状态") {
-                                    Text(isMicrophoneMuted ? "已静音 🔇" : "正常 🎙️")
+                            SettingsCard(title: L("多媒体设备", "Audio & Media Devices")) {
+                                SettingsRow(L("内置麦克风状态", "Built-in Microphone Status")) {
+                                    Text(isMicrophoneMuted ? L("已静音 🔇", "Muted 🔇") : L("正常 🎙️", "Active 🎙️"))
                                         .fontWeight(.medium)
                                 }
 
                                 Divider().padding(.horizontal, 16)
 
-                                SettingsRow("无头模式下自动静音内置麦克风") {
+                                SettingsRow(L("无头模式下自动静音内置麦克风", "Auto-Mute Built-in Microphone in Headless Mode")) {
                                     Toggle("", isOn: Binding(
                                         get: { self.muteMicrophone },
                                         set: { newValue in
@@ -1097,25 +1138,25 @@ struct PreferencesView: View {
                                     .labelsHidden()
                                 }
                             }
-                            
+
                         case .integrations:
-                            SettingsCard(title: "系统硬件监控 & 告警") {
-                                SettingsRow("当前芯片温度") {
+                            SettingsCard(title: L("系统硬件监控 & 告警", "Hardware Monitoring & Alerts")) {
+                                SettingsRow(L("当前芯片温度", "Current CPU Temperature")) {
                                     Text(String(format: "%.1f°C", smc.currentTemperature))
                                         .fontWeight(.semibold)
                                         .foregroundColor(smc.currentTemperature >= overheatThreshold ? .red : .primary)
                                 }
-                                
+
                                 Divider().padding(.horizontal, 16)
-                                
-                                SettingsRow("当前风扇转速") {
-                                    Text(smc.isFanless ? "无风扇 (被动散热)" : (smc.fanSpeed > 0 ? "\(smc.fanSpeed) RPM" : "正常 (系统自动控制)"))
+
+                                SettingsRow(L("当前风扇转速", "Current Fan Speed")) {
+                                    Text(smc.isFanless ? L("无风扇 (被动散热)", "Fanless (Passive Cooling)") : (smc.fanSpeed > 0 ? "\(smc.fanSpeed) RPM" : L("正常 (系统自动控制)", "Normal (Auto Controlled)")))
                                         .fontWeight(.semibold)
                                 }
-                                
+
                                 Divider().padding(.horizontal, 16)
-                                
-                                SettingsRow("启用芯片过热报警") {
+
+                                SettingsRow(L("启用芯片过热报警", "Enable CPU Overheat Alert")) {
                                     HStack(spacing: 12) {
                                         Toggle("", isOn: Binding(
                                             get: { self.overheatAlertEnabled },
@@ -1126,16 +1167,16 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.switch)
                                         .labelsHidden()
-                                        
-                                        Button("设定...") {
+
+                                        Button(L("设定...", "Configure...")) {
                                             self.showOverheatConfig = true
                                         }
                                     }
                                 }
-                                
+
                                 Divider().padding(.horizontal, 16)
-                                
-                                SettingsRow("启用消息推送通道") {
+
+                                SettingsRow(L("启用消息推送通道", "Enable Push Notification Channels")) {
                                     HStack(spacing: 12) {
                                         Toggle("", isOn: Binding(
                                             get: { self.notificationsEnabled },
@@ -1146,16 +1187,16 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.switch)
                                         .labelsHidden()
-                                        
-                                        Button("设定...") {
+
+                                        Button(L("设定...", "Configure...")) {
                                             self.showNotificationsConfig = true
                                         }
                                     }
                                 }
                             }
-                            
-                            SettingsCard(title: "哪吒监控 & ServerStatus 探针") {
-                                SettingsRow("启用哪吒监控 (Nezha Agent)") {
+
+                            SettingsCard(title: L("哪吒监控 & ServerStatus 探针", "Nezha Monitoring & ServerStatus Agent")) {
+                                SettingsRow(L("启用哪吒监控 (Nezha Agent)", "Enable Nezha Agent")) {
                                     HStack(spacing: 10) {
                                         if nezhaEnabled {
                                             HStack(spacing: 4) {
@@ -1187,17 +1228,17 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.switch)
                                         .labelsHidden()
-                                        
-                                        Button("设定...") {
+
+                                        Button(L("设定...", "Configure...")) {
                                              self.isNezhaConfigModified = false
                                              self.showNezhaConfig = true
                                          }
                                     }
                                 }
-                                
+
                                 Divider().padding(.horizontal, 16)
-                                
-                                SettingsRow("启用 ServerStatus 客户端") {
+
+                                SettingsRow(L("启用 ServerStatus 客户端", "Enable ServerStatus Client")) {
                                     HStack(spacing: 12) {
                                         Toggle("", isOn: Binding(
                                             get: { self.serverStatusEnabled },
@@ -1213,18 +1254,18 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.switch)
                                         .labelsHidden()
-                                        
-                                        Button("设定...") {
+
+                                        Button(L("设定...", "Configure...")) {
                                             self.showServerStatusConfig = true
                                         }
                                     }
                                 }
                             }
-                            
-                            
-                            
-                            SettingsCard(title: "Uptime Kuma 心跳打卡") {
-                                SettingsRow("启用 Uptime Kuma 推送") {
+
+
+
+                            SettingsCard(title: L("Uptime Kuma 心跳打卡", "Uptime Kuma Heartbeat")) {
+                                SettingsRow(L("启用 Uptime Kuma 推送", "Enable Uptime Kuma Push")) {
                                     HStack(spacing: 12) {
                                         Toggle("", isOn: Binding(
                                             get: { self.kumaEnabled },
@@ -1241,7 +1282,7 @@ struct PreferencesView: View {
                                         .toggleStyle(.switch)
                                         .labelsHidden()
 
-                                        Button("设定...") {
+                                        Button(L("设定...", "Configure...")) {
                                             self.showKumaConfig = true
                                         }
                                     }
@@ -1249,8 +1290,8 @@ struct PreferencesView: View {
                             }
 
                         case .tunneling:
-                            SettingsCard(title: "Microsoft Dev Tunnels 穿透服务") {
-                                SettingsRow("启用 Dev Tunnels (微软中继)") {
+                            SettingsCard(title: L("Microsoft Dev Tunnels 穿透服务", "Microsoft Dev Tunnels")) {
+                                SettingsRow(L("启用 Dev Tunnels (微软中继)", "Enable Dev Tunnels (Azure Relay)")) {
                                     HStack(spacing: 10) {
                                         if devTunnelEnabled {
                                             HStack(spacing: 4) {
@@ -1282,8 +1323,8 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.switch)
                                         .labelsHidden()
-                                        
-                                        Button("设定...") {
+
+                                        Button(L("设定...", "Configure...")) {
                                             self.isDevTunnelConfigModified = false
                                             self.devTunnelTestResult = nil
                                             self.devTunnelLoggedInUser = DevTunnelService.shared.checkUserLoginStatus()
@@ -1294,7 +1335,7 @@ struct PreferencesView: View {
                                         }
                                     }
                                 }
-                                
+
                                 if case .connected(let webUrl, _) = devTunnelStatus, devTunnelEnabled {
                                     Divider().padding(.horizontal, 16)
                                     VStack(alignment: .leading, spacing: 6) {
@@ -1306,24 +1347,24 @@ struct PreferencesView: View {
                                                         Image(systemName: port == "22" ? "terminal" : "link")
                                                             .foregroundColor(port == "22" ? .purple : .green)
                                                             .font(.caption)
-                                                        
-                                                        let ruleName = devTunnelPortRules.first(where: { $0.port == port })?.name ?? "端口 \(port)"
+
+                                                        let ruleName = devTunnelPortRules.first(where: { $0.port == port })?.name ?? L("端口 \(port)", "Port \(port)")
                                                         Text("\(ruleName) (\(port)):")
                                                             .font(.caption2)
                                                             .foregroundColor(.secondary)
-                                                        
+
                                                         Text(url)
                                                             .font(.system(.caption, design: .monospaced))
                                                             .foregroundColor(.primary)
                                                             .lineLimit(1)
-                                                        
+
                                                         Spacer()
-                                                        
+
                                                         Button(action: {
                                                             NSPasteboard.general.clearContents()
                                                             NSPasteboard.general.setString(url, forType: .string)
                                                         }) {
-                                                            Text("复制")
+                                                            Text(L("复制", "Copy"))
                                                                 .font(.caption2)
                                                         }
                                                         .buttonStyle(.plain)
@@ -1348,7 +1389,7 @@ struct PreferencesView: View {
                                                     NSPasteboard.general.clearContents()
                                                     NSPasteboard.general.setString(webUrl, forType: .string)
                                                 }) {
-                                                    Text("复制")
+                                                    Text(L("复制", "Copy"))
                                                         .font(.caption2)
                                                 }
                                                 .buttonStyle(.plain)
@@ -1362,7 +1403,7 @@ struct PreferencesView: View {
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
                                 }
-                                
+
                                 if case .error(let msg) = devTunnelStatus, devTunnelEnabled {
                                     Divider().padding(.horizontal, 16)
                                     HStack(alignment: .top, spacing: 8) {
@@ -1379,8 +1420,8 @@ struct PreferencesView: View {
                                 }
                             }
 
-                            SettingsCard(title: "Cloudflare Tunnel 穿透服务") {
-                                SettingsRow("启用 Cloudflare Tunnel (cloudflared)") {
+                            SettingsCard(title: L("Cloudflare Tunnel 穿透服务", "Cloudflare Tunnel")) {
+                                SettingsRow(L("启用 Cloudflare Tunnel (cloudflared)", "Enable Cloudflare Tunnel (cloudflared)")) {
                                     HStack(spacing: 10) {
                                         if cloudflareEnabled {
                                             HStack(spacing: 4) {
@@ -1412,15 +1453,15 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.switch)
                                         .labelsHidden()
-                                        
-                                        Button("设定...") {
+
+                                        Button(L("设定...", "Configure...")) {
                                             self.isCloudflareConfigModified = false
                                             self.cloudflareTestResult = nil
                                             self.showCloudflareConfig = true
                                         }
                                     }
                                 }
-                                
+
                                 if case .error(let msg) = cloudflareStatus, cloudflareEnabled {
                                     Divider().padding(.horizontal, 16)
                                     HStack(alignment: .top, spacing: 8) {
@@ -1437,8 +1478,8 @@ struct PreferencesView: View {
                                 }
                             }
 
-                            SettingsCard(title: "FRP 内网穿透服务") {
-                                SettingsRow("启用 FRP 客户端 (frpc)") {
+                            SettingsCard(title: L("FRP 内网穿透服务", "FRP Reverse Proxy")) {
+                                SettingsRow(L("启用 FRP 客户端 (frpc)", "Enable FRP Client (frpc)")) {
                                     HStack(spacing: 10) {
                                         if frpEnabled {
                                             HStack(spacing: 4) {
@@ -1470,8 +1511,8 @@ struct PreferencesView: View {
                                         ))
                                         .toggleStyle(.switch)
                                         .labelsHidden()
-                                        
-                                        Button("设定...") {
+
+                                        Button(L("设定...", "Configure...")) {
                                              self.isFrpConfigModified = false
                                              self.showFrpConfig = true
                                          }
@@ -1481,26 +1522,26 @@ struct PreferencesView: View {
 
                         case .status:
 
-                            SettingsCard(title: "显示器与 Headless 守护策略") {
-                                SettingsRow("断开全部外屏时自动恢复内屏") {
+                            SettingsCard(title: L("显示器与 Headless 守护策略", "Display & Headless Guard Policy")) {
+                                SettingsRow(L("断开全部外屏时自动恢复内屏", "Auto-Restore Built-in Display When External Disconnected")) {
                                     Toggle("", isOn: $autoExitOnDisconnect)
                                         .toggleStyle(.switch)
                                         .labelsHidden()
                                 }
-                                
+
                                 Divider().padding(.horizontal, 16)
-                                
-                                SettingsRow("接入外屏时自动进入无头模式") {
+
+                                SettingsRow(L("接入外屏时自动进入无头模式", "Auto-Enable Headless Mode When External Display Connected")) {
                                     Toggle("", isOn: $autoRestoreOnConnect)
                                         .toggleStyle(.switch)
                                         .labelsHidden()
                                 }
                             }
-                            
-                            SettingsCard(title: "当前连接的显示器") {
+
+                            SettingsCard(title: L("当前连接的显示器", "Connected Displays")) {
                                 if connectedDisplays.isEmpty {
-                                    SettingsRow("未检测到有效显示器") {
-                                        Text("无")
+                                    SettingsRow(L("未检测到有效显示器", "No active displays detected")) {
+                                        Text(L("无", "None"))
                                             .foregroundColor(.secondary)
                                     }
                                 } else {
@@ -1533,16 +1574,16 @@ struct PreferencesView: View {
         // ------------------ Web控制面板配置弹窗 ------------------
         .sheet(isPresented: $showWebServerConfig) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("局域网 Web 控制面板配置")
+                Text(L("局域网 Web 控制面板配置", "LAN Web Control Panel Configuration"))
                     .font(.headline)
                     .fontWeight(.bold)
 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("管理密码:")
+                        Text(L("管理密码:", "Password:"))
                             .foregroundColor(.secondary)
                             .frame(width: 75, alignment: .leading)
-                        TextField("设置密码", text: Binding(
+                        TextField(L("设置密码", "Set Password"), text: Binding(
                             get: { self.webServerPassword },
                             set: { newValue in
                                 self.webServerPassword = newValue
@@ -1554,7 +1595,7 @@ struct PreferencesView: View {
                     }
 
                     HStack(alignment: .top) {
-                        Text("服务端口:")
+                        Text(L("服务端口:", "Port:"))
                             .foregroundColor(.secondary)
                             .frame(width: 75, alignment: .leading)
                             .padding(.top, 4)
@@ -1574,11 +1615,11 @@ struct PreferencesView: View {
                                 }
 
                             if let portVal = Int(webServerPort), portVal > 0 && portVal < 1024 {
-                                Text("小于 1024 的特权端口可能需要 root 权限")
+                                Text(L("小于 1024 的特权端口可能需要 root 权限", "Ports below 1024 may require root privileges"))
                                     .font(.caption2)
                                     .foregroundColor(.orange)
                             } else if let portVal = Int(webServerPort), portVal > 65535 {
-                                Text("端口超出有效范围 (1 - 65535)")
+                                Text(L("端口超出有效范围 (1 - 65535)", "Port out of valid range (1 - 65535)"))
                                     .font(.caption2)
                                     .foregroundColor(.red)
                             }
@@ -1586,7 +1627,7 @@ struct PreferencesView: View {
                     }
 
                     HStack {
-                        Text("访问地址:")
+                        Text(L("访问地址:", "Access URL:"))
                             .foregroundColor(.secondary)
                             .frame(width: 75, alignment: .leading)
                         Text(verbatim: "http://\(webServerIP):\(displayWebServerPort)")
@@ -1601,7 +1642,7 @@ struct PreferencesView: View {
 
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         commitWebServerPort()
                         self.showWebServerConfig = false
                     }
@@ -1614,35 +1655,35 @@ struct PreferencesView: View {
                 commitWebServerPort()
             }
         }
-        
+
         // ------------------ 电池休眠保护配置弹窗 ------------------
         .sheet(isPresented: $showBatteryConfig) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("低电量电池保护配置")
+                Text(L("低电量电池保护配置", "Low Battery Protection Settings"))
                     .font(.headline)
                     .fontWeight(.bold)
-                
+
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("当前电量:")
+                        Text(L("当前电量:", "Current Level:"))
                             .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
+                            .frame(width: 105, alignment: .leading)
                         Text("\(battery.currentCapacity)%")
                             .fontWeight(.semibold)
                     }
 
                     HStack {
-                        Text("电源状态:")
+                        Text(L("电源状态:", "Power Source:"))
                             .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
-                        Text(battery.powerState == "AC Power" ? "外接电源直供" : "电池供电中")
+                            .frame(width: 105, alignment: .leading)
+                        Text(battery.powerState == "AC Power" ? L("外接电源直供", "AC Power") : L("电池供电中", "On Battery"))
                             .fontWeight(.medium)
                     }
-                    
+
                     HStack {
-                        Text("休眠电量阈值:")
+                        Text(L("休眠电量阈值:", "Sleep Threshold:"))
                             .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
+                            .frame(width: 105, alignment: .leading)
                         Slider(value: Binding(
                             get: { Double(self.batteryThreshold) },
                             set: { newValue in
@@ -1653,48 +1694,48 @@ struct PreferencesView: View {
                             }
                         ), in: 10...50, step: 5)
                         .frame(width: 160)
-                        
+
                         Text("\(batteryThreshold)%")
                             .fontWeight(.bold)
                     }
                 }
                 .padding(.vertical, 8)
-                
+
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         self.showBatteryConfig = false
                     }
                     .keyboardShortcut(.defaultAction)
                 }
             }
             .padding(20)
-            .frame(width: 380, height: 220)
+            .frame(width: 390, height: 220)
         }
-        
+
         // ------------------ SMC 过热温度报警配置弹窗 ------------------
         .sheet(isPresented: $showOverheatConfig) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("芯片过热报警配置")
+                Text(L("芯片过热报警配置", "CPU Overheat Alert Settings"))
                     .font(.headline)
                     .fontWeight(.bold)
-                
+
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("当前温度:")
+                        Text(L("当前温度:", "Current Temp:"))
                             .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
+                            .frame(width: 105, alignment: .leading)
                         Text(String(format: "%.1f°C", smc.currentTemperature))
                             .fontWeight(.semibold)
                             .foregroundColor(smc.currentTemperature >= overheatThreshold ? .red : .primary)
                     }
-                    
+
                     HStack {
-                        Text("报警温度阈值:")
+                        Text(L("报警温度阈值:", "Alert Threshold:"))
                             .foregroundColor(.secondary)
-                            .frame(width: 90, alignment: .leading)
+                            .frame(width: 105, alignment: .leading)
                         Slider(value: Binding(
                             get: { self.overheatThreshold },
                             set: { newValue in
@@ -1703,39 +1744,39 @@ struct PreferencesView: View {
                             }
                         ), in: 60...95, step: 5)
                         .frame(width: 160)
-                        
+
                         Text("\(Int(overheatThreshold))°C")
                             .fontWeight(.bold)
                     }
                 }
                 .padding(.vertical, 8)
-                
+
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         self.showOverheatConfig = false
                     }
                     .keyboardShortcut(.defaultAction)
                 }
             }
             .padding(20)
-            .frame(width: 380, height: 200)
+            .frame(width: 390, height: 200)
         }
-        
+
         // ------------------ 推送通道集成配置弹窗 ------------------
         .sheet(isPresented: $showNotificationsConfig) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("消息推送通道配置")
+                Text(L("消息推送通道配置", "Push Notification Channels"))
                     .font(.headline)
                     .fontWeight(.bold)
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
-                                Toggle("启用 Bark 推送 (iOS)", isOn: Binding(
+                                Toggle(L("启用 Bark 推送 (iOS)", "Enable Bark Push (iOS)"), isOn: Binding(
                                     get: { self.barkEnabled },
                                     set: { newValue in
                                         self.barkEnabled = newValue
@@ -1745,13 +1786,13 @@ struct PreferencesView: View {
                                 .toggleStyle(.switch)
                                 Spacer()
                             }
-                            
+
                             if barkEnabled {
                                 HStack {
                                     Text("Bark Key:")
                                         .foregroundColor(.secondary)
                                         .frame(width: 80, alignment: .leading)
-                                    TextField("填入 Bark Device Key", text: Binding(
+                                    TextField(L("填入 Bark Device Key", "Enter Bark Device Key"), text: Binding(
                                         get: { self.barkKey },
                                         set: { newValue in
                                             self.barkKey = newValue
@@ -1763,12 +1804,12 @@ struct PreferencesView: View {
                                 .padding(.leading, 12)
                             }
                         }
-                        
+
                         Divider()
-                        
+
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
-                                Toggle("启用 Telegram Bot 推送", isOn: Binding(
+                                Toggle(L("启用 Telegram Bot 推送", "Enable Telegram Bot Push"), isOn: Binding(
                                     get: { self.telegramEnabled },
                                     set: { newValue in
                                         self.telegramEnabled = newValue
@@ -1778,14 +1819,14 @@ struct PreferencesView: View {
                                 .toggleStyle(.switch)
                                 Spacer()
                             }
-                            
+
                             if telegramEnabled {
                                 VStack(spacing: 8) {
                                     HStack {
                                         Text("Bot Token:")
                                             .foregroundColor(.secondary)
                                             .frame(width: 80, alignment: .leading)
-                                        TextField("填入 Bot Token", text: Binding(
+                                        TextField(L("填入 Bot Token", "Enter Bot Token"), text: Binding(
                                             get: { self.telegramBotToken },
                                             set: { newValue in
                                                 self.telegramBotToken = newValue
@@ -1794,12 +1835,12 @@ struct PreferencesView: View {
                                         ))
                                         .textFieldStyle(.roundedBorder)
                                     }
-                                    
+
                                     HStack {
                                         Text("Chat ID:")
                                             .foregroundColor(.secondary)
                                             .frame(width: 80, alignment: .leading)
-                                        TextField("填入 Chat ID", text: Binding(
+                                        TextField(L("填入 Chat ID", "Enter Chat ID"), text: Binding(
                                             get: { self.telegramChatId },
                                             set: { newValue in
                                                 self.telegramChatId = newValue
@@ -1812,12 +1853,17 @@ struct PreferencesView: View {
                                 .padding(.leading, 12)
                             }
                         }
-                        
+
                         Divider()
-                        
+
                         HStack {
-                            Button("发送测试通知") {
-                                NotificationService.shared.sendAlert(type: .test, title: "连接测试", body: "这是一条来自 MacHead 的集成状态测试通知，连接正常！", force: true)
+                            Button(L("发送测试通知", "Send Test Notification")) {
+                                NotificationService.shared.sendAlert(
+                                    type: .test,
+                                    title: L("连接测试", "Connection Test"),
+                                    body: L("这是一条来自 MacHead 的集成状态测试通知，连接正常！", "This is a test notification from MacHead. Connection is working!"),
+                                    force: true
+                                )
                             }
                             .buttonStyle(.bordered)
                             Spacer()
@@ -1825,12 +1871,12 @@ struct PreferencesView: View {
                     }
                     .padding(.vertical, 4)
                 }
-                
+
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         self.showNotificationsConfig = false
                     }
                     .keyboardShortcut(.defaultAction)
@@ -1839,16 +1885,16 @@ struct PreferencesView: View {
             .padding(20)
             .frame(width: 400, height: 380)
         }
-        
+
         // ------------------ 哪吒监控配置弹窗 ------------------
         .sheet(isPresented: $showNezhaConfig) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("哪吒监控配置")
+                    Text(L("哪吒监控配置", "Nezha Monitoring Settings"))
                         .font(.headline)
                         .fontWeight(.bold)
-                    
-                    Toggle("启用服务", isOn: Binding(
+
+                    Toggle(L("启用服务", "Enable"), isOn: Binding(
                         get: { self.nezhaEnabled },
                         set: { newValue in
                             self.nezhaEnabled = newValue
@@ -1863,10 +1909,10 @@ struct PreferencesView: View {
                     .toggleStyle(.switch)
                     .controlSize(.small)
                     .padding(.leading, 8)
-                    
+
                     Spacer()
-                    
-                    Button("测试连接并启用") {
+
+                    Button(L("测试连接并启用", "Test & Enable")) {
                         self.nezhaEnabled = true
                         UserDefaults.standard.set(true, forKey: "nezhaEnabled")
                         NezhaAgentService.shared.stop()
@@ -1877,14 +1923,14 @@ struct PreferencesView: View {
                     }
                     .controlSize(.small)
                 }
-                
+
                 // 实时诊断卡片
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
                         Circle()
                             .fill(nezhaStatusColor)
                             .frame(width: 8, height: 8)
-                        Text("当前状态:")
+                        Text(L("当前状态:", "Status:"))
                             .font(.caption)
                             .fontWeight(.semibold)
                         Text(nezhaStatusBadgeText)
@@ -1892,7 +1938,7 @@ struct PreferencesView: View {
                             .fontWeight(.bold)
                             .foregroundColor(nezhaStatusColor)
                     }
-                    
+
                     Text(nezhaStatus.displayText)
                         .font(.caption2)
                         .foregroundColor(nezhaStatusColor)
@@ -1905,10 +1951,10 @@ struct PreferencesView: View {
 
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("面板地址:")
+                        Text(L("面板地址:", "Server:"))
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
-                        TextField("host:port (如 104.223.55.31:8008)", text: $nezhaServer)
+                        TextField(L("host:port (如 104.223.55.31:8008)", "host:port (e.g. 104.223.55.31:8008)"), text: $nezhaServer)
                             .textFieldStyle(.roundedBorder)
                             .frame(width: 220)
                             .onChange(of: nezhaServer) { newValue in
@@ -1916,9 +1962,9 @@ struct PreferencesView: View {
                                 self.isNezhaConfigModified = true
                             }
                     }
-                    
+
                     HStack {
-                        Text("连接密钥:")
+                        Text(L("连接密钥:", "Secret:"))
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
                         SecureField("Secret Key", text: $nezhaSecret)
@@ -1929,12 +1975,12 @@ struct PreferencesView: View {
                                 self.isNezhaConfigModified = true
                             }
                     }
-                    
+
                     HStack {
-                        Text("安全传输:")
+                        Text(L("安全传输:", "Security:"))
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
-                        Toggle("启用 SSL/TLS 加密", isOn: $nezhaTls)
+                        Toggle(L("启用 SSL/TLS 加密", "Enable SSL/TLS"), isOn: $nezhaTls)
                             .toggleStyle(.switch)
                             .onChange(of: nezhaTls) { newValue in
                                 UserDefaults.standard.set(newValue, forKey: "nezhaTls")
@@ -1943,12 +1989,12 @@ struct PreferencesView: View {
                     }
                 }
                 .padding(.vertical, 4)
-                
+
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         if self.isNezhaConfigModified {
                             self.isNezhaConfigModified = false
                             IntegrationManager.shared.reloadServices()
@@ -1961,17 +2007,17 @@ struct PreferencesView: View {
             .padding(20)
             .frame(width: 440, height: 380)
         }
-        
+
         // ------------------ ServerStatus 配置弹窗 ------------------
         .sheet(isPresented: $showServerStatusConfig) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("ServerStatus 客户端配置")
+                Text(L("ServerStatus 客户端配置", "ServerStatus Client Settings"))
                     .font(.headline)
                     .fontWeight(.bold)
-                
+
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("服务端地址:")
+                        Text(L("服务端地址:", "Server:"))
                             .foregroundColor(.secondary)
                             .frame(width: 90, alignment: .leading)
                         TextField("grpc://host:port", text: Binding(
@@ -1985,12 +2031,12 @@ struct PreferencesView: View {
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 180)
                     }
-                    
+
                     HStack {
-                        Text("主机用户名:")
+                        Text(L("主机用户名:", "Username:"))
                             .foregroundColor(.secondary)
                             .frame(width: 90, alignment: .leading)
-                        TextField("User ID", text: Binding(
+                        TextField(L("用户名", "User ID"), text: Binding(
                             get: { self.serverStatusUser },
                             set: { newValue in
                                 self.serverStatusUser = newValue
@@ -2001,9 +2047,9 @@ struct PreferencesView: View {
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 180)
                     }
-                    
+
                     HStack {
-                        Text("连接密码:")
+                        Text(L("连接密码:", "Password:"))
                             .foregroundColor(.secondary)
                             .frame(width: 90, alignment: .leading)
                         SecureField("Password", text: Binding(
@@ -2019,12 +2065,12 @@ struct PreferencesView: View {
                     }
                 }
                 .padding(.vertical, 8)
-                
+
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         self.showServerStatusConfig = false
                     }
                     .keyboardShortcut(.defaultAction)
@@ -2033,11 +2079,11 @@ struct PreferencesView: View {
             .padding(20)
             .frame(width: 380, height: 240)
         }
-        
+
         // ------------------ Uptime Kuma 配置弹窗 ------------------
         // ------------------ FRP 内网穿透配置弹窗 ------------------
         // ------------------ FRP 内网穿透配置弹窗 ------------------
-        
+
         // ------------------ Cloudflare Tunnel 配置弹窗 ------------------
         .sheet(isPresented: $showCloudflareConfig) {
             VStack(alignment: .leading, spacing: 16) {
@@ -2045,20 +2091,23 @@ struct PreferencesView: View {
                     Image(systemName: "cloud.fill")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.orange)
-                    Text("Cloudflare Tunnel 配置 (cloudflared)")
+                    Text(L("Cloudflare Tunnel 配置 (cloudflared)", "Cloudflare Tunnel Settings (cloudflared)"))
                         .font(.headline)
                     Spacer()
                 }
-                
-                Text("输入您的 Cloudflare Tunnel 运行 Token。应用将在后台自动调用内置的 cloudflared 客户端建立免公网 IP 穿透隧道。")
+
+                Text(L(
+                    "输入您的 Cloudflare Tunnel 运行 Token。应用将在后台自动调用内置的 cloudflared 客户端建立免公网 IP 穿透隧道。",
+                    "Enter your Cloudflare Tunnel Token. MacHead will run the bundled cloudflared client in the background to establish a public tunnel."
+                ))
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    
+
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Tunnel Token")
+                    Text(L("隧道 Token", "Tunnel Token"))
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    SecureField("输入 eyJh... 格式的 Cloudflare Token", text: Binding(
+                    SecureField(L("输入 eyJh... 格式的 Cloudflare Token", "Enter Cloudflare Token (eyJh...)"), text: Binding(
                         get: { self.cloudflareToken },
                         set: { newValue in
                             if self.cloudflareToken != newValue {
@@ -2069,7 +2118,7 @@ struct PreferencesView: View {
                     ))
                         .textFieldStyle(.roundedBorder)
                 }
-                
+
                 if let result = cloudflareTestResult {
                     HStack(spacing: 8) {
                         Image(systemName: result.success ? "checkmark.circle.fill" : "xmark.circle.fill")
@@ -2085,7 +2134,7 @@ struct PreferencesView: View {
                     .background(result.success ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
                     .cornerRadius(6)
                 }
-                
+
                 HStack {
                     Button(action: {
                         self.isCloudflareTesting = true
@@ -2100,20 +2149,20 @@ struct PreferencesView: View {
                                 ProgressView()
                                     .controlSize(.small)
                             }
-                            Text(isCloudflareTesting ? "正在测试..." : "测试连接")
+                            Text(isCloudflareTesting ? L("正在测试...", "Testing...") : L("测试连接", "Test Connection"))
                         }
                     }
                     .disabled(isCloudflareTesting || cloudflareToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    
+
                     Spacer()
-                    
-                    Button("取消") {
+
+                    Button(L("取消", "Cancel")) {
                         self.cloudflareTestResult = nil
                         self.showCloudflareConfig = false
                     }
                     .buttonStyle(.plain)
-                    
-                    Button("保存并应用") {
+
+                    Button(L("保存并应用", "Save & Apply")) {
                         self.cloudflareTestResult = nil
                         if self.isCloudflareConfigModified {
                             self.isCloudflareConfigModified = false
@@ -2137,18 +2186,21 @@ struct PreferencesView: View {
                     Image(systemName: "network.badge.shield.half.filled")
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(.blue)
-                    Text("Microsoft Dev Tunnels 配置")
+                    Text(L("Microsoft Dev Tunnels 配置", "Microsoft Dev Tunnels Settings"))
                         .font(.headline)
                     Spacer()
                 }
-                
-                Text("微软官方提供的安全跨网穿透隧道。通过 Azure Relay 边缘网络建立公网访问，支持自动端口多路复用与 GitHub 身份鉴权。")
+
+                Text(L(
+                    "微软官方提供的安全跨网穿透隧道。通过 Azure Relay 边缘网络建立公网访问，支持自动端口多路复用与 GitHub 身份鉴权。",
+                    "Microsoft's official secure cross-network tunnel via Azure Relay edge network, supporting port multiplexing and GitHub authentication."
+                ))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
                 // CLI Component Status Card
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("devtunnel CLI 组件")
+                    Text(L("devtunnel CLI 组件", "devtunnel CLI Component"))
                         .font(.caption)
                         .fontWeight(.semibold)
 
@@ -2156,7 +2208,7 @@ struct PreferencesView: View {
                         HStack {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundColor(.green)
-                            Text("已就绪")
+                            Text(L("已就绪", "Ready"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Text(binaryPath)
@@ -2170,7 +2222,10 @@ struct PreferencesView: View {
                         HStack {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.orange)
-                            Text("未检测到 devtunnel CLI。该组件不随 App 内置，点击右侧按钮从微软官方下载安装。")
+                            Text(L(
+                                "未检测到 devtunnel CLI。该组件不随 App 内置，点击右侧按钮从微软官方下载安装。",
+                                "devtunnel CLI not found. Click Install to download from Microsoft's official release."
+                            ))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -2190,7 +2245,7 @@ struct PreferencesView: View {
                                     if isDevTunnelInstalling {
                                         ProgressView().controlSize(.small)
                                     }
-                                    Text(isDevTunnelInstalling ? "安装中..." : "一键安装")
+                                    Text(isDevTunnelInstalling ? L("安装中...", "Installing...") : L("一键安装", "Install"))
                                 }
                             }
                             .controlSize(.small)
@@ -2198,12 +2253,15 @@ struct PreferencesView: View {
                         }
 
                         if let installError = devTunnelInstallError {
-                            Text("安装失败: \(installError)")
+                            Text(L("安装失败: \(installError)", "Install failed: \(installError)"))
                                 .font(.caption2)
                                 .foregroundColor(.red)
                         }
 
-                        Text("也可自行安装后重启 App（如 brew install --cask devtunnel），MacHead 会自动识别 PATH 中的命令。")
+                        Text(L(
+                            "也可自行安装后重启 App（如 brew install --cask devtunnel），MacHead 会自动识别 PATH 中的命令。",
+                            "Or install manually (e.g. 'brew install --cask devtunnel') and relaunch MacHead."
+                        ))
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -2214,20 +2272,20 @@ struct PreferencesView: View {
 
                 // Account Login Status Card
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("微软 / GitHub 账号鉴权")
+                    Text(L("微软 / GitHub 账号鉴权", "Microsoft / GitHub Authentication"))
                         .font(.caption)
                         .fontWeight(.semibold)
-                    
+
                     HStack {
                         if let user = devTunnelLoggedInUser {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundColor(.green)
-                            Text("已登录: \(user)")
+                            Text(L("已登录: \(user)", "Signed in: \(user)"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .lineLimit(1)
                             Spacer()
-                            Button("退出登录") {
+                            Button(L("退出登录", "Sign Out")) {
                                 DevTunnelService.shared.logout()
                                 self.devTunnelLoggedInUser = nil
                             }
@@ -2235,7 +2293,7 @@ struct PreferencesView: View {
                         } else {
                             Image(systemName: "person.crop.circle.badge.questionmark")
                                 .foregroundColor(.orange)
-                            Text("尚未登录账号 (可通过浏览器一键授权)")
+                            Text(L("尚未登录账号 (可通过浏览器一键授权)", "Not signed in (authorize via browser)"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -2250,7 +2308,7 @@ struct PreferencesView: View {
                                     if isDevTunnelLoggingIn {
                                         ProgressView().controlSize(.small)
                                     }
-                                    Text("登录 GitHub 账号")
+                                    Text(L("登录 GitHub 账号", "Sign in with GitHub"))
                                 }
                             }
                             .controlSize(.small)
@@ -2260,18 +2318,18 @@ struct PreferencesView: View {
                     .background(Color.primary.opacity(0.04))
                     .cornerRadius(6)
                 }
-                
+
                 // Quota & Traffic Usage Card
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
-                        Text("月度流量与配额状态")
+                        Text(L("月度流量与配额状态", "Monthly Bandwidth & Quota"))
                             .font(.caption)
                             .fontWeight(.semibold)
                         Spacer()
                         if isQueryingLimits {
                             ProgressView().controlSize(.small)
                         } else {
-                            Button("刷新配额") {
+                            Button(L("刷新配额", "Refresh Quota")) {
                                 self.isQueryingLimits = true
                                 DevTunnelService.shared.queryUserLimits { info in
                                     self.isQueryingLimits = false
@@ -2283,11 +2341,14 @@ struct PreferencesView: View {
                             .foregroundColor(.accentColor)
                         }
                     }
-                    
+
                     if let quota = devTunnelQuota {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
-                                Text("已用流量: \(String(format: "%.2f", quota.bandwidthUsedGB)) GB / \(String(format: "%.1f", quota.bandwidthLimitGB)) GB")
+                                Text(L(
+                                    "已用流量: \(String(format: "%.2f", quota.bandwidthUsedGB)) GB / \(String(format: "%.1f", quota.bandwidthLimitGB)) GB",
+                                    "Bandwidth Used: \(String(format: "%.2f", quota.bandwidthUsedGB)) GB / \(String(format: "%.1f", quota.bandwidthLimitGB)) GB"
+                                ))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                                 Spacer()
@@ -2296,12 +2357,15 @@ struct PreferencesView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(quota.bandwidthPercent > 85 ? .red : (quota.bandwidthPercent > 60 ? .orange : .green))
                             }
-                            
+
                             ProgressView(value: quota.bandwidthPercent, total: 100.0)
                                 .accentColor(quota.bandwidthPercent > 85 ? .red : (quota.bandwidthPercent > 60 ? .orange : .blue))
-                            
+
                             HStack {
-                                Text("活跃隧道数: \(quota.currentTunnels) / \(quota.maxTunnels)")
+                                Text(L(
+                                    "活跃隧道数: \(quota.currentTunnels) / \(quota.maxTunnels)",
+                                    "Active Tunnels: \(quota.currentTunnels) / \(quota.maxTunnels)"
+                                ))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -2311,7 +2375,10 @@ struct PreferencesView: View {
                         .cornerRadius(6)
                     } else {
                         HStack {
-                            Text("微软官方免费配额：每月 5 GB 流量，支持 10 条隧道与多端口多路复用。")
+                            Text(L(
+                                "微软官方免费配额：每月 5 GB 流量，支持 10 条隧道与多端口多路复用。",
+                                "Microsoft Free Quota: 5 GB monthly bandwidth, up to 10 tunnels and multi-port forwarding."
+                            ))
                                 .font(.caption2)
                                 .foregroundColor(.secondary)
                         }
@@ -2320,67 +2387,67 @@ struct PreferencesView: View {
                         .cornerRadius(6)
                     }
                 }
-                
+
                 // Mode selector
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("隧道模式")
+                    Text(L("隧道模式", "Tunnel Mode"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Picker("", selection: Binding(
                         get: { self.devTunnelMode },
                         set: { self.devTunnelMode = $0; self.isDevTunnelConfigModified = true }
                     )) {
-                        Text("账号自动模式 (推荐)").tag("login")
-                        Text("Access Token 模式").tag("token")
+                        Text(L("账号自动模式 (推荐)", "Account Mode (Recommended)")).tag("login")
+                        Text(L("Access Token 模式", "Access Token Mode")).tag("token")
                     }
                     .pickerStyle(.segmented)
                 }
-                
+
                 if devTunnelMode == "token" {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Tunnel ID (选填)")
+                        Text(L("Tunnel ID (选填)", "Tunnel ID (Optional)"))
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        TextField("例如: machead-server", text: Binding(
+                        TextField(L("例如: machead-server", "e.g. machead-server"), text: Binding(
                             get: { self.devTunnelId },
                             set: { self.devTunnelId = $0; self.isDevTunnelConfigModified = true }
                         ))
                         .textFieldStyle(.roundedBorder)
-                        
-                        Text("Access Token")
+
+                        Text(L("访问 Token", "Access Token"))
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        SecureField("输入 devtunnel 生成的 Access Token", text: Binding(
+                        SecureField(L("输入 devtunnel 生成的 Access Token", "Enter devtunnel Access Token"), text: Binding(
                             get: { self.devTunnelToken },
                             set: { self.devTunnelToken = $0; self.isDevTunnelConfigModified = true }
                         ))
                         .textFieldStyle(.roundedBorder)
                     }
                 }
-                
+
                 // Local Port Forwarding Rules
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("本地端口映射配置")
+                        Text(L("本地端口映射配置", "Local Port Forwarding Rules"))
                             .font(.caption)
                             .fontWeight(.semibold)
                         Spacer()
                         Button(action: {
                             var rules = self.devTunnelPortRules
-                            rules.append(DevTunnelPortRule(name: "自定义服务 \(rules.count + 1)", port: "", protocolType: "auto", isEnabled: true))
+                            rules.append(DevTunnelPortRule(name: L("自定义服务 \(rules.count + 1)", "Custom Service \(rules.count + 1)"), port: "", protocolType: "auto", isEnabled: true))
                             self.devTunnelPortRules = rules
                             self.isDevTunnelConfigModified = true
                         }) {
                             HStack(spacing: 3) {
                                 Image(systemName: "plus.circle.fill")
-                                Text("添加端口")
+                                Text(L("添加端口", "Add Port"))
                             }
                             .font(.caption2)
                             .foregroundColor(.accentColor)
                         }
                         .buttonStyle(.plain)
                     }
-                    
+
                     VStack(spacing: 6) {
                         ForEach(devTunnelPortRules.indices, id: \.self) { idx in
                             HStack(spacing: 8) {
@@ -2390,32 +2457,32 @@ struct PreferencesView: View {
                                 ))
                                 .toggleStyle(.checkbox)
                                 .labelsHidden()
-                                
-                                TextField("服务名称", text: Binding(
+
+                                TextField(L("服务名称", "Service Name"), text: Binding(
                                     get: { devTunnelPortRules[idx].name },
                                     set: { devTunnelPortRules[idx].name = $0; isDevTunnelConfigModified = true }
                                 ))
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 130)
-                                
-                                TextField("本地端口", text: Binding(
+
+                                TextField(L("本地端口", "Local Port"), text: Binding(
                                     get: { devTunnelPortRules[idx].port },
                                     set: { devTunnelPortRules[idx].port = $0; isDevTunnelConfigModified = true }
                                 ))
                                 .textFieldStyle(.roundedBorder)
                                 .frame(width: 75)
-                                
+
                                 Picker("", selection: Binding(
                                     get: { devTunnelPortRules[idx].protocolType },
                                     set: { devTunnelPortRules[idx].protocolType = $0; isDevTunnelConfigModified = true }
                                 )) {
-                                    Text("Auto").tag("auto")
+                                    Text(L("自动", "Auto")).tag("auto")
                                     Text("HTTP").tag("http")
                                     Text("HTTPS").tag("https")
                                 }
                                 .pickerStyle(.menu)
                                 .frame(width: 85)
-                                
+
                                 if devTunnelPortRules.count > 1 {
                                     Button(action: {
                                         var rules = self.devTunnelPortRules
@@ -2435,8 +2502,8 @@ struct PreferencesView: View {
                     .padding(8)
                     .background(Color.primary.opacity(0.04))
                     .cornerRadius(8)
-                    
-                    Toggle("允许公网匿名访问 (免 GitHub OAuth 拦截)", isOn: Binding(
+
+                    Toggle(L("允许公网匿名访问 (免 GitHub OAuth 拦截)", "Allow Anonymous Public Access (Bypass GitHub OAuth Gate)"), isOn: Binding(
                         get: { self.devTunnelAllowAnonymous },
                         set: { self.devTunnelAllowAnonymous = $0; self.isDevTunnelConfigModified = true }
                     ))
@@ -2444,7 +2511,7 @@ struct PreferencesView: View {
                     .font(.caption)
                     .padding(.top, 4)
                 }
-                
+
                 // Test result banner
                 if let result = devTunnelTestResult {
                     HStack(spacing: 8) {
@@ -2461,7 +2528,7 @@ struct PreferencesView: View {
                     .background(result.success ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
                     .cornerRadius(6)
                 }
-                
+
                 HStack {
                     Button(action: {
                         self.isDevTunnelTesting = true
@@ -2481,20 +2548,20 @@ struct PreferencesView: View {
                             if isDevTunnelTesting {
                                 ProgressView().controlSize(.small)
                             }
-                            Text(isDevTunnelTesting ? "正在测试..." : "测试连接")
+                            Text(isDevTunnelTesting ? L("正在测试...", "Testing...") : L("测试连接", "Test Connection"))
                         }
                     }
                     .disabled(isDevTunnelTesting)
-                    
+
                     Spacer()
-                    
-                    Button("取消") {
+
+                    Button(L("取消", "Cancel")) {
                         self.devTunnelTestResult = nil
                         self.showDevTunnelConfig = false
                     }
                     .buttonStyle(.plain)
-                    
-                    Button("保存并应用") {
+
+                    Button(L("保存并应用", "Save & Apply")) {
                         self.devTunnelTestResult = nil
                         if self.isDevTunnelConfigModified {
                             self.isDevTunnelConfigModified = false
@@ -2518,11 +2585,11 @@ struct PreferencesView: View {
         .sheet(isPresented: $showFrpConfig) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("FRP 内网穿透配置 (frpc)")
+                    Text(L("FRP 内网穿透配置 (frpc)", "FRP Reverse Proxy Settings (frpc)"))
                         .font(.headline)
                         .fontWeight(.bold)
-                    
-                    Toggle("启用服务", isOn: Binding(
+
+                    Toggle(L("启用服务", "Enable"), isOn: Binding(
                         get: { self.frpEnabled },
                         set: { newValue in
                             self.frpEnabled = newValue
@@ -2537,10 +2604,10 @@ struct PreferencesView: View {
                     .toggleStyle(.switch)
                     .controlSize(.small)
                     .padding(.leading, 8)
-                    
+
                     Spacer()
-                    
-                    Button("测试连接并启用") {
+
+                    Button(L("测试连接并启用", "Test & Enable")) {
                         self.frpEnabled = true
                         UserDefaults.standard.set(true, forKey: "frpEnabled")
                         FrpService.saveRules(self.frpRules)
@@ -2552,14 +2619,14 @@ struct PreferencesView: View {
                     }
                     .controlSize(.small)
                 }
-                
+
                 // 实时诊断卡片
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
                         Circle()
                             .fill(frpStatusColor)
                             .frame(width: 8, height: 8)
-                        Text("当前状态:")
+                        Text(L("当前状态:", "Status:"))
                             .font(.caption)
                             .fontWeight(.semibold)
                         Text(frpStatusBadgeText)
@@ -2567,7 +2634,7 @@ struct PreferencesView: View {
                             .fontWeight(.bold)
                             .foregroundColor(frpStatusColor)
                     }
-                    
+
                     Text(frpStatus.displayText)
                         .font(.caption2)
                         .foregroundColor(frpStatusColor)
@@ -2578,7 +2645,7 @@ struct PreferencesView: View {
                 .background(frpStatusColor.opacity(0.1))
                 .cornerRadius(8)
 
-                Picker("配置模式", selection: Binding(
+                Picker(L("配置模式", "Config Mode"), selection: Binding(
                     get: { self.frpMode },
                     set: { newValue in
                         self.frpMode = newValue
@@ -2586,8 +2653,8 @@ struct PreferencesView: View {
                         self.isFrpConfigModified = true
                     }
                 )) {
-                    Text("快捷模式").tag("quick")
-                    Text("自定义配置").tag("custom")
+                    Text(L("快捷模式", "Quick Mode")).tag("quick")
+                    Text(L("自定义配置", "Custom Config")).tag("custom")
                 }
                 .pickerStyle(.segmented)
 
@@ -2596,25 +2663,25 @@ struct PreferencesView: View {
                         VStack(alignment: .leading, spacing: 14) {
                             // 服务端信息卡片
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("FRP 服务端基本信息")
+                                Text(L("FRP 服务端基本信息", "FRP Server Details"))
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.secondary)
-                                
+
                                 HStack {
-                                    Text("服务器地址:")
+                                    Text(L("服务器地址:", "Server Addr:"))
                                         .foregroundColor(.secondary)
                                         .frame(width: 90, alignment: .leading)
-                                    TextField("x.x.x.x 或 frp.domain.com", text: $frpServerAddr)
+                                    TextField(L("x.x.x.x 或 frp.domain.com", "x.x.x.x or frp.domain.com"), text: $frpServerAddr)
                                         .textFieldStyle(.roundedBorder)
                                         .onChange(of: frpServerAddr) { newValue in
                                             UserDefaults.standard.set(newValue, forKey: "frpServerAddr")
                                             self.isFrpConfigModified = true
                                         }
                                 }
-                                
+
                                 HStack {
-                                    Text("服务器端口:")
+                                    Text(L("服务器端口:", "Server Port:"))
                                         .foregroundColor(.secondary)
                                         .frame(width: 90, alignment: .leading)
                                     TextField("7000", text: $frpServerPort)
@@ -2625,36 +2692,36 @@ struct PreferencesView: View {
                                             self.isFrpConfigModified = true
                                         }
                                 }
-                                
+
                                 HStack {
-                                    Text("Auth Token:")
+                                    Text(L("认证 Token:", "Auth Token:"))
                                         .foregroundColor(.secondary)
                                         .frame(width: 90, alignment: .leading)
-                                    SecureField("可选，无 Token 可留空", text: $frpToken)
+                                    SecureField(L("可选，无 Token 可留空", "Optional (leave empty if none)"), text: $frpToken)
                                         .textFieldStyle(.roundedBorder)
                                         .onChange(of: frpToken) { newValue in
                                             UserDefaults.standard.set(newValue, forKey: "frpToken")
                                             self.isFrpConfigModified = true
                                         }
                                 }
-                                
+
                                 HStack {
-                                    Text("frpc 路径:")
+                                    Text(L("frpc 路径:", "frpc Path:"))
                                         .foregroundColor(.secondary)
                                         .frame(width: 90, alignment: .leading)
-                                    TextField("自动使用内置 frpc 或系统路径", text: $frpBinaryPath)
+                                    TextField(L("自动使用内置 frpc 或系统路径", "Auto-detect bundled or system frpc"), text: $frpBinaryPath)
                                         .textFieldStyle(.roundedBorder)
                                         .onChange(of: frpBinaryPath) { newValue in
                                             UserDefaults.standard.set(newValue, forKey: "frpBinaryPath")
                                             self.isFrpConfigModified = true
                                         }
-                                    Button("浏览...") {
+                                    Button(L("浏览...", "Browse...")) {
                                         let panel = NSOpenPanel()
                                         panel.canChooseFiles = true
                                         panel.canChooseDirectories = false
                                         panel.allowsMultipleSelection = false
-                                        panel.message = "选择 frpc 可执行文件"
-                                        panel.prompt = "选择"
+                                        panel.message = L("选择 frpc 可执行文件", "Select frpc binary")
+                                        panel.prompt = L("选择", "Select")
                                         if panel.runModal() == .OK, let url = panel.url {
                                             self.frpBinaryPath = url.path
                                             UserDefaults.standard.set(url.path, forKey: "frpBinaryPath")
@@ -2667,16 +2734,16 @@ struct PreferencesView: View {
                             .padding(12)
                             .background(Color.primary.opacity(0.04))
                             .cornerRadius(8)
-                            
+
                             // 代理隧道规则列表栏
                             HStack {
-                                Text("代理隧道映射规则 (\(frpRules.count) 条)")
+                                Text(L("代理隧道映射规则 (\(frpRules.count) 条)", "Proxy Mapping Rules (\(frpRules.count))"))
                                     .font(.caption)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.secondary)
-                                
+
                                 Spacer()
-                                
+
                                 Button(action: {
                                     let newRule = FrpProxyRule(
                                         name: "proxy-\(frpRules.count + 1)",
@@ -2691,21 +2758,21 @@ struct PreferencesView: View {
                                 }) {
                                     HStack(spacing: 4) {
                                         Image(systemName: "plus.circle.fill")
-                                        Text("添加隧道规则")
+                                        Text(L("添加隧道规则", "Add Proxy Rule"))
                                     }
                                     .font(.caption.weight(.medium))
                                 }
                                 .buttonStyle(.borderless)
                             }
-                            
+
                             if frpRules.isEmpty {
                                 VStack(spacing: 8) {
-                                    Text("暂无代理隧道映射规则")
+                                    Text(L("暂无代理隧道映射规则", "No proxy mapping rules configured"))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
-                                    Button("添加默认规则 (SSH + Web)") {
+                                    Button(L("添加默认规则 (SSH + Web)", "Add Default Rules (SSH + Web)")) {
                                         self.frpRules = FrpService.loadRules()
-        self.frpBinaryPath = UserDefaults.standard.string(forKey: "frpBinaryPath") ?? ""
+                                        self.frpBinaryPath = UserDefaults.standard.string(forKey: "frpBinaryPath") ?? ""
                                         FrpService.saveRules(self.frpRules)
                                         self.isFrpConfigModified = true
                                     }
@@ -2724,8 +2791,8 @@ struct PreferencesView: View {
                                                 .fontWeight(.bold)
                                                 .foregroundColor(.secondary)
                                                 .frame(width: 20)
-                                            
-                                            TextField("规则名称", text: Binding(
+
+                                            TextField(L("规则名称", "Rule Name"), text: Binding(
                                                 get: { self.frpRules[index].name },
                                                 set: { newValue in
                                                     self.frpRules[index].name = newValue
@@ -2735,7 +2802,7 @@ struct PreferencesView: View {
                                             ))
                                             .textFieldStyle(.roundedBorder)
                                             .frame(width: 140)
-                                            
+
                                             Picker("", selection: Binding(
                                                 get: { self.frpRules[index].type },
                                                 set: { newValue in
@@ -2751,9 +2818,9 @@ struct PreferencesView: View {
                                             }
                                             .pickerStyle(.segmented)
                                             .frame(width: 180)
-                                            
+
                                             Spacer()
-                                            
+
                                             Button(action: {
                                                 self.frpRules.remove(at: index)
                                                 FrpService.saveRules(self.frpRules)
@@ -2763,11 +2830,11 @@ struct PreferencesView: View {
                                                     .foregroundColor(.red)
                                             }
                                             .buttonStyle(.borderless)
-                                            .help("删除此规则")
+                                            .help(L("删除此规则", "Delete rule"))
                                         }
-                                        
+
                                         HStack(spacing: 8) {
-                                            Text("本地IP:")
+                                            Text(L("本地IP:", "Local IP:"))
                                                 .font(.caption2)
                                                 .foregroundColor(.secondary)
                                             TextField("127.0.0.1", text: Binding(
@@ -2780,8 +2847,8 @@ struct PreferencesView: View {
                                             ))
                                             .textFieldStyle(.roundedBorder)
                                             .frame(width: 90)
-                                            
-                                            Text("本地端口:")
+
+                                            Text(L("本地端口:", "Local Port:"))
                                                 .font(.caption2)
                                                 .foregroundColor(.secondary)
                                             TextField("22", text: Binding(
@@ -2794,9 +2861,9 @@ struct PreferencesView: View {
                                             ))
                                             .textFieldStyle(.roundedBorder)
                                             .frame(width: 55)
-                                            
+
                                             if frpRules[index].type == "tcp" || frpRules[index].type == "udp" {
-                                                Text("远程端口:")
+                                                Text(L("远程端口:", "Remote Port:"))
                                                     .font(.caption2)
                                                     .foregroundColor(.secondary)
                                                 TextField("6022", text: Binding(
@@ -2810,7 +2877,7 @@ struct PreferencesView: View {
                                                 .textFieldStyle(.roundedBorder)
                                                 .frame(width: 65)
                                             } else {
-                                                Text("绑定域名:")
+                                                Text(L("绑定域名:", "Domain:"))
                                                     .font(.caption2)
                                                     .foregroundColor(.secondary)
                                                 TextField("domain.com", text: Binding(
@@ -2841,10 +2908,10 @@ struct PreferencesView: View {
                     }
                 } else {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("配置文件内容 (支持 TOML / INI 语法):")
+                        Text(L("配置文件内容 (支持 TOML / INI 语法):", "Config File Content (TOML / INI):"))
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        
+
                         TextEditor(text: Binding(
                             get: { self.frpCustomConfig },
                             set: { newValue in
@@ -2864,12 +2931,12 @@ struct PreferencesView: View {
                         )
                     }
                 }
-                
+
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         FrpService.saveRules(self.frpRules)
                         if self.isFrpConfigModified {
                             self.isFrpConfigModified = false
@@ -2883,16 +2950,16 @@ struct PreferencesView: View {
             .padding(20)
             .frame(width: 540, height: 600)
         }
-        
+
         .sheet(isPresented: $showKumaConfig) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("Uptime Kuma 推送配置")
+                Text(L("Uptime Kuma 推送配置", "Uptime Kuma Push Settings"))
                     .font(.headline)
                     .fontWeight(.bold)
-                
+
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("推送 URL:")
+                        Text(L("推送 URL:", "Push URL:"))
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
                         TextField("http(s)://...", text: Binding(
@@ -2906,9 +2973,9 @@ struct PreferencesView: View {
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 220)
                     }
-                    
+
                     HStack {
-                        Text("汇报间隔:")
+                        Text(L("汇报间隔:", "Interval:"))
                             .foregroundColor(.secondary)
                             .frame(width: 80, alignment: .leading)
                         Slider(value: Binding(
@@ -2920,18 +2987,18 @@ struct PreferencesView: View {
                             }
                         ), in: 10...300, step: 10)
                         .frame(width: 160)
-                        
-                        Text("\(Int(kumaInterval)) 秒")
+
+                        Text(L("\(Int(kumaInterval)) 秒", "\(Int(kumaInterval))s"))
                             .fontWeight(.bold)
                     }
                 }
                 .padding(.vertical, 8)
-                
+
                 Spacer()
-                
+
                 HStack {
                     Spacer()
-                    Button("完成") {
+                    Button(L("完成", "Done")) {
                         self.showKumaConfig = false
                     }
                     .keyboardShortcut(.defaultAction)
@@ -2944,6 +3011,10 @@ struct PreferencesView: View {
             updateConnectedDisplays()
             updateBatteryState()
             remoteSharing.refresh()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .appLanguageChanged)) { _ in
+            updateConnectedDisplays()
+            updateBatteryState()
         }
         .onReceive(NotificationCenter.default.publisher(for: .headlessModeStateChanged)) { _ in
             updateConnectedDisplays()
@@ -3056,9 +3127,9 @@ struct PreferencesView: View {
             let isApple = vendorID == 0x05AC // Apple's Vendor ID
             let name: String
             if isBuiltIn {
-                name = "内置显示屏 (Color LCD)"
+                name = L("内置显示屏 (Color LCD)", "Built-in Display (Color LCD)")
             } else {
-                name = isApple ? "Apple 显示器 (ID: \(id))" : "外接显示器 (ID: \(id))"
+                name = isApple ? L("Apple 显示器 (ID: \(id))", "Apple Display (ID: \(id))") : L("外接显示器 (ID: \(id))", "External Display (ID: \(id))")
             }
             return DisplayInfo(id: id, name: name, isBuiltIn: isBuiltIn, isApple: isApple)
         }
@@ -3095,7 +3166,7 @@ struct PreferencesView: View {
             Circle()
                 .fill(isActive ? Color.green : Color.gray)
                 .frame(width: 6, height: 6)
-            Text(isActive ? "已监听" : "未开启")
+            Text(isActive ? L("已监听", "Listening") : L("未开启", "Disabled"))
                 .font(.caption2)
                 .fontWeight(.medium)
                 .foregroundColor(isActive ? .green : .secondary)
@@ -3123,7 +3194,7 @@ struct PreferencesView: View {
                 .foregroundColor(copiedServiceHint == serviceKey ? .green : .secondary)
         }
         .buttonStyle(.borderless)
-        .help("复制连接链接")
+        .help(L("复制连接链接", "Copy connection URL"))
     }
 }
 

@@ -44,13 +44,13 @@ public enum FrpStatus: Equatable {
     public var displayText: String {
         switch self {
         case .stopped:
-            return "未启用 FRP 内网穿透"
+            return L("未启用 FRP 内网穿透", "FRP Tunnel is disabled")
         case .connecting:
-            return "正在建立 FRP 穿透隧道..."
+            return L("正在建立 FRP 穿透隧道...", "Connecting to FRP Tunnel...")
         case .connected:
-            return "已成功建立 FRP 穿透隧道"
+            return L("已成功建立 FRP 穿透隧道", "Connected to FRP Tunnel")
         case .error(let msg):
-            return "穿透失败: \(msg)"
+            return L("穿透失败: \(msg)", "Tunnel failed: \(msg)")
         }
     }
 }
@@ -168,18 +168,21 @@ public final class FrpService {
         
         guard let path = binaryPath else {
             print("FrpService: Binary frpc not found")
-            currentStatus = .error(message: "未找到 frpc 可执行文件 (可在配置中手动指定路径或执行 brew install frp)")
+            currentStatus = .error(message: L(
+                "未找到 frpc 可执行文件 (可在配置中手动指定路径或执行 brew install frp)",
+                "frpc binary not found (specify path in settings or run 'brew install frp')"
+            ))
             return
         }
-        
+
         let mode = defaults.string(forKey: "frpMode") ?? "quick"
         let configContent: String
         let isIniFormat: Bool
-        
+
         if mode == "custom" {
             let customText = defaults.string(forKey: "frpCustomConfig") ?? ""
             if customText.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
-                currentStatus = .error(message: "自定义配置内容为空")
+                currentStatus = .error(message: L("自定义配置内容为空", "Custom configuration is empty"))
                 return
             }
             configContent = customText
@@ -189,14 +192,14 @@ public final class FrpService {
             let serverPort = defaults.string(forKey: "frpServerPort") ?? "7000"
             let token = defaults.string(forKey: "frpToken") ?? ""
             let rules = FrpService.loadRules()
-            
+
             if serverAddr.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
-                currentStatus = .error(message: "未配置 FRP 服务器地址")
+                currentStatus = .error(message: L("未配置 FRP 服务器地址", "FRP server address is empty"))
                 return
             }
-            
+
             if rules.isEmpty {
-                currentStatus = .error(message: "未配置任何代理隧道映射规则")
+                currentStatus = .error(message: L("未配置任何代理隧道映射规则", "No proxy tunnel mapping rules configured"))
                 return
             }
             
@@ -244,36 +247,42 @@ public final class FrpService {
             try configContent.write(toFile: configPath, atomically: true, encoding: .utf8)
         } catch {
             print("FrpService: Failed to write config file - \(error.localizedDescription)")
-            currentStatus = .error(message: "配置文件写入失败: \(error.localizedDescription)")
+            currentStatus = .error(message: L(
+                "配置文件写入失败: \(error.localizedDescription)",
+                "Failed to write config file: \(error.localizedDescription)"
+            ))
             return
         }
-        
+
         currentStatus = .connecting
-        
+
         let newProcess = Process()
         newProcess.executableURL = URL(fileURLWithPath: path)
         newProcess.arguments = ["-c", configPath]
-        
+
         let outPipe = Pipe()
         let errPipe = Pipe()
         newProcess.standardOutput = outPipe
         newProcess.standardError = errPipe
         self.outputPipe = outPipe
         self.errorPipe = errPipe
-        
+
         setupPipeObserver(outPipe)
         setupPipeObserver(errPipe)
-        
+
         newProcess.terminationHandler = { [weak self] proc in
             print("FrpService: frpc process terminated with status \(proc.terminationStatus)")
             self?.isServiceRunning = false
-            
+
             DispatchQueue.main.async {
                 if self?.currentStatus == .connecting {
-                    self?.currentStatus = .error(message: "进程异常退出 (Code \(proc.terminationStatus))")
+                    self?.currentStatus = .error(message: L(
+                        "进程异常退出 (Code \(proc.terminationStatus))",
+                        "Process exited unexpectedly (Code \(proc.terminationStatus))"
+                    ))
                 }
             }
-            
+
             DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) { [weak self] in
                 guard let self = self else { return }
                 let stillEnabled = UserDefaults.standard.bool(forKey: "frpEnabled")
@@ -283,7 +292,7 @@ public final class FrpService {
                 }
             }
         }
-        
+
         do {
             try newProcess.run()
             self.process = newProcess
@@ -291,10 +300,13 @@ public final class FrpService {
             print("FrpService: Successfully started frpc with config \(configPath)")
         } catch {
             print("FrpService: Failed to launch frpc process - \(error.localizedDescription)")
-            currentStatus = .error(message: "启动失败: \(error.localizedDescription)")
+            currentStatus = .error(message: L(
+                "启动失败: \(error.localizedDescription)",
+                "Failed to start: \(error.localizedDescription)"
+            ))
         }
     }
-    
+
     private func setupPipeObserver(_ pipe: Pipe) {
         pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
@@ -302,19 +314,19 @@ public final class FrpService {
             self?.parseLogLine(line)
         }
     }
-    
+
     private func parseLogLine(_ line: String) {
         let lower = line.lowercased()
         if lower.contains("start proxy success") || lower.contains("login to server success") || lower.contains("proxy added") {
             currentStatus = .connected
         } else if lower.contains("authorization failed") || lower.contains("token invalid") || lower.contains("token error") {
-            currentStatus = .error(message: "鉴权失败 (Token 错误)")
+            currentStatus = .error(message: L("鉴权失败 (Token 错误)", "Authentication failed (Invalid Token)"))
         } else if lower.contains("connection refused") || lower.contains("connect to server error") || lower.contains("i/o timeout") || lower.contains("dial tcp") {
-            currentStatus = .error(message: "无法连接服务端 (请检查服务器 IP 和端口)")
+            currentStatus = .error(message: L("无法连接服务端 (请检查服务器 IP 和端口)", "Cannot reach FRP server (check IP and port)"))
         } else if lower.contains("already exists") {
-            currentStatus = .error(message: "代理名称已被占用")
+            currentStatus = .error(message: L("代理名称已被占用", "Proxy name is already in use"))
         } else if lower.contains("port unavailable") || lower.contains("port already in use") {
-            currentStatus = .error(message: "远程端口不可用或已被占用")
+            currentStatus = .error(message: L("远程端口不可用或已被占用", "Remote port is unavailable or already in use"))
         }
     }
     

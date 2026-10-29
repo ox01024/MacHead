@@ -63,8 +63,11 @@ public final class IntegrationManager: ObservableObject {
         if temp >= limit {
             NotificationService.shared.sendAlert(
                 type: .overheat,
-                title: "芯片核心温度过高 ⚠️",
-                body: "当前 Mac 处理器温度已达到 \(Int(temp))°C，超过了设定的安全阈值（\(Int(limit))°C）。请检查合盖摆放位置与散热情况。"
+                title: L("芯片核心温度过高 ⚠️", "High CPU Temperature Alert ⚠️"),
+                body: L(
+                    "当前 Mac 处理器温度已达到 \(Int(temp))°C，超过了设定的安全阈值（\(Int(limit))°C）。请检查合盖摆放位置与散热情况。",
+                    "Mac CPU temperature reached \(Int(temp))°C, exceeding the alert threshold (\(Int(limit))°C). Please check ventilation and placement."
+                )
             )
         }
     }

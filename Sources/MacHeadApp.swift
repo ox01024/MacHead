@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MacHeadApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @ObservedObject private var l10n = LocalizationManager.shared
 
     var body: some Scene {
         Settings {
@@ -9,12 +10,12 @@ struct MacHeadApp: App {
         }
         .commands {
             CommandGroup(replacing: .appSettings) {
-                Button("偏好设置...") {
+                Button(L("偏好设置...", "Settings...")) {
                     appDelegate.openPreferences()
                 }
                 .keyboardShortcut(",", modifiers: .command)
 
-                Button("检查更新...") {
+                Button(L("检查更新...", "Check for Updates...")) {
                     UpdateManager.shared.checkForUpdates(silent: false)
                 }
             }

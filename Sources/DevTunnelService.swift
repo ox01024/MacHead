@@ -56,13 +56,13 @@ public enum DevTunnelStatus: Equatable {
     public var displayText: String {
         switch self {
         case .stopped:
-            return "未启用 Dev Tunnels 穿透"
+            return L("未启用 Dev Tunnels 穿透", "Dev Tunnels is disabled")
         case .connecting:
-            return "正在向微软 Azure 申请穿透隧道..."
+            return L("正在向微软 Azure 申请穿透隧道...", "Requesting tunnel from Microsoft Azure...")
         case .connected(let webUrl, _):
-            return "已成功建立 Dev Tunnels: \(webUrl)"
+            return L("已成功建立 Dev Tunnels: \(webUrl)", "Dev Tunnels connected: \(webUrl)")
         case .error(let msg):
-            return "穿透失败: \(msg)"
+            return L("穿透失败: \(msg)", "Tunnel failed: \(msg)")
         }
     }
 }
@@ -95,8 +95,8 @@ public final class DevTunnelService {
         }
         
         let defaultRules = [
-            DevTunnelPortRule(name: "MacHead Web 控制台", port: "\(WebServer.shared.currentPort)", protocolType: "http", isEnabled: true),
-            DevTunnelPortRule(name: "SSH 远程登录", port: "22", protocolType: "auto", isEnabled: true)
+            DevTunnelPortRule(name: L("MacHead Web 控制台", "MacHead Web Console"), port: "\(WebServer.shared.currentPort)", protocolType: "http", isEnabled: true),
+            DevTunnelPortRule(name: L("SSH 远程登录", "SSH Remote Login"), port: "22", protocolType: "auto", isEnabled: true)
         ]
         savePortRules(defaultRules)
         return defaultRules
@@ -174,7 +174,7 @@ public final class DevTunnelService {
                 guard let url = URL(string: downloadURLString),
                       let data = try? Data(contentsOf: url), !data.isEmpty else {
                     throw NSError(domain: "DevTunnelInstall", code: -4,
-                                  userInfo: [NSLocalizedDescriptionKey: "下载失败，请检查网络连接"])
+                                  userInfo: [NSLocalizedDescriptionKey: L("下载失败，请检查网络连接", "Download failed. Please check your network connection.")])
                 }
                 try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
                 let zipDest = tempDir.appendingPathComponent("devtunnel.zip")
@@ -188,7 +188,7 @@ public final class DevTunnelService {
                 p.waitUntilExit()
                 guard p.terminationStatus == 0 else {
                     throw NSError(domain: "DevTunnelInstall", code: -1,
-                                  userInfo: [NSLocalizedDescriptionKey: "解压官方压缩包失败"])
+                                  userInfo: [NSLocalizedDescriptionKey: L("解压官方压缩包失败", "Failed to extract official archive")])
                 }
 
                 // 3. 校验 Mach-O 文件头，防止将错误页面误认为二进制
@@ -196,14 +196,14 @@ public final class DevTunnelService {
                 guard let handle = try? FileHandle(forReadingFrom: extracted),
                       let header = try? handle.read(upToCount: 4), header.count == 4 else {
                     throw NSError(domain: "DevTunnelInstall", code: -2,
-                                  userInfo: [NSLocalizedDescriptionKey: "下载内容无效，请稍后重试"])
+                                  userInfo: [NSLocalizedDescriptionKey: L("下载内容无效，请稍后重试", "Downloaded file is invalid. Please try again later.")])
                 }
                 try? handle.close()
                 let bytes = [UInt8](header)
                 // 64-bit Mach-O 魔数 (0xFEEDFACF, LE/BE)
                 guard bytes == [0xCF, 0xFA, 0xED, 0xFE] || bytes == [0xFE, 0xED, 0xFA, 0xCF] else {
                     throw NSError(domain: "DevTunnelInstall", code: -3,
-                                  userInfo: [NSLocalizedDescriptionKey: "下载内容不是有效的 macOS 可执行文件"])
+                                  userInfo: [NSLocalizedDescriptionKey: L("下载内容不是有效的 macOS 可执行文件", "Downloaded file is not a valid macOS executable")])
                 }
 
                 // 4. 安装到用户目录并赋予执行权限
@@ -311,20 +311,20 @@ public final class DevTunnelService {
     
     public func loginWithBrowser(provider: String = "github", completion: @escaping (Bool, String) -> Void) {
         guard let path = findBinaryPath() else {
-            completion(false, "未找到 devtunnel 可执行文件")
+            completion(false, L("未找到 devtunnel 可执行文件", "devtunnel binary not found"))
             return
         }
-        
+
         DispatchQueue.global(qos: .userInitiated).async {
             let p = Process()
             p.executableURL = URL(fileURLWithPath: path)
             let flag = (provider.lowercased() == "github" || provider.lowercased() == "g") ? "-g" : "-e"
             p.arguments = ["user", "login", flag, "-b"]
-            
+
             let pipe = Pipe()
             p.standardOutput = pipe
             p.standardError = pipe
-            
+
             do {
                 try p.run()
                 p.waitUntilExit()
@@ -332,7 +332,7 @@ public final class DevTunnelService {
                 let out = String(data: data, encoding: .utf8) ?? ""
                 if p.terminationStatus == 0 {
                     DispatchQueue.main.async {
-                        completion(true, "登录成功")
+                        completion(true, L("登录成功", "Signed in successfully"))
                     }
                 } else {
                     DispatchQueue.main.async {
@@ -346,7 +346,7 @@ public final class DevTunnelService {
             }
         }
     }
-    
+
     public func logout() {
         guard let path = findBinaryPath() else { return }
         let p = Process()
@@ -354,47 +354,50 @@ public final class DevTunnelService {
         p.arguments = ["user", "logout"]
         try? p.run()
     }
-    
+
     public func start() {
         guard !isServiceRunning else { return }
-        
+
         let defaults = UserDefaults.standard
         guard defaults.bool(forKey: "devTunnelEnabled") else {
             currentStatus = .stopped
             killOrphanedProcesses()
             return
         }
-        
+
         guard let path = findBinaryPath() else {
-            currentStatus = .error(message: "未找到 devtunnel 可执行文件")
+            currentStatus = .error(message: L("未找到 devtunnel 可执行文件", "devtunnel binary not found"))
             return
         }
-        
+
         self.activePortUrls.removeAll()
-        
+
         let mode = defaults.string(forKey: "devTunnelMode") ?? "login"
         let token = (defaults.string(forKey: "devTunnelToken") ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let tunnelId = (defaults.string(forKey: "devTunnelId") ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let allowAnonymous = defaults.object(forKey: "devTunnelAllowAnonymous") != nil ? defaults.bool(forKey: "devTunnelAllowAnonymous") : true
-        
+
         var args: [String] = ["host"]
         if !tunnelId.isEmpty {
             args.append(tunnelId)
         }
-        
+
         if mode == "token" {
             if token.isEmpty {
-                currentStatus = .error(message: "未填写 Dev Tunnel Access Token")
+                currentStatus = .error(message: L("未填写 Dev Tunnel Access Token", "Dev Tunnel Access Token is empty"))
                 return
             }
             args.append(contentsOf: ["-t", token])
         } else {
             if checkUserLoginStatus() == nil && token.isEmpty {
-                currentStatus = .error(message: "尚未登录微软/GitHub 账号，请在设定中点击登录或填入 Token")
+                currentStatus = .error(message: L(
+                    "尚未登录微软/GitHub 账号，请在设定中点击登录或填入 Token",
+                    "Not signed in to Microsoft/GitHub. Please sign in or enter a Token in Settings."
+                ))
                 return
             }
         }
-        
+
         // Multi-port forwarding from custom rules
         let rules = DevTunnelService.loadPortRules().filter { $0.isEnabled && !$0.port.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         if rules.isEmpty {
@@ -409,37 +412,40 @@ public final class DevTunnelService {
                 }
             }
         }
-        
+
         if allowAnonymous {
             args.append("-a")
         }
-        
+
         currentStatus = .connecting
-        
+
         let newProcess = Process()
         newProcess.executableURL = URL(fileURLWithPath: path)
         newProcess.arguments = args
-        
+
         let outPipe = Pipe()
         let errPipe = Pipe()
         newProcess.standardOutput = outPipe
         newProcess.standardError = errPipe
         self.outputPipe = outPipe
         self.errorPipe = errPipe
-        
+
         setupPipeObserver(outPipe)
         setupPipeObserver(errPipe)
-        
+
         newProcess.terminationHandler = { [weak self] proc in
             print("DevTunnelService: devtunnel process terminated with code \(proc.terminationStatus)")
             self?.isServiceRunning = false
-            
+
             DispatchQueue.main.async {
                 if self?.currentStatus == .connecting {
-                    self?.currentStatus = .error(message: "进程退出 (Code \(proc.terminationStatus))")
+                    self?.currentStatus = .error(message: L(
+                        "进程退出 (Code \(proc.terminationStatus))",
+                        "Process exited (Code \(proc.terminationStatus))"
+                    ))
                 }
             }
-            
+
             DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) { [weak self] in
                 guard let self = self else { return }
                 let stillEnabled = UserDefaults.standard.bool(forKey: "devTunnelEnabled")
@@ -449,7 +455,7 @@ public final class DevTunnelService {
                 }
             }
         }
-        
+
         do {
             try newProcess.run()
             self.process = newProcess
@@ -457,10 +463,13 @@ public final class DevTunnelService {
             print("DevTunnelService: Launched devtunnel host successfully with \(rules.count) ports")
         } catch {
             print("DevTunnelService: Failed to run devtunnel - \(error.localizedDescription)")
-            currentStatus = .error(message: "启动失败: \(error.localizedDescription)")
+            currentStatus = .error(message: L(
+                "启动失败: \(error.localizedDescription)",
+                "Failed to start: \(error.localizedDescription)"
+            ))
         }
     }
-    
+
     private func setupPipeObserver(_ pipe: Pipe) {
         pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
@@ -468,62 +477,71 @@ public final class DevTunnelService {
             self?.parseLogLine(line)
         }
     }
-    
+
     private func parseLogLine(_ line: String) {
         let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
         let lower = trimmed.lowercased()
-        
+
         // Exact regex match: https://<tunnelid>-<port>.<region>.devtunnels.ms
         if let regex = try? NSRegularExpression(pattern: "https://([a-zA-Z0-9]+)-(\\d+)\\.[a-zA-Z0-9.-]+\\b") {
             let nsString = trimmed as NSString
             let matches = regex.matches(in: trimmed, range: NSRange(location: 0, length: nsString.length))
-            
+
             for match in matches {
                 let fullUrl = nsString.substring(with: match.range).trimmingCharacters(in: .whitespacesAndNewlines)
                 let port = nsString.substring(with: match.range(at: 2))
-                
+
                 if !fullUrl.contains("-inspect") && !fullUrl.contains("tunnels.api.") {
                     self.activePortUrls[port] = fullUrl
                 }
             }
         }
-        
+
         if !self.activePortUrls.isEmpty {
             let webPort = "\(WebServer.shared.currentPort)"
             let web = self.activePortUrls[webPort] ?? self.activePortUrls["8080"] ?? self.activePortUrls.values.first ?? ""
             self.currentStatus = .connected(webUrl: web, sshUrl: self.activePortUrls["22"])
         }
-        
+
         if lower.contains("unauthorized") || lower.contains("not permitted") || lower.contains("request not permitted") {
-            currentStatus = .error(message: "鉴权失败：请点击「登录 GitHub 账号」或填入有效 Token")
+            currentStatus = .error(message: L(
+                "鉴权失败：请点击「登录 GitHub 账号」或填入有效 Token",
+                "Authentication failed: Please sign in with GitHub or enter a valid Token"
+            ))
         } else if lower.contains("connection refused") || lower.contains("failed to connect") {
-            currentStatus = .error(message: "无法连接微软 Azure 边缘中继节点")
+            currentStatus = .error(message: L(
+                "无法连接微软 Azure 边缘中继节点",
+                "Cannot reach Microsoft Azure relay node"
+            ))
         }
     }
-    
+
     public func testConnection(mode: String, tunnelId: String, token: String, allowAnonymous: Bool, rules: [DevTunnelPortRule], completion: @escaping (Bool, String) -> Void) {
         guard let path = findBinaryPath() else {
-            completion(false, "未找到 devtunnel 可执行文件")
+            completion(false, L("未找到 devtunnel 可执行文件", "devtunnel binary not found"))
             return
         }
-        
+
         var args = ["host"]
         if !tunnelId.isEmpty {
             args.append(tunnelId)
         }
         if mode == "token" {
             if token.isEmpty {
-                completion(false, "Token 不能为空")
+                completion(false, L("Token 不能为空", "Token cannot be empty"))
                 return
             }
             args.append(contentsOf: ["-t", token])
         } else {
             if checkUserLoginStatus() == nil && token.isEmpty {
-                completion(false, "未检测到微软/GitHub 登录凭据，请先点击「登录 GitHub 账号」")
+                completion(false, L(
+                    "未检测到微软/GitHub 登录凭据，请先点击「登录 GitHub 账号」",
+                    "No Microsoft/GitHub credentials found. Please sign in first."
+                ))
                 return
             }
         }
-        
+
         let activeRules = rules.filter { $0.isEnabled && !$0.port.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         if activeRules.isEmpty {
             args.append(contentsOf: ["-p", "\(WebServer.shared.currentPort)"])
@@ -537,23 +555,23 @@ public final class DevTunnelService {
                 }
             }
         }
-        
+
         if allowAnonymous {
             args.append("-a")
         }
-        
+
         let testProcess = Process()
         testProcess.executableURL = URL(fileURLWithPath: path)
         testProcess.arguments = args
-        
+
         let pipe = Pipe()
         testProcess.standardError = pipe
         testProcess.standardOutput = pipe
-        
+
         var finished = false
         var capturedUrl = ""
         let lock = NSLock()
-        
+
         func finish(success: Bool, message: String) {
             lock.lock()
             defer { lock.unlock() }
@@ -567,7 +585,7 @@ public final class DevTunnelService {
                 completion(success, message)
             }
         }
-        
+
         pipe.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             guard !data.isEmpty, let line = String(data: data, encoding: .utf8) else { return }
@@ -577,23 +595,23 @@ public final class DevTunnelService {
             }
             let lower = line.lowercased()
             lock.unlock()
-            
+
             if !capturedUrl.isEmpty {
-                finish(success: true, message: "连通性测试成功：已就绪 (\(capturedUrl))")
+                finish(success: true, message: L("连通性测试成功：已就绪 (\(capturedUrl))", "Connection test passed: Ready (\(capturedUrl))"))
             } else if lower.contains("unauthorized") || lower.contains("not permitted") || lower.contains("request not permitted") {
-                finish(success: false, message: "测试失败：未授权或 Token 无效")
+                finish(success: false, message: L("测试失败：未授权或 Token 无效", "Test failed: Unauthorized or invalid Token"))
             } else if lower.contains("connection refused") || lower.contains("timed out") {
-                finish(success: false, message: "测试失败：连接微软中继节点超时")
+                finish(success: false, message: L("测试失败：连接微软中继节点超时", "Test failed: Connection to Azure relay timed out"))
             }
         }
-        
+
         do {
             try testProcess.run()
         } catch {
-            completion(false, "启动测试失败: \(error.localizedDescription)")
+            completion(false, L("启动测试失败: \(error.localizedDescription)", "Failed to launch test: \(error.localizedDescription)"))
             return
         }
-        
+
         DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
             lock.lock()
             let isDone = finished
@@ -601,9 +619,9 @@ public final class DevTunnelService {
             lock.unlock()
             if !isDone {
                 if !url.isEmpty {
-                    finish(success: true, message: "连通性测试成功：\(url)")
+                    finish(success: true, message: L("连通性测试成功：\(url)", "Connection test passed: \(url)"))
                 } else {
-                    finish(success: false, message: "测试超时：未在 5 秒内收到 Azure 中继就绪信号")
+                    finish(success: false, message: L("测试超时：未在 5 秒内收到 Azure 中继就绪信号", "Test timed out: No Azure relay handshake within 5 seconds"))
                 }
             }
         }

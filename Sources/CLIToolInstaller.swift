@@ -55,11 +55,14 @@ enum CLIToolInstaller {
         // 提权创建（与用户确认后）
         return onMainIfRemote {
             let alert = NSAlert()
-            alert.messageText = "安装 MacHead 命令行工具"
-            alert.informativeText = "MacHead 希望在 /usr/local/bin/machead 创建命令行工具的软链接。启用后，您可以在终端中运行 'machead' 直接管控设备守护程序。"
+            alert.messageText = L("安装 MacHead 命令行工具", "Install MacHead CLI Tool")
+            alert.informativeText = L(
+                "MacHead 希望在 /usr/local/bin/machead 创建命令行工具的软链接。启用后，您可以在终端中运行 'machead' 直接管控设备守护程序。",
+                "MacHead wants to create a symlink at /usr/local/bin/machead so you can control the daemon directly from the terminal using 'machead'."
+            )
             alert.alertStyle = .informational
-            alert.addButton(withTitle: "立即安装 (需密码或Touch ID)")
-            alert.addButton(withTitle: "稍后")
+            alert.addButton(withTitle: L("立即安装 (需密码或Touch ID)", "Install Now (Requires Admin)"))
+            alert.addButton(withTitle: L("稍后", "Later"))
 
             guard alert.runModal() == .alertFirstButtonReturn else { return false }
             return runElevated("mkdir -p /usr/local/bin && ln -sf \(targetPath) \(symlinkPath)")
@@ -78,10 +81,13 @@ enum CLIToolInstaller {
         } catch {
             return onMainIfRemote {
                 let alert = NSAlert()
-                alert.messageText = "移除 MacHead 命令行工具"
-                alert.informativeText = "删除 /usr/local/bin/machead 需要管理员权限。"
-                alert.addButton(withTitle: "授权移除")
-                alert.addButton(withTitle: "跳过")
+                alert.messageText = L("移除 MacHead 命令行工具", "Remove MacHead CLI Tool")
+                alert.informativeText = L(
+                    "删除 /usr/local/bin/machead 需要管理员权限。",
+                    "Administrator privileges are required to remove /usr/local/bin/machead."
+                )
+                alert.addButton(withTitle: L("授权移除", "Remove"))
+                alert.addButton(withTitle: L("跳过", "Skip"))
 
                 guard alert.runModal() == .alertFirstButtonReturn else { return false }
                 return runElevated("rm -f \(symlinkPath)")

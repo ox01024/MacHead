@@ -546,9 +546,12 @@
                 <header>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 24px; font-family: var(--font-serif);"></span>
-                        <h1>MacHead 远程控制台</h1>
+                        <h1 data-i18n="headerTitle">MacHead 远程控制台</h1>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="theme-btn" onclick="toggleLang()" id="lang-btn">
+                            <span>🌐 EN</span>
+                        </button>
                         <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
                             <span id="theme-icon-container" style="display: flex; align-items: center;"></span>
                             <span id="theme-text">深色模式</span>
@@ -558,7 +561,7 @@
                                 <span style="display: flex; align-items: center;">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                                 </span>
-                                <span>退出登录</span>
+                                <span data-i18n="logout">退出登录</span>
                             </button>
                         </a>
                     </div>
@@ -568,13 +571,13 @@
                 <div class="alert-container" id="alert-box">
                     <!-- Alerts dynamically inserted here -->
                 </div>
-                
+
                 <div class="grid">
                     <!-- CPU Card -->
                     <div class="card">
                         <div class="card-title">
-                            <span>CPU 占用率</span>
-                            <span class="peak-label" id="cpu-peak" title="双击重置" ondblclick="resetPeak('cpu')">峰值: 0%</span>
+                            <span data-i18n="cpuTitle">CPU 占用率</span>
+                            <span class="peak-label" id="cpu-peak" title="双击重置" data-i18n-title="peakResetTitle" ondblclick="resetPeak('cpu')">峰值: 0%</span>
                         </div>
                         <div class="card-value" id="cpu-text">0%</div>
                         <div class="card-subtitle" id="cpu-temp-text">温度: -- °C</div>
@@ -597,12 +600,12 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- RAM Card -->
                     <div class="card">
                         <div class="card-title">
-                            <span>内存占用</span>
-                            <span class="peak-label" id="ram-peak" title="双击重置" ondblclick="resetPeak('ram')">峰值: 0%</span>
+                            <span data-i18n="ramTitle">内存占用</span>
+                            <span class="peak-label" id="ram-peak" title="双击重置" data-i18n-title="peakResetTitle" ondblclick="resetPeak('ram')">峰值: 0%</span>
                         </div>
                         <div class="card-value" id="ram-text">0%</div>
                         <div class="card-subtitle" id="ram-details-text">已用: -- GB / -- GB</div>
@@ -629,8 +632,8 @@
                     <!-- GPU Card -->
                     <div class="card">
                         <div class="card-title">
-                            <span>GPU 占用率</span>
-                            <span class="peak-label" id="gpu-peak" title="双击重置" ondblclick="resetPeak('gpu')">峰值: 0%</span>
+                            <span data-i18n="gpuTitle">GPU 占用率</span>
+                            <span class="peak-label" id="gpu-peak" title="双击重置" data-i18n-title="peakResetTitle" ondblclick="resetPeak('gpu')">峰值: 0%</span>
                         </div>
                         <div class="card-value" id="gpu-text">0%</div>
                         <div class="card-subtitle" id="gpu-vram-text">显存: -- GB / -- GB</div>
@@ -659,10 +662,10 @@
                     <!-- Network Card -->
                     <div class="card" style="grid-column: 1 / -1;">
                         <div class="card-title">
-                            <span>实时网络吞吐量</span>
+                            <span data-i18n="netTitle">实时网络吞吐量</span>
                             <div style="display:flex; gap:12px;">
-                                <span class="peak-label" id="rx-peak" title="双击重置下载峰值" ondblclick="resetPeak('rx')">↓ 峰值: 0 B/s</span>
-                                <span class="peak-label" id="tx-peak" title="双击重置上传峰值" ondblclick="resetPeak('tx')">↑ 峰值: 0 B/s</span>
+                                <span class="peak-label" id="rx-peak" title="双击重置下载峰值" data-i18n-title="peakRxResetTitle" ondblclick="resetPeak('rx')">↓ 峰值: 0 B/s</span>
+                                <span class="peak-label" id="tx-peak" title="双击重置上传峰值" data-i18n-title="peakTxResetTitle" ondblclick="resetPeak('tx')">↑ 峰值: 0 B/s</span>
                             </div>
                         </div>
                         <div class="card-value" style="font-size:22px; justify-content:space-between; width:100%; margin-top:4px;">
@@ -700,7 +703,7 @@
                 <div class="grid">
                     <!-- SSD Card -->
                     <div class="card">
-                        <div class="card-title">SSD 磁盘空间</div>
+                        <div class="card-title" data-i18n="ssdTitle">SSD 磁盘空间</div>
                         <div class="card-value" id="disk-text" style="font-size:24px;">-- GB / -- GB</div>
                         <div class="card-subtitle" id="disk-subtitle">剩余: -- GB</div>
                         <div class="progress-bar-container">
@@ -710,28 +713,28 @@
 
                     <!-- System Info / Thermal Card -->
                     <div class="card">
-                        <div class="card-title">温控与元数据</div>
+                        <div class="card-title" data-i18n="thermalTitle">温控与元数据</div>
                         <table class="meta-table" style="margin-top:4px;">
                             <tr>
-                                <td class="label">运行时间 (Uptime)</td>
+                                <td class="label" data-i18n="uptimeLabel">运行时间 (Uptime)</td>
                                 <td class="val" style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
                                     <span class="pulse-dot"></span>
-                                    <span id="uptime-text">正在查询...</span>
+                                    <span id="uptime-text" data-i18n="querying">正在查询...</span>
                                 </td>
                             </tr>
                             <tr>
-                                <td class="label">系统热阻压力</td>
+                                <td class="label" data-i18n="thermalStressLabel">系统热阻压力</td>
                                 <td class="val" style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
                                     <span class="status-dot" id="thermal-dot"></span>
-                                    <span id="thermal-text">正在查询...</span>
+                                    <span id="thermal-text" data-i18n="querying">正在查询...</span>
                                 </td>
                             </tr>
                             <tr>
-                                <td class="label">电池实时温度</td>
-                                <td class="val" id="battery-temp-text">正在查询...</td>
+                                <td class="label" data-i18n="batteryTempLabel">电池实时温度</td>
+                                <td class="val" id="battery-temp-text" data-i18n="querying">正在查询...</td>
                             </tr>
                             <tr>
-                                <td class="label">合盖与外接屏</td>
+                                <td class="label" data-i18n="lidStateLabel">合盖与外接屏</td>
                                 <td class="val" id="lid-state-text">💻 合盖 (Clamshell)</td>
                             </tr>
                         </table>
@@ -741,46 +744,46 @@
                 <div class="grid">
                     <!-- Mode Status Card -->
                     <div class="card">
-                        <div class="card-title">系统运行状态</div>
+                        <div class="card-title" data-i18n="modeCardTitle">系统运行状态</div>
                         <div class="card-value" id="mode-text">
                             <span class="status-dot" id="mode-dot"></span>
-                            <span id="mode-label" style="font-size: 20px; font-weight: 500; margin-left: 6px;">正在连接...</span>
+                            <span id="mode-label" style="font-size: 20px; font-weight: 500; margin-left: 6px;" data-i18n="connecting">正在连接...</span>
                         </div>
-                        <div style="margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height: 1.4;">
+                        <div style="margin-top:12px; font-size:12.5px; color:var(--text-muted); line-height: 1.4;" data-i18n="modeCardDesc">
                             工作站模式决定内置显示器和供电唤醒断言是否锁死。
                         </div>
                     </div>
-                    
+
                     <!-- Battery Health Card -->
                     <div class="card">
-                        <div class="card-title">电池与电源状态</div>
+                        <div class="card-title" data-i18n="batteryCardTitle">电池与电源状态</div>
                         <table class="meta-table" style="margin-top:4px;">
                             <tr>
-                                <td class="label">剩余电量 / 充电</td>
+                                <td class="label" data-i18n="batteryCapLabel">剩余电量 / 充电</td>
                                 <td class="val">
                                     <span id="battery-capacity">--%</span>
                                     <span id="charging-indicator" style="font-size:15px; color:#e0a96d; display:none; margin-left: 4px;">⚡️</span>
                                 </td>
                             </tr>
                             <tr>
-                                <td class="label">即时充放功耗</td>
+                                <td class="label" data-i18n="batteryPowerLabel">即时充放功耗</td>
                                 <td class="val" id="battery-power-val">0.0 W</td>
                             </tr>
                             <tr>
-                                <td class="label">当前供电来源</td>
-                                <td class="val" id="power-source-text">正在查询...</td>
+                                <td class="label" data-i18n="powerSourceLabel">当前供电来源</td>
+                                <td class="val" id="power-source-text" data-i18n="querying">正在查询...</td>
                             </tr>
                             <tr>
-                                <td class="label">预计支撑 / 状态</td>
+                                <td class="label" data-i18n="batteryRemainingLabel">预计支撑 / 状态</td>
                                 <td class="val" id="battery-time-remaining">--</td>
                             </tr>
                             <tr>
-                                <td class="label">电池健康 / 循环</td>
+                                <td class="label" data-i18n="batteryHealthLabel">电池健康 / 循环</td>
                                 <td class="val"><span id="battery-health">--%</span> · <span id="battery-cycles">-- 次</span></td>
                             </tr>
                             <tr>
-                                <td class="label">防鼓包限充保护</td>
-                                <td class="val" id="charge-limit-status">正在检测...</td>
+                                <td class="label" data-i18n="chargeLimitLabel">防鼓包限充保护</td>
+                                <td class="val" id="charge-limit-status" data-i18n="detecting">正在检测...</td>
                             </tr>
                         </table>
                     </div>
@@ -790,32 +793,32 @@
                     <!-- Native Remote Services Card -->
                     <div class="card" style="grid-column: 1 / -1;">
                         <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
-                            <span>macOS 原生远程管理感知</span>
-                            <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">系统原生服务 · 局域网即连</span>
+                            <span data-i18n="nativeRemoteTitle">macOS 原生远程管理感知</span>
+                            <span style="font-size:11px; font-weight:normal; color:var(--text-muted);" data-i18n="nativeRemoteSubtitle">系统原生服务 · 局域网即连</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 10px;">
                             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-                                    <span style="font-weight:600; font-size:13px;">SSH 远程登录</span>
+                                    <span style="font-weight:600; font-size:13px;" data-i18n="sshTitle">SSH 远程登录</span>
                                     <span id="ssh-badge" class="service-badge inactive">未开启</span>
                                 </div>
-                                <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;">端口 22 · 字符终端</div>
+                                <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;" data-i18n="sshSub">端口 22 · 字符终端</div>
                                 <div id="ssh-action-area" style="font-size:12px; font-family:var(--font-mono); color:var(--text-primary); word-break:break-all;">--</div>
                             </div>
                             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-                                    <span style="font-weight:600; font-size:13px;">屏幕共享 (VNC)</span>
+                                    <span style="font-weight:600; font-size:13px;" data-i18n="vncTitle">屏幕共享 (VNC)</span>
                                     <span id="vnc-badge" class="service-badge inactive">未开启</span>
                                 </div>
-                                <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;">端口 5900 · 远程桌面</div>
+                                <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;" data-i18n="vncSub">端口 5900 · 远程桌面</div>
                                 <div id="vnc-action-area" style="font-size:12px; font-family:var(--font-mono); color:var(--text-primary); word-break:break-all;">--</div>
                             </div>
                             <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
-                                    <span style="font-weight:600; font-size:13px;">文件共享 (SMB)</span>
+                                    <span style="font-weight:600; font-size:13px;" data-i18n="smbTitle">文件共享 (SMB)</span>
                                     <span id="smb-badge" class="service-badge inactive">未开启</span>
                                 </div>
-                                <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;">端口 445 · 局域网访达与文件挂载</div>
+                                <div style="font-size:11px; color:var(--text-muted); margin-bottom: 8px;" data-i18n="smbSub">端口 445 · 局域网访达与文件挂载</div>
                                 <div id="smb-action-area" style="font-size:12px; font-family:var(--font-mono); color:var(--text-primary); word-break:break-all;">--</div>
                             </div>
                         </div>
@@ -825,83 +828,78 @@
                 <div class="grid">
                     <!-- Controls Card -->
                     <div class="card" style="grid-column: 1 / -1;">
-                        <div class="card-title">设备远程控制</div>
-                        
+                        <div class="card-title" data-i18n="controlsCardTitle">设备远程控制</div>
+
                         <div class="control-row">
                             <div>
-                                <div class="control-label">MacBook Headless 模式</div>
-                                <div class="control-desc">关闭内置屏幕以模拟独立 Mac Studio 行为。</div>
+                                <div class="control-label" data-i18n="ctrlHeadlessTitle">MacBook Headless 模式</div>
+                                <div class="control-desc" data-i18n="ctrlHeadlessDesc">关闭内置屏幕以模拟独立 Mac Studio 行为。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="headless-toggle" onchange="toggleSetting('headless')">
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        
+
                         <div class="control-row">
                             <div>
-                                <div class="control-label">防止空闲睡眠</div>
-                                <div class="control-desc">保持系统常亮，合盖不休眠。</div>
+                                <div class="control-label" data-i18n="ctrlSleepTitle">防止空闲睡眠</div>
+                                <div class="control-desc" data-i18n="ctrlSleepDesc">保持系统常亮，合盖不休眠。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="sleep-toggle" onchange="toggleSetting('sleep')">
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        
+
                         <div class="control-row">
                             <div>
-                                <div class="control-label">禁用内置触控板</div>
-                                <div class="control-desc">检测到外接鼠标时，自动关闭触控板输入以防误触。</div>
+                                <div class="control-label" data-i18n="ctrlTrackpadTitle">禁用内置触控板</div>
+                                <div class="control-desc" data-i18n="ctrlTrackpadDesc">检测到外接鼠标时，自动关闭触控板输入以防误触。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="trackpad-toggle" onchange="toggleSetting('trackpad')">
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        
+
                         <div class="control-row">
                             <div>
-                                <div class="control-label">无头模式下禁用键盘和触控板</div>
-                                <div class="control-desc">进入无头模式后，自动屏蔽内置键盘按键与内置触控板输入以防误触。</div>
+                                <div class="control-label" data-i18n="ctrlKeyboardTitle">无头模式下禁用键盘和触控板</div>
+                                <div class="control-desc" data-i18n="ctrlKeyboardDesc">进入无头模式后，自动屏蔽内置键盘按键与内置触控板输入以防误触。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="keyboard-toggle" onchange="toggleSetting('keyboard-headless')">
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        
+
                         <div class="control-row">
                             <div>
-                                <div class="control-label">静音内置麦克风</div>
-                                <div class="control-desc">保护物理隐私，进入无头模式时静音系统麦克风。</div>
+                                <div class="control-label" data-i18n="ctrlMicTitle">静音内置麦克风</div>
+                                <div class="control-desc" data-i18n="ctrlMicDesc">保护物理隐私，进入无头模式时静音系统麦克风。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="microphone-toggle" onchange="toggleSetting('microphone')">
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        
-                        
 
-                        
-
-
-<div class="control-row">
+                        <div class="control-row">
                             <div>
-                                <div class="control-label">断开外接显示器时自动退出</div>
-                                <div class="control-desc">检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。</div>
+                                <div class="control-label" data-i18n="ctrlExitDiscTitle">断开外接显示器时自动退出</div>
+                                <div class="control-desc" data-i18n="ctrlExitDiscDesc">检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="exit-disconnect-toggle" onchange="toggleSetting('exit-disconnect')">
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        
+
                         <div class="control-row">
                             <div>
-                                <div class="control-label">接入外接显示器时自动恢复</div>
-                                <div class="control-desc">有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。</div>
+                                <div class="control-label" data-i18n="ctrlRestoreConnTitle">接入外接显示器时自动恢复</div>
+                                <div class="control-desc" data-i18n="ctrlRestoreConnDesc">有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。</div>
                             </div>
                             <label class="switch">
                                 <input type="checkbox" id="restore-connect-toggle" onchange="toggleSetting('restore-connect')">
@@ -911,7 +909,7 @@
 
                         <div class="control-row">
                             <div>
-                                <div class="control-label">防鼓包充电上限 (Charge Limit)</div>
+                                <div class="control-label" data-i18n="ctrlChargeLimitTitle">防鼓包充电上限 (Charge Limit)</div>
                                 <div class="control-desc" id="charge-limit-desc">达到设定上限后暂停充电，延缓电池高压与发热老化（老系统/全机型通用）。</div>
                             </div>
                             <div style="display:flex; align-items:center; gap:10px;">
@@ -936,6 +934,159 @@
             
             
             <script>
+                let lastStatusData = null;
+                const webI18n = {
+                    zh: {
+                        docTitle: 'MacHead 控制面板',
+                        headerTitle: 'MacHead 远程控制台',
+                        logout: '退出登录',
+                        cpuTitle: 'CPU 占用率',
+                        ramTitle: '内存占用',
+                        gpuTitle: 'GPU 占用率',
+                        netTitle: '实时网络吞吐量',
+                        ssdTitle: 'SSD 磁盘空间',
+                        thermalTitle: '温控与元数据',
+                        uptimeLabel: '运行时间 (Uptime)',
+                        thermalStressLabel: '系统热阻压力',
+                        batteryTempLabel: '电池实时温度',
+                        lidStateLabel: '合盖与外接屏',
+                        modeCardTitle: '系统运行状态',
+                        modeCardDesc: '工作站模式决定内置显示器和供电唤醒断言是否锁死。',
+                        batteryCardTitle: '电池与电源状态',
+                        batteryCapLabel: '剩余电量 / 充电',
+                        batteryPowerLabel: '即时充放功耗',
+                        powerSourceLabel: '当前供电来源',
+                        batteryRemainingLabel: '预计支撑 / 状态',
+                        batteryHealthLabel: '电池健康 / 循环',
+                        chargeLimitLabel: '防鼓包限充保护',
+                        nativeRemoteTitle: 'macOS 原生远程管理感知',
+                        nativeRemoteSubtitle: '系统原生服务 · 局域网即连',
+                        sshTitle: 'SSH 远程登录',
+                        sshSub: '端口 22 · 字符终端',
+                        vncTitle: '屏幕共享 (VNC)',
+                        vncSub: '端口 5900 · 远程桌面',
+                        smbTitle: '文件共享 (SMB)',
+                        smbSub: '端口 445 · 局域网访达与文件挂载',
+                        controlsCardTitle: '设备远程控制',
+                        ctrlHeadlessTitle: 'MacBook Headless 模式',
+                        ctrlHeadlessDesc: '关闭内置屏幕以模拟独立 Mac Studio 行为。',
+                        ctrlSleepTitle: '防止空闲睡眠',
+                        ctrlSleepDesc: '保持系统常亮，合盖不休眠。',
+                        ctrlTrackpadTitle: '禁用内置触控板',
+                        ctrlTrackpadDesc: '检测到外接鼠标时，自动关闭触控板输入以防误触。',
+                        ctrlKeyboardTitle: '无头模式下禁用键盘和触控板',
+                        ctrlKeyboardDesc: '进入无头模式后，自动屏蔽内置键盘按键与内置触控板输入以防误触。',
+                        ctrlMicTitle: '静音内置麦克风',
+                        ctrlMicDesc: '保护物理隐私，进入无头模式时静音系统麦克风。',
+                        ctrlExitDiscTitle: '断开外接显示器时自动退出',
+                        ctrlExitDiscDesc: '检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。',
+                        ctrlRestoreConnTitle: '接入外接显示器时自动恢复',
+                        ctrlRestoreConnDesc: '有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。',
+                        ctrlChargeLimitTitle: '防鼓包充电上限 (Charge Limit)',
+                        peakResetTitle: '双击重置',
+                        peakRxResetTitle: '双击重置下载峰值',
+                        peakTxResetTitle: '双击重置上传峰值',
+                        querying: '正在查询...',
+                        detecting: '正在检测...',
+                        connecting: '正在连接...',
+                        langBtn: '🌐 EN'
+                    },
+                    en: {
+                        docTitle: 'MacHead Control Panel',
+                        headerTitle: 'MacHead Remote Console',
+                        logout: 'Sign Out',
+                        cpuTitle: 'CPU Usage',
+                        ramTitle: 'Memory Usage',
+                        gpuTitle: 'GPU Usage',
+                        netTitle: 'Real-Time Network Throughput',
+                        ssdTitle: 'SSD Storage',
+                        thermalTitle: 'Thermal & Metadata',
+                        uptimeLabel: 'Uptime',
+                        thermalStressLabel: 'Thermal Pressure',
+                        batteryTempLabel: 'Battery Temperature',
+                        lidStateLabel: 'Display & Clamshell',
+                        modeCardTitle: 'System Operating Mode',
+                        modeCardDesc: 'Workstation mode controls whether the built-in display and power sleep assertions are locked.',
+                        batteryCardTitle: 'Battery & Power Status',
+                        batteryCapLabel: 'Battery Level / Charging',
+                        batteryPowerLabel: 'Power Draw',
+                        powerSourceLabel: 'Power Source',
+                        batteryRemainingLabel: 'Est. Runtime / Status',
+                        batteryHealthLabel: 'Battery Health / Cycles',
+                        chargeLimitLabel: 'Charge Limit Protection',
+                        nativeRemoteTitle: 'macOS Native Remote Services',
+                        nativeRemoteSubtitle: 'System Native Services · Instant LAN Access',
+                        sshTitle: 'SSH Remote Login',
+                        sshSub: 'Port 22 · Terminal Shell',
+                        vncTitle: 'Screen Sharing (VNC)',
+                        vncSub: 'Port 5900 · Remote Desktop',
+                        smbTitle: 'File Sharing (SMB)',
+                        smbSub: 'Port 445 · LAN Finder & File Mount',
+                        controlsCardTitle: 'Remote Device Controls',
+                        ctrlHeadlessTitle: 'MacBook Headless Mode',
+                        ctrlHeadlessDesc: 'Turn off the built-in display to run like a standalone Mac Studio.',
+                        ctrlSleepTitle: 'Prevent Idle Sleep',
+                        ctrlSleepDesc: 'Keep the system awake and prevent sleep when the lid is closed.',
+                        ctrlTrackpadTitle: 'Disable Built-in Trackpad',
+                        ctrlTrackpadDesc: 'Automatically disable the built-in trackpad when an external mouse is connected.',
+                        ctrlKeyboardTitle: 'Disable Keyboard & Trackpad in Headless Mode',
+                        ctrlKeyboardDesc: 'Block built-in keyboard and trackpad input while Headless Mode is active.',
+                        ctrlMicTitle: 'Mute Built-in Microphone',
+                        ctrlMicDesc: 'Mute the built-in microphone for physical privacy when entering Headless Mode.',
+                        ctrlExitDiscTitle: 'Auto-Exit on External Display Disconnect',
+                        ctrlExitDiscDesc: 'Restore the built-in display automatically when all external displays disconnect.',
+                        ctrlRestoreConnTitle: 'Auto-Restore on External Display Connect',
+                        ctrlRestoreConnDesc: 'Re-enter Headless Mode automatically when an external display is reconnected.',
+                        ctrlChargeLimitTitle: 'Battery Swelling Protection (Charge Limit)',
+                        peakResetTitle: 'Double-click to reset',
+                        peakRxResetTitle: 'Double-click to reset download peak',
+                        peakTxResetTitle: 'Double-click to reset upload peak',
+                        querying: 'Querying...',
+                        detecting: 'Detecting...',
+                        connecting: 'Connecting...',
+                        langBtn: '🌐 中文'
+                    }
+                };
+
+                function getLang() {
+                    const saved = localStorage.getItem('mh_web_lang');
+                    if (saved === 'zh' || saved === 'en') return saved;
+                    if (lastStatusData && (lastStatusData.appLanguage === 'zh' || lastStatusData.appLanguage === 'en')) {
+                        return lastStatusData.appLanguage;
+                    }
+                    return (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+                }
+
+                function isEn() {
+                    return getLang() === 'en';
+                }
+
+                function applyStaticI18n() {
+                    const lang = getLang();
+                    const dict = webI18n[lang] || webI18n.zh;
+                    document.title = dict.docTitle;
+                    document.querySelectorAll('[data-i18n]').forEach(el => {
+                        const key = el.getAttribute('data-i18n');
+                        if (dict[key]) el.textContent = dict[key];
+                    });
+                    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                        const key = el.getAttribute('data-i18n-title');
+                        if (dict[key]) el.setAttribute('title', dict[key]);
+                    });
+                    const langBtn = document.getElementById('lang-btn');
+                    if (langBtn) langBtn.textContent = dict.langBtn;
+                    const currentTheme = document.body.getAttribute('data-theme') || 'light';
+                    setTheme(currentTheme);
+                    ['cpu', 'ram', 'gpu', 'rx', 'tx'].forEach(updatePeakUI);
+                    if (lastStatusData) updateUI(lastStatusData);
+                }
+
+                function toggleLang() {
+                    const next = isEn() ? 'zh' : 'en';
+                    localStorage.setItem('mh_web_lang', next);
+                    applyStaticI18n();
+                }
+
                 // History data arrays for sparklines
                 const historyLimit = 40;
                 const cpuHistory = [];
@@ -977,13 +1128,63 @@
                 function updatePeakUI(metric) {
                     const el = document.getElementById(metric + '-peak');
                     if (!el) return;
-                    
+                    const en = isEn();
+                    const peakLabel = en ? 'Peak: ' : '峰值: ';
                     if (metric === 'cpu' || metric === 'ram' || metric === 'gpu') {
-                        el.innerText = '峰值: ' + Math.round(peaks[metric]) + '%';
+                        el.innerText = peakLabel + Math.round(peaks[metric]) + '%';
+                        el.title = en ? 'Double-click to reset' : '双击重置';
                     } else if (metric === 'rx') {
-                        el.innerText = '↓ 峰值: ' + formatSpeed(peaks[metric]);
+                        el.innerText = '↓ ' + peakLabel + formatSpeed(peaks[metric]);
+                        el.title = en ? 'Double-click to reset download peak' : '双击重置下载峰值';
                     } else if (metric === 'tx') {
-                        el.innerText = '↑ 峰值: ' + formatSpeed(peaks[metric]);
+                        el.innerText = '↑ ' + peakLabel + formatSpeed(peaks[metric]);
+                        el.title = en ? 'Double-click to reset upload peak' : '双击重置上传峰值';
+                    }
+                }
+
+                function formatUptime(seconds, en) {
+                    if (typeof seconds !== 'number' || isNaN(seconds) || seconds < 0) return '';
+                    const d = Math.floor(seconds / 86400);
+                    const h = Math.floor((seconds % 86400) / 3600);
+                    const m = Math.floor((seconds % 3600) / 60);
+                    const parts = [];
+                    if (d > 0) parts.push(en ? `${d}d` : `${d}天`);
+                    if (h > 0 || d > 0) parts.push(en ? `${h}h` : `${h}小时`);
+                    parts.push(en ? `${m}m` : `${m}分钟`);
+                    return parts.join(' ');
+                }
+
+                function formatBatteryTime(data, en) {
+                    if (!data) return '';
+                    const mins = data.timeRemainingMinutes;
+                    if (data.isUPSActive) {
+                        if (mins && mins > 0) {
+                            const h = Math.floor(mins / 60);
+                            const m = mins % 60;
+                            if (h > 0) {
+                                return en ? `${h}h ${m}m` : `${h}小时${m}分钟`;
+                            } else {
+                                return en ? `${m}m` : `${m}分钟`;
+                            }
+                        }
+                        return en ? 'Calculating...' : '计算中...';
+                    } else if (data.isCharging) {
+                        if (mins && mins > 0) {
+                            const h = Math.floor(mins / 60);
+                            const m = mins % 60;
+                            if (h > 0) {
+                                return en ? `${h}h ${m}m to full` : `${h}小时${m}分充满`;
+                            } else {
+                                return en ? `${m}m to full` : `${m}分钟充满`;
+                            }
+                        }
+                        return en ? 'Charging...' : '正在充电...';
+                    } else {
+                        const isFull = data.isCharged || (data.batteryCapacity >= 99);
+                        if (isFull) {
+                            return en ? 'Fully Charged (AC Direct)' : '已充满 (交流电直供)';
+                        }
+                        return en ? 'AC Direct Power' : '外接电源直供';
                     }
                 }
 
@@ -1096,10 +1297,10 @@
                     const btnText = document.getElementById('theme-text');
                     if (theme === 'dark') {
                         btnIcon.innerHTML = sunSVG;
-                        btnText.innerText = '浅色模式';
+                        btnText.innerText = isEn() ? 'Light Mode' : '浅色模式';
                     } else {
                         btnIcon.innerHTML = moonSVG;
-                        btnText.innerText = '深色模式';
+                        btnText.innerText = isEn() ? 'Dark Mode' : '深色模式';
                     }
                 }
 
@@ -1109,22 +1310,29 @@
                 }
 
                 initTheme();
+                applyStaticI18n();
 
                 function updateUI(data) {
+                    const prevAppLang = lastStatusData ? lastStatusData.appLanguage : null;
+                    lastStatusData = data;
+                    if (!localStorage.getItem('mh_web_lang') && data.appLanguage && data.appLanguage !== prevAppLang) {
+                        applyStaticI18n();
+                    }
+                    const en = isEn();
                     const modeDot = document.getElementById('mode-dot');
                     const modeLabel = document.getElementById('mode-label');
                     const headlessToggle = document.getElementById('headless-toggle');
-                    
+
                     if (data.headlessModeEnabled) {
                         modeDot.className = "status-dot active";
-                        modeLabel.innerText = "MacBook Headless 激活";
+                        modeLabel.innerText = en ? "MacBook Headless Active" : "MacBook Headless 激活";
                         headlessToggle.checked = true;
                     } else {
                         modeDot.className = "status-dot inactive";
-                        modeLabel.innerText = "Normal 模式 (显示正常)";
+                        modeLabel.innerText = en ? "Normal Mode (Built-in Display On)" : "Normal 模式 (显示正常)";
                         headlessToggle.checked = false;
                     }
-                    
+
                     document.getElementById('sleep-toggle').checked = data.preventIdleSleep;
                     document.getElementById('trackpad-toggle').checked = data.trackpadDisabled;
                     document.getElementById('keyboard-toggle').checked = data.keyboardAndTrackpadDisabledInHeadless;
@@ -1143,61 +1351,78 @@
                     if (descEl) {
                         if (data.customLimitEnabled) {
                             const resumeVal = Math.max(20, limitThreshold - 5);
-                            descEl.innerHTML = '<span style="color:#52c41a;font-weight:600;">已开启自主守护：</span>' + limitThreshold + '% 停止充电，降至 ' + resumeVal + '% 恢复补电 (Sailing Mode)。';
+                            descEl.innerHTML = en
+                                ? '<span style="color:#52c41a;font-weight:600;">Active Guard: </span>Pause charging at ' + limitThreshold + '%, resume at ' + resumeVal + '% (Sailing Mode).'
+                                : '<span style="color:#52c41a;font-weight:600;">已开启自主守护：</span>' + limitThreshold + '% 停止充电，降至 ' + resumeVal + '% 恢复补电 (Sailing Mode)。';
                         } else {
-                            descEl.innerText = '达到设定上限后暂停充电，延缓电池高压与发热老化（老系统/全机型通用）。';
+                            descEl.innerText = en
+                                ? 'Pause charging at the set threshold to prevent high-voltage and thermal aging.'
+                                : '达到设定上限后暂停充电，延缓电池高压与发热老化（老系统/全机型通用）。';
                         }
                     }
-                    
+
                     // Power Source & Electrical metrics
                     document.getElementById('battery-capacity').innerText = data.batteryCapacity + '%';
                     document.getElementById('charging-indicator').style.display = data.isCharging ? 'inline' : 'none';
 
                     const powerWatts = data.batteryPowerWatts || 0;
-                    document.getElementById('battery-power-val').innerText = powerWatts > 0 ? (powerWatts.toFixed(1) + ' W') : (data.isCharging ? '充电中' : '0.0 W (直供)');
+                    document.getElementById('battery-power-val').innerText = powerWatts > 0
+                        ? (powerWatts.toFixed(1) + ' W')
+                        : (data.isCharging ? (en ? 'Charging' : '充电中') : (en ? '0.0 W (AC Direct)' : '0.0 W (直供)'));
 
                     if (data.isUPSActive) {
-                        document.getElementById('power-source-text').innerHTML = '<span style="color:#f5a623;font-weight:600;">🔋 电池供电 (UPS 模式)</span>';
-                        document.getElementById('battery-time-remaining').innerHTML = '<span style="color:#f5a623;font-weight:600;">预计支撑 ' + (data.timeRemainingFormatted || '计算中...') + '</span>';
+                        document.getElementById('power-source-text').innerHTML = en
+                            ? '<span style="color:#f5a623;font-weight:600;">🔋 On Battery (UPS Mode)</span>'
+                            : '<span style="color:#f5a623;font-weight:600;">🔋 电池供电 (UPS 模式)</span>';
+                        const estTime = formatBatteryTime(data, en);
+                        document.getElementById('battery-time-remaining').innerHTML = en
+                            ? '<span style="color:#f5a623;font-weight:600;">Est. ' + estTime + '</span>'
+                            : '<span style="color:#f5a623;font-weight:600;">预计支撑 ' + estTime + '</span>';
                     } else {
-                        const adapterText = data.adapterWatts > 0 ? (' (' + data.adapterWatts + 'W 适配器)') : ' (AC)';
-                        document.getElementById('power-source-text').innerText = '🔌 外接电源' + adapterText;
-                        document.getElementById('battery-time-remaining').innerText = data.timeRemainingFormatted || (data.isCharging ? '正在充电' : '交流电直供');
+                        const adapterText = data.adapterWatts > 0 ? (en ? (' (' + data.adapterWatts + 'W Adapter)') : (' (' + data.adapterWatts + 'W 适配器)')) : ' (AC)';
+                        document.getElementById('power-source-text').innerText = (en ? '🔌 AC Power' : '🔌 外接电源') + adapterText;
+                        document.getElementById('battery-time-remaining').innerText = formatBatteryTime(data, en);
                     }
 
                     // Battery registry info
                     document.getElementById('battery-health').innerText = data.batteryHealth.toFixed(1) + '%';
-                    document.getElementById('battery-cycles').innerText = data.batteryCycleCount + ' 次';
+                    document.getElementById('battery-cycles').innerText = data.batteryCycleCount + (en ? ' cycles' : ' 次');
                     document.getElementById('battery-temp-text').innerText = data.batteryTemp.toFixed(1) + ' °C';
 
                     if (data.isChargeLimitEnabled) {
-                        document.getElementById('charge-limit-status').innerHTML = '<span style="color:#52c41a;font-weight:600;">已保护 (' + data.chargeLimitPercent + '%)</span>';
+                        document.getElementById('charge-limit-status').innerHTML = en
+                            ? '<span style="color:#52c41a;font-weight:600;">Protected (' + data.chargeLimitPercent + '%)</span>'
+                            : '<span style="color:#52c41a;font-weight:600;">已保护 (' + data.chargeLimitPercent + '%)</span>';
                     } else {
-                        document.getElementById('charge-limit-status').innerHTML = '<span style="color:#fa8c16;">建议开启 (80%)</span>';
+                        document.getElementById('charge-limit-status').innerHTML = en
+                            ? '<span style="color:#fa8c16;">Recommended (80%)</span>'
+                            : '<span style="color:#fa8c16;">建议开启 (80%)</span>';
                     }
 
                     // Uptime & Thermal
-                    document.getElementById('uptime-text').innerText = data.uptime;
-                    
+                    document.getElementById('uptime-text').innerText = (data.uptimeSeconds !== undefined)
+                        ? formatUptime(data.uptimeSeconds, en)
+                        : data.uptime;
+
                     const thermalDot = document.getElementById('thermal-dot');
                     const thermalText = document.getElementById('thermal-text');
                     let thermalStr = '';
                     let dotClass = 'status-dot';
                     switch (data.thermalState) {
                         case 'Nominal':
-                            thermalStr = '正常 (Nominal)';
+                            thermalStr = en ? 'Nominal' : '正常 (Nominal)';
                             dotClass += ' nominal';
                             break;
                         case 'Fair':
-                            thermalStr = '轻度压力 (Fair)';
+                            thermalStr = en ? 'Fair' : '轻度压力 (Fair)';
                             dotClass += ' fair';
                             break;
                         case 'Serious':
-                            thermalStr = '严重压力 (Serious)';
+                            thermalStr = en ? 'Serious' : '严重压力 (Serious)';
                             dotClass += ' serious';
                             break;
                         case 'Critical':
-                            thermalStr = '紧急过热 (Critical)';
+                            thermalStr = en ? 'Critical' : '紧急过热 (Critical)';
                             dotClass += ' critical';
                             break;
                         default:
@@ -1215,9 +1440,9 @@
                     document.getElementById('ram-text').textContent = ramVal + '%';
                     document.getElementById('gpu-text').textContent = gpuVal + '%';
 
-                    document.getElementById('cpu-temp-text').textContent = '温度: ' + data.cpuTemp.toFixed(1) + ' °C';
-                    document.getElementById('ram-details-text').textContent = '已用: ' + data.ramUsedGB.toFixed(2) + ' GB / ' + data.ramTotalGB.toFixed(1) + ' GB';
-                    document.getElementById('gpu-vram-text').textContent = '显存: ' + data.vramUsedGB.toFixed(2) + ' GB / ' + data.vramAllocatedGB.toFixed(2) + ' GB';
+                    document.getElementById('cpu-temp-text').textContent = (en ? 'Temp: ' : '温度: ') + data.cpuTemp.toFixed(1) + ' °C';
+                    document.getElementById('ram-details-text').textContent = (en ? 'Used: ' : '已用: ') + data.ramUsedGB.toFixed(2) + ' GB / ' + data.ramTotalGB.toFixed(1) + ' GB';
+                    document.getElementById('gpu-vram-text').textContent = (en ? 'VRAM: ' : '显存: ') + data.vramUsedGB.toFixed(2) + ' GB / ' + data.vramAllocatedGB.toFixed(2) + ' GB';
 
                     // Add history points
                     cpuHistory.push(cpuVal);
@@ -1280,11 +1505,13 @@
                     const diskTotal = data.diskTotalGB.toFixed(1);
                     const diskFree = (data.diskTotalGB - data.diskUsedGB).toFixed(1);
                     document.getElementById('disk-text').innerText = diskUsed + ' GB / ' + diskTotal + ' GB';
-                    document.getElementById('disk-subtitle').innerText = '剩余空间: ' + diskFree + ' GB (' + data.diskPercent.toFixed(1) + '% 已用)';
-                    
+                    document.getElementById('disk-subtitle').innerText = en
+                        ? ('Free: ' + diskFree + ' GB (' + data.diskPercent.toFixed(1) + '% used)')
+                        : ('剩余空间: ' + diskFree + ' GB (' + data.diskPercent.toFixed(1) + '% 已用)');
+
                     const diskBar = document.getElementById('disk-bar');
                     diskBar.style.width = data.diskPercent + '%';
-                    
+
                     // Set Disk progress bar color
                     diskBar.className = 'progress-bar';
                     if (data.diskPercent < 80) {
@@ -1296,13 +1523,16 @@
                     }
 
                     // Lid & Clamshell state
-                    document.getElementById('lid-state-text').innerText = data.headlessModeEnabled ? '💻 已关闭内屏 (Headless)' : '💻 屏幕开启 (Normal)';
+                    document.getElementById('lid-state-text').innerText = data.headlessModeEnabled
+                        ? (en ? '💻 Built-in Display Off (Headless)' : '💻 已关闭内屏 (Headless)')
+                        : (en ? '💻 Built-in Display On (Normal)' : '💻 屏幕开启 (Normal)');
 
                     // Process Diagnostic Alerts
                     updateAlerts(data);
                 }
 
                 function updateAlerts(data) {
+                    const en = isEn();
                     const alertBox = document.getElementById('alert-box');
                     alertBox.innerHTML = ''; // Clear current alerts
 
@@ -1313,13 +1543,17 @@
                         alerts.push({
                             type: 'danger',
                             icon: '🚨',
-                            text: '<b>磁盘容量告急：</b>系统主存储已占用 ' + data.diskPercent.toFixed(1) + '%，请立即清理 Docker 缓存或系统日志以防写入锁定！'
+                            text: en
+                                ? '<b>Critical Disk Usage:</b> System storage is at ' + data.diskPercent.toFixed(1) + '%. Clean up Docker cache or logs immediately!'
+                                : '<b>磁盘容量告急：</b>系统主存储已占用 ' + data.diskPercent.toFixed(1) + '%，请立即清理 Docker 缓存或系统日志以防写入锁定！'
                         });
                     } else if (data.diskPercent >= 80) {
                         alerts.push({
                             type: 'warning',
                             icon: '⚠️',
-                            text: '<b>磁盘容量紧张：</b>存储占用达 ' + data.diskPercent.toFixed(1) + '%，建议检查磁盘占用。'
+                            text: en
+                                ? '<b>High Disk Usage:</b> Storage usage reached ' + data.diskPercent.toFixed(1) + '%. Consider freeing up space.'
+                                : '<b>磁盘容量紧张：</b>存储占用达 ' + data.diskPercent.toFixed(1) + '%，建议检查磁盘占用。'
                         });
                     }
 
@@ -1328,24 +1562,35 @@
                         alerts.push({
                             type: 'danger',
                             icon: '🔥',
-                            text: '<b>电池温度过高（' + data.batteryTemp.toFixed(1) + ' °C）：</b>检测到电池面临严重高热风险。请开盖以散发积热，避免电池老化与鼓包！'
+                            text: en
+                                ? '<b>Battery Overheating (' + data.batteryTemp.toFixed(1) + ' °C):</b> Open the lid to dissipate heat and prevent battery swelling!'
+                                : '<b>电池温度过高（' + data.batteryTemp.toFixed(1) + ' °C）：</b>检测到电池面临严重高热风险。请开盖以散发积热，避免电池老化与鼓包！'
                         });
                     } else if (data.batteryTemp >= 42) {
                         alerts.push({
                             type: 'warning',
                             icon: '⚠️',
-                            text: '<b>电池温度偏高（' + data.batteryTemp.toFixed(1) + ' °C）：</b>合盖工作站可能空气流通受阻，请确保散热风口畅通。'
+                            text: en
+                                ? '<b>Elevated Battery Temp (' + data.batteryTemp.toFixed(1) + ' °C):</b> Ensure proper airflow around your closed MacBook.'
+                                : '<b>电池温度偏高（' + data.batteryTemp.toFixed(1) + ' °C）：</b>合盖工作站可能空气流通受阻，请确保散热风口畅通。'
                         });
                     }
 
                     // 3. Power outage warning (UPS Mode)
                     if (data.isUPSActive) {
-                        const estTimeStr = data.timeRemainingFormatted ? ('预计可支撑运行约 ' + data.timeRemainingFormatted) : '正在测算剩余支撑时间';
-                        const powerStr = (data.batteryPowerWatts > 0) ? ('，当前放电功耗 ' + data.batteryPowerWatts.toFixed(1) + 'W') : '';
+                        const estTime = formatBatteryTime(data, en);
+                        const estTimeStr = (data.timeRemainingMinutes && data.timeRemainingMinutes > 0)
+                            ? (en ? ('est. ' + estTime + ' remaining') : ('预计可支撑运行约 ' + estTime))
+                            : (en ? 'calculating runtime' : '正在测算剩余支撑时间');
+                        const powerStr = (data.batteryPowerWatts > 0)
+                            ? (en ? (', draw ' + data.batteryPowerWatts.toFixed(1) + 'W') : ('，当前放电功耗 ' + data.batteryPowerWatts.toFixed(1) + 'W'))
+                            : '';
                         alerts.push({
                             type: 'warning',
                             icon: '🔋',
-                            text: '<b>UPS 电池模式运行中：</b>外部市电已中断，MacBook 依靠内置电池续航（剩余 ' + data.batteryCapacity + '%，' + estTimeStr + powerStr + '）。若电量跌破阈值，将自动进入安全休眠。'
+                            text: en
+                                ? '<b>UPS Battery Mode Active:</b> AC power disconnected. Running on internal battery (' + data.batteryCapacity + '%, ' + estTimeStr + powerStr + ').'
+                                : '<b>UPS 电池模式运行中：</b>外部市电已中断，MacBook 依靠内置电池续航（剩余 ' + data.batteryCapacity + '%，' + estTimeStr + powerStr + '）。若电量跌破阈值，将自动进入安全休眠。'
                         });
                     }
 
@@ -1354,7 +1599,9 @@
                         alerts.push({
                             type: 'warning',
                             icon: '🔋',
-                            text: '<b>电池建议检修：</b>最大容量已劣化至 ' + data.batteryHealth.toFixed(1) + '%（低于 80%），长期 7×24 小时插电运行请关注电池安全。'
+                            text: en
+                                ? '<b>Battery Service Recommended:</b> Maximum capacity degraded to ' + data.batteryHealth.toFixed(1) + '% (below 80%).'
+                                : '<b>电池建议检修：</b>最大容量已劣化至 ' + data.batteryHealth.toFixed(1) + '%（低于 80%），长期 7×24 小时插电运行请关注电池安全。'
                         });
                     }
 
@@ -1363,7 +1610,9 @@
                         alerts.push({
                             type: 'warning',
                             icon: '🛡️',
-                            text: '<b>长期满电建议开启 80% 限充：</b>当前电量已达 100%。作为长期合盖常驻服务器，持续高压高充易导致锂电池加速鼓包，建议在系统设置中开启 80% 充电上限。'
+                            text: en
+                                ? '<b>80% Charge Limit Recommended:</b> Battery is at 100% on continuous AC power. Enable the 80% Charge Limit below to prevent battery swelling.'
+                                : '<b>长期满电建议开启 80% 限充：</b>当前电量已达 100%。作为长期合盖常驻服务器，持续高压高充易导致锂电池加速鼓包，建议在系统设置中开启 80% 充电上限。'
                         });
                     }
 
@@ -1386,7 +1635,7 @@
                     if (navigator.clipboard) {
                         navigator.clipboard.writeText(text).then(() => {
                             const original = btn.innerText;
-                            btn.innerText = '已复制!';
+                            btn.innerText = isEn() ? 'Copied!' : '已复制!';
                             btn.style.color = '#42b883';
                             setTimeout(() => {
                                 btn.innerText = original;
@@ -1397,8 +1646,10 @@
                 }
 
                 function renderNativeServices(data) {
+                    const en = isEn();
                     const host = window.location.hostname || '127.0.0.1';
                     const user = data.systemUser || 'user';
+                    const copyLbl = en ? 'Copy' : '复制';
 
                     // SSH
                     const sshBadge = document.getElementById('ssh-badge');
@@ -1406,16 +1657,16 @@
                     if (sshBadge && sshArea) {
                         if (data.sshEnabled) {
                             sshBadge.className = 'service-badge active';
-                            sshBadge.innerText = '已监听';
+                            sshBadge.innerText = en ? 'Listening' : '已监听';
                             const cmd = `ssh ${user}@${host}`;
                             sshArea.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">${cmd}</span>
-                                <button class="copy-inline-btn" onclick="copyText('${cmd}', this)">复制</button>
+                                <button class="copy-inline-btn" onclick="copyText('${cmd}', this)">${copyLbl}</button>
                             </div>`;
                         } else {
                             sshBadge.className = 'service-badge inactive';
-                            sshBadge.innerText = '未开启';
-                            sshArea.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">未在系统共享中启用远程登录</span>`;
+                            sshBadge.innerText = en ? 'Disabled' : '未开启';
+                            sshArea.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">${en ? 'Remote Login not enabled in System Settings' : '未在系统共享中启用远程登录'}</span>`;
                         }
                     }
 
@@ -1425,16 +1676,16 @@
                     if (vncBadge && vncArea) {
                         if (data.vncEnabled) {
                             vncBadge.className = 'service-badge active';
-                            vncBadge.innerText = '已监听';
+                            vncBadge.innerText = en ? 'Listening' : '已监听';
                             const url = `vnc://${host}`;
                             vncArea.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">${url}</span>
-                                <button class="copy-inline-btn" onclick="copyText('${url}', this)">复制</button>
+                                <button class="copy-inline-btn" onclick="copyText('${url}', this)">${copyLbl}</button>
                             </div>`;
                         } else {
                             vncBadge.className = 'service-badge inactive';
-                            vncBadge.innerText = '未开启';
-                            vncArea.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">未在系统共享中启用屏幕共享</span>`;
+                            vncBadge.innerText = en ? 'Disabled' : '未开启';
+                            vncArea.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">${en ? 'Screen Sharing not enabled in System Settings' : '未在系统共享中启用屏幕共享'}</span>`;
                         }
                     }
 
@@ -1444,16 +1695,16 @@
                     if (smbBadge && smbArea) {
                         if (data.smbEnabled) {
                             smbBadge.className = 'service-badge active';
-                            smbBadge.innerText = '已监听';
+                            smbBadge.innerText = en ? 'Listening' : '已监听';
                             const url = `smb://${host}`;
                             smbArea.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">${url}</span>
-                                <button class="copy-inline-btn" onclick="copyText('${url}', this)">复制</button>
+                                <button class="copy-inline-btn" onclick="copyText('${url}', this)">${copyLbl}</button>
                             </div>`;
                         } else {
                             smbBadge.className = 'service-badge inactive';
-                            smbBadge.innerText = '未开启';
-                            smbArea.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">未在系统共享中启用文件共享</span>`;
+                            smbBadge.innerText = en ? 'Disabled' : '未开启';
+                            smbArea.innerHTML = `<span style="color:var(--text-muted); font-size:11px;">${en ? 'File Sharing not enabled in System Settings' : '未在系统共享中启用文件共享'}</span>`;
                         }
                     }
                 }
@@ -1553,7 +1804,7 @@
 
                         // Build rich tooltip content
                         if (tooltip) {
-                            const timeStr = snap.time.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            const timeStr = snap.time.toLocaleTimeString(isEn() ? 'en-US' : 'zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                             const timeDiv = tooltip.querySelector('.tooltip-time');
                             const valDiv = tooltip.querySelector('.tooltip-value');
                             if (timeDiv) timeDiv.textContent = timeStr;
@@ -1601,11 +1852,11 @@
                         const container = card.querySelector('.sparkline-container');
                         if (!container) return;
                         const titleEl = card.querySelector('.card-title span');
-                        const title = titleEl ? titleEl.textContent : '';
+                        const i18nKey = titleEl ? (titleEl.getAttribute('data-i18n') || '') : '';
                         let chartType = 'cpu';
-                        if (title.includes('内存')) chartType = 'ram';
-                        else if (title.includes('GPU')) chartType = 'gpu';
-                        else if (title.includes('网络')) chartType = 'net';
+                        if (i18nKey === 'ramTitle') chartType = 'ram';
+                        else if (i18nKey === 'gpuTitle') chartType = 'gpu';
+                        else if (i18nKey === 'netTitle') chartType = 'net';
                         setupSparklineHover(container, chartType);
                     });
                 })();

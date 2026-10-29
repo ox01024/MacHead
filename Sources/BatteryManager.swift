@@ -52,7 +52,7 @@ final class BatteryManager: ObservableObject {
     @Published private(set) var isSMCControlActive: Bool = false
     @Published private(set) var isChargeLimitEnabled: Bool = false
     @Published private(set) var chargeLimitPercent: Int = 80
-    @Published private(set) var chargeLimitSource: String = "未开启"
+    @Published private(set) var chargeLimitSource: String = L("未开启", "Disabled")
 
     var isSupportedNativeLimit: Bool {
         if #available(macOS 15.0, *) { return true }
@@ -82,6 +82,7 @@ final class BatteryManager: ObservableObject {
 
     private var lastPowerState: String?
     private var wasLowBattery: Bool = false
+    private var languageObserver: NSObjectProtocol?
 
     private init() {}
 
@@ -112,6 +113,17 @@ final class BatteryManager: ObservableObject {
             self?.updateBatteryInfo()
             self?.evaluateCustomChargeLimit()
         }
+
+        if languageObserver == nil {
+            languageObserver = NotificationCenter.default.addObserver(
+                forName: .appLanguageChanged,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.updateBatteryInfo()
+                self?.checkChargeLimitPolicy()
+            }
+        }
     }
 
     func stop() {
@@ -121,6 +133,10 @@ final class BatteryManager: ObservableObject {
         }
         refreshTimer?.invalidate()
         refreshTimer = nil
+        if let observer = languageObserver {
+            NotificationCenter.default.removeObserver(observer)
+            languageObserver = nil
+        }
     }
 
     func handlePowerSourceChanged() {
@@ -140,19 +156,30 @@ final class BatteryManager: ObservableObject {
             if onBattery {
                 var estText = ""
                 if timeRemainingMinutes > 0 {
-                    estText = "，预计还可支撑运行约 \(timeRemainingFormatted)（实时放电功率 \(String(format: "%.1f", powerWatts))W）"
+                    estText = L(
+                        "，预计还可支撑运行约 \(timeRemainingFormatted)（实时放电功率 \(String(format: "%.1f", powerWatts))W）",
+                        ", estimated runtime ~\(timeRemainingFormatted) (discharge power \(String(format: "%.1f", powerWatts))W)"
+                    )
                 }
                 NotificationService.shared.sendAlert(
                     type: .powerDisconnect,
-                    title: "外部电源已断开 🔌 (UPS 模式)",
-                    body: "Mac 已切换至电池供电。当前剩余电量：\(currentCapacity)%\(estText)，请及时检查电源连接情况。"
+                    title: L("外部电源已断开 🔌 (UPS 模式)", "AC Power Disconnected 🔌 (UPS Mode)"),
+                    body: L(
+                        "Mac 已切换至电池供电。当前剩余电量：\(currentCapacity)%\(estText)，请及时检查电源连接情况。",
+                        "Mac switched to battery power. Remaining charge: \(currentCapacity)%\(estText). Please check your power adapter."
+                    )
                 )
             } else {
-                let adapterInfo = adapterWatts > 0 ? "（已连接 \(adapterWatts)W 适配器）" : ""
+                let adapterInfo = adapterWatts > 0
+                    ? L("（已连接 \(adapterWatts)W 适配器）", " (\(adapterWatts)W adapter connected)")
+                    : ""
                 NotificationService.shared.sendAlert(
                     type: .powerDisconnect,
-                    title: "外部电源已恢复 🔌",
-                    body: "Mac 已恢复交流电供电\(adapterInfo)，当前剩余电量：\(currentCapacity)%。"
+                    title: L("外部电源已恢复 🔌", "AC Power Restored 🔌"),
+                    body: L(
+                        "Mac 已恢复交流电供电\(adapterInfo)，当前剩余电量：\(currentCapacity)%。",
+                        "Mac is back on AC power\(adapterInfo). Current battery charge: \(currentCapacity)%."
+                    )
                 )
             }
         }
@@ -161,8 +188,11 @@ final class BatteryManager: ObservableObject {
         if lowBattery && !wasLowBattery && onBattery && enableProtection {
             NotificationService.shared.sendAlert(
                 type: .lowBattery,
-                title: "系统低电量警告 🔋",
-                body: "Mac 剩余电量已降至 \(currentCapacity)%，低于电池保护阈值（\(thresholdVal)%）。MacHead 已自动释放休眠阻止，Mac 将进入自动休眠状态以保护电池寿命。"
+                title: L("系统低电量警告 🔋", "Low Battery Alert 🔋"),
+                body: L(
+                    "Mac 剩余电量已降至 \(currentCapacity)%，低于电池保护阈值（\(thresholdVal)%）。MacHead 已自动释放休眠阻止，Mac 将进入自动休眠状态以保护电池寿命。",
+                    "Battery dropped to \(currentCapacity)%, below the protection threshold (\(thresholdVal)%). MacHead released sleep prevention so your Mac can sleep safely."
+                )
             )
         }
         wasLowBattery = lowBattery
@@ -307,9 +337,11 @@ final class BatteryManager: ObservableObject {
                     if estMinutes > 0 {
                         let h = estMinutes / 60
                         let m = estMinutes % 60
-                        self.timeRemainingFormatted = h > 0 ? "\(h)小时\(m)分钟" : "\(m)分钟"
+                        self.timeRemainingFormatted = h > 0
+                            ? L("\(h)小时\(m)分钟", "\(h)h \(m)m")
+                            : L("\(m)分钟", "\(m)m")
                     } else {
-                        self.timeRemainingFormatted = "计算中..."
+                        self.timeRemainingFormatted = L("计算中...", "Calculating...")
                     }
                 } else {
                     // 外接电源状态
@@ -318,17 +350,19 @@ final class BatteryManager: ObservableObject {
                             self.timeRemainingMinutes = fullMinutes
                             let h = fullMinutes / 60
                             let m = fullMinutes % 60
-                            self.timeRemainingFormatted = h > 0 ? "\(h)小时\(m)分充满" : "\(m)分钟充满"
+                            self.timeRemainingFormatted = h > 0
+                                ? L("\(h)小时\(m)分充满", "\(h)h \(m)m to full")
+                                : L("\(m)分钟充满", "\(m)m to full")
                         } else {
                             self.timeRemainingMinutes = -1
-                            self.timeRemainingFormatted = "正在充电..."
+                            self.timeRemainingFormatted = L("正在充电...", "Charging...")
                         }
                     } else {
                         self.timeRemainingMinutes = 0
                         if self.isCharged || self.currentCapacity >= 99 {
-                            self.timeRemainingFormatted = "已充满 (交流电直供)"
+                            self.timeRemainingFormatted = L("已充满 (交流电直供)", "Fully Charged (AC Direct)")
                         } else {
-                            self.timeRemainingFormatted = "外接电源直供"
+                            self.timeRemainingFormatted = L("外接电源直供", "AC Direct Power")
                         }
                     }
                 }
@@ -477,9 +511,9 @@ final class BatteryManager: ObservableObject {
             self.isChargeLimitEnabled = true
             self.chargeLimitPercent = customLimitThreshold
             if isSMCControlActive {
-                self.chargeLimitSource = "MacHead 底层守护 (已停充)"
+                self.chargeLimitSource = L("MacHead 底层守护 (已停充)", "MacHead SMC Guard (Paused)")
             } else {
-                self.chargeLimitSource = "MacHead 自主限充 (Sailing Mode)"
+                self.chargeLimitSource = L("MacHead 自主限充 (Sailing Mode)", "MacHead Charge Limit (Sailing Mode)")
             }
             return
         }
@@ -500,7 +534,7 @@ final class BatteryManager: ObservableObject {
                     if !terminated && (noChargeToFull || limit < 100) {
                         self.isChargeLimitEnabled = true
                         self.chargeLimitPercent = limit
-                        self.chargeLimitSource = "macOS 系统原生限充"
+                        self.chargeLimitSource = L("macOS 系统原生限充", "macOS Native Charge Limit")
                         return
                     }
                 }
@@ -512,7 +546,7 @@ final class BatteryManager: ObservableObject {
         let battPaths = ["/opt/homebrew/bin/batt", "/usr/local/bin/batt"]
         for bPath in battPaths {
             if fileManager.fileExists(atPath: bPath) {
-                self.chargeLimitSource = "第三方控制器 (batt)"
+                self.chargeLimitSource = L("第三方控制器 (batt)", "3rd-Party Controller (batt)")
                 self.isChargeLimitEnabled = true
                 return
             }
@@ -522,9 +556,9 @@ final class BatteryManager: ObservableObject {
         self.isChargeLimitEnabled = false
         self.chargeLimitPercent = 80
         if isSupportedNativeLimit {
-            self.chargeLimitSource = "未激活系统限充"
+            self.chargeLimitSource = L("未激活系统限充", "System Limit Inactive")
         } else {
-            self.chargeLimitSource = "老系统无原生限充 (建议开启自主守护)"
+            self.chargeLimitSource = L("老系统无原生限充 (建议开启自主守护)", "No Native Limit (Enable MacHead Guard)")
         }
     }
 }

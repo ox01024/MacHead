@@ -270,7 +270,10 @@ public final class TailcatService {
         }
 
         guard let binaryPath = findBinaryPath() else {
-            currentStatus = .error(message: "未找到内置 tailcat 组件，请执行 ./Scripts/build-tailcat.sh 或重新安装应用")
+            currentStatus = .error(message: L(
+                "未找到内置 tailcat 组件，请执行 ./Scripts/build-tailcat.sh 或重新安装应用",
+                "Bundled tailcat binary not found. Please run ./Scripts/build-tailcat.sh or reinstall MacHead."
+            ))
             return
         }
 
@@ -294,7 +297,7 @@ public final class TailcatService {
                     DispatchQueue.main.async {
                         guard self.startGeneration == expectedGen else { return }
                         self.isServiceRunning = false
-                        self.currentStatus = .error(message: "无法生成固定设备密钥文件")
+                        self.currentStatus = .error(message: L("无法生成固定设备密钥文件", "Failed to generate persistent device key file"))
                     }
                     return
                 }
@@ -343,7 +346,10 @@ public final class TailcatService {
                     self.process = nil
 
                     if case .connecting = self.currentStatus {
-                        self.currentStatus = .error(message: "tailcat 进程异常退出 (代码: \(proc.terminationStatus))")
+                        self.currentStatus = .error(message: L(
+                            "tailcat 进程异常退出 (代码: \(proc.terminationStatus))",
+                            "tailcat process exited unexpectedly (Code: \(proc.terminationStatus))"
+                        ))
                     } else if self.isAccountLoggedIn || UserDefaults.standard.bool(forKey: "tailcatEnabled") {
                         self.currentStatus = .connecting
                         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
@@ -374,7 +380,10 @@ public final class TailcatService {
                 DispatchQueue.main.async {
                     guard self.startGeneration == expectedGen else { return }
                     self.isServiceRunning = false
-                    self.currentStatus = .error(message: "无法启动 tailcat: \(error.localizedDescription)")
+                    self.currentStatus = .error(message: L(
+                        "无法启动 tailcat: \(error.localizedDescription)",
+                        "Failed to start tailcat: \(error.localizedDescription)"
+                    ))
                 }
             }
         }
@@ -581,7 +590,7 @@ public final class TailcatService {
                 timer.invalidate()
                 self.isWaitingForBrowserAuth = false
                 NotificationCenter.default.post(name: .tailcatAccountChanged, object: nil)
-                completion?(false, "浏览器登录授权超时，请重试")
+                completion?(false, L("浏览器登录授权超时，请重试", "Browser authorization timed out. Please try again."))
                 return
             }
 
@@ -606,7 +615,7 @@ public final class TailcatService {
                         self.authPollTimer?.invalidate()
                         self.authPollTimer = nil
                         self.completeAccountLogin(sessionToken: sessionToken, user: user, baseUrl: base)
-                        completion?(true, "账号绑定成功")
+                        completion?(true, L("账号绑定成功", "Account linked successfully"))
                     }
                 }.resume()
             }

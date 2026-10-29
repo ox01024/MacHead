@@ -6,13 +6,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var popover: NSPopover?
     private let controller = HeadlessModeController.shared
     private var preferencesWindow: NSWindow?
-    
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Run as an accessory (menu-bar only) app
         NSApp.setActivationPolicy(.accessory)
-        
+
         // Register default preferences
         UserDefaults.standard.register(defaults: [
+            "AppLanguage": "system",
             "PreventIdleSleep": true,
             "KeepRunningOnLidClose": false,
             "AutoEnableHeadlessOnLaunch": false,
@@ -68,41 +69,50 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             "tailcatFixedCode": "",
             "tailcatBinaryPath": ""
         ])
-        
+
         // Generate random default WebServerPassword if not present
         if UserDefaults.standard.string(forKey: "WebServerPassword") == nil ||
            UserDefaults.standard.string(forKey: "WebServerPassword")?.isEmpty == true {
             let randomPass = "MH-" + String((0..<4).map { _ in "0123456789ABCDEF".randomElement()! })
             UserDefaults.standard.set(randomPass, forKey: "WebServerPassword")
         }
-        
+
         // Start monitoring input devices
         InputDeviceManager.shared.start()
-        
+
         // Start monitoring battery/power status
         BatteryManager.shared.start()
-        
+
         // Start Web Server if enabled in preferences
         WebServer.shared.start()
-        
+
+        // Pre-cache built-in display ID when available
+        _ = DisplayManager.shared.builtInDisplayID
+
         // Start monitoring display plug/unplug events globally
         controller.registerDisplayCallback()
-        
+
         // Start all active integrations (Nezha, ServerStatus, Uptime Kuma, SMC)
         IntegrationManager.shared.startAllServices()
-        
+
         // Create menu bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.target = self
         statusItem.button?.action = #selector(statusItemClicked(_:))
         statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         updateIcon()
-        
+
         // Observe headless mode state changes (such as auto-restoration)
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleStateChanged),
             name: .headlessModeStateChanged,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleLanguageChanged),
+            name: .appLanguageChanged,
             object: nil
         )
         // Observe Distributed Notifications from CLI Client
@@ -113,7 +123,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             object: nil,
             suspensionBehavior: .deliverImmediately
         )
-        
+
         DistributedNotificationCenter.default().addObserver(
             self,
             selector: #selector(handleCLIDisengage),
@@ -121,11 +131,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             object: nil,
             suspensionBehavior: .deliverImmediately
         )
-        
+
         // CLI 软链接为 opt-in 组件：仅在偏好设置中开启后维护，默认零包外写入；
         // 异步执行，提权弹窗不得阻塞启动流程
         DispatchQueue.main.async { CLIToolInstaller.setupIfEnabled() }
-        
+
         // Auto-enable headless mode on launch if enabled in preferences
         let autoEnable = UserDefaults.standard.bool(forKey: "AutoEnableHeadlessOnLaunch")
         if autoEnable {
@@ -144,7 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func updateIcon() {
         let isHeadless = controller.isHeadlessModeEnabled
-        
+
         let imageName = isHeadless ? "macmini" : "laptopcomputer"
         if let image = NSImage(systemSymbolName: imageName, accessibilityDescription: "MacHead") {
             image.isTemplate = true
@@ -155,7 +165,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             statusItem.button?.title = isHeadless ? "●" : "○"
         }
     }
-    
+
     @objc private func statusItemClicked(_ sender: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
         if event.type == .rightMouseUp {
@@ -164,7 +174,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             togglePopover(sender)
         }
     }
-    
+
     @objc private func togglePopover(_ sender: NSStatusBarButton) {
         if let popover = popover, popover.isShown {
             popover.performClose(sender)
@@ -172,7 +182,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             showPopover(sender)
         }
     }
-    
+
     private func showPopover(_ sender: NSStatusBarButton) {
         if popover == nil {
             let popoverInstance = NSPopover()
@@ -180,7 +190,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             popoverInstance.animates = true
             self.popover = popoverInstance
         }
-        
+
         let popoverView = StatusPopoverView(
             onOpenPreferences: { [weak self] in
                 self?.popover?.performClose(nil)
@@ -191,27 +201,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 self?.quitApp()
             }
         )
-        
+
         popover?.contentViewController = NSHostingController(rootView: popoverView)
         popover?.show(relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
         popover?.contentViewController?.view.window?.makeKey()
     }
-    
+
     private func showContextMenu() {
         let menu = NSMenu()
-        
+
         let toggleItem = NSMenuItem(
-            title: controller.isHeadlessModeEnabled ? "恢复内置屏显示" : "开启 Headless 模式",
+            title: controller.isHeadlessModeEnabled
+                ? L("恢复内置屏显示", "Restore Built-In Display")
+                : L("开启 Headless 模式", "Enable Headless Mode"),
             action: #selector(toggleHeadlessModeMenuAction),
             keyEquivalent: "h"
         )
         toggleItem.target = self
         menu.addItem(toggleItem)
-        
+
         menu.addItem(NSMenuItem.separator())
-        
+
         let preferencesItem = NSMenuItem(
-            title: "偏好设置...",
+            title: L("偏好设置...", "Settings..."),
             action: #selector(openPreferences),
             keyEquivalent: ","
         )
@@ -219,7 +231,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         menu.addItem(preferencesItem)
 
         let updateItem = NSMenuItem(
-            title: "检查更新...",
+            title: L("检查更新...", "Check for Updates..."),
             action: #selector(checkForUpdatesMenuAction),
             keyEquivalent: ""
         )
@@ -229,7 +241,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         menu.addItem(NSMenuItem.separator())
 
         let quitItem = NSMenuItem(
-            title: "退出 MacHead",
+            title: L("退出 MacHead", "Quit MacHead"),
             action: #selector(quitApp),
             keyEquivalent: "q"
         )
@@ -239,7 +251,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusItem.button?.performClick(nil)
         statusItem.menu = nil
     }
-    
+
     @objc private func toggleHeadlessModeMenuAction() {
         if controller.isHeadlessModeEnabled {
             controller.disableHeadlessMode()
@@ -256,20 +268,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let mainMenu = NSApp.mainMenu,
               let appMenu = mainMenu.items.first?.submenu else { return }
 
-        // Ensure "偏好设置..." and "检查更新..." exist in the top-left MacHead application menu
-        let hasCheckUpdate = appMenu.items.contains {
+        if let existingUpdateItem = appMenu.items.first(where: {
             $0.action == #selector(checkForUpdatesMenuAction) || $0.title.contains("检查更新") || $0.title.contains("Check for Updates")
-        }
-        if !hasCheckUpdate {
+        }) {
+            existingUpdateItem.title = L("检查更新...", "Check for Updates...")
+        } else {
             let insertIndex = min(2, appMenu.items.count)
             let updateItem = NSMenuItem(
-                title: "检查更新...",
+                title: L("检查更新...", "Check for Updates..."),
                 action: #selector(checkForUpdatesMenuAction),
                 keyEquivalent: ""
             )
             updateItem.target = self
             appMenu.insertItem(updateItem, at: insertIndex)
         }
+    }
+
+    @objc private func handleLanguageChanged() {
+        preferencesWindow?.title = L("MacHead 偏好设置", "MacHead Settings")
+        ensureAppMenuItems()
+        BatteryManager.shared.handlePowerSourceChanged()
     }
 
     @objc func openPreferences() {
@@ -282,7 +300,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 backing: .buffered,
                 defer: false
             )
-            window.title = "MacHead 偏好设置"
+            window.title = L("MacHead 偏好设置", "MacHead Settings")
             window.titlebarAppearsTransparent = true
             window.titleVisibility = .hidden
             window.backgroundColor = .clear
@@ -292,6 +310,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             window.setFrameAutosaveName("MacHeadPreferencesWindow")
             window.delegate = self
             self.preferencesWindow = window
+        } else {
+            preferencesWindow?.title = L("MacHead 偏好设置", "MacHead Settings")
         }
 
         // Switch to .regular while Preferences window is open so macOS menu bar shows "MacHead -> 检查更新..."
@@ -308,27 +328,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
         }
     }
-    
+
     @objc private func handleStateChanged() {
         updateIcon()
         InputDeviceManager.shared.evaluateTrackpadAndKeyboardState()
     }
-    
-    
+
+
     @objc private func handleCLIEngage() {
         NSLog("MacHead: 收到来自 CLI 的启用命令，正在启用 Headless 模式...")
         if !controller.isHeadlessModeEnabled {
             controller.enableHeadlessMode()
         }
     }
-    
+
     @objc private func handleCLIDisengage() {
         NSLog("MacHead: 收到来自 CLI 的禁用命令，正在关闭 Headless 模式...")
         if controller.isHeadlessModeEnabled {
             controller.disableHeadlessMode()
         }
     }
-    
+
     func applicationWillTerminate(_ notification: Notification) {
         IntegrationManager.shared.stopAllServices()
         WebServer.shared.stop()
@@ -336,7 +356,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             controller.disableHeadlessMode()
         }
     }
-    
+
     @objc private func quitApp() {
         NSApp.terminate(nil)
     }

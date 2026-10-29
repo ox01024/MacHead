@@ -166,19 +166,70 @@
 </head>
 <body>
     <div class="login-card">
+        <div style="display:flex; justify-content:flex-end; margin-top:-12px; margin-bottom:4px;">
+            <button type="button" id="lang-btn" onclick="toggleLang()" style="background:transparent; border:1px solid var(--card-border); color:var(--text-muted); font-size:11px; padding:3px 8px; border-radius:6px; cursor:pointer;">🌐 EN</button>
+        </div>
         <span class="logo"></span>
-        <h1>MacHead 远程控制台</h1>
-        <p>请输入安全密码以进入面板</p>
-        
+        <h1 id="login-title">MacHead 远程控制台</h1>
+        <p id="login-subtitle">请输入安全密码以进入面板</p>
+
         <!-- ERROR_PLACEHOLDER -->
-        
+
         <form method="POST" action="/login">
             <div class="form-group">
-                <label for="password">控制台密码</label>
+                <label for="password" id="password-label">控制台密码</label>
                 <input type="password" id="password" name="password" placeholder="请输入密码" autofocus required>
             </div>
-            <button type="submit" class="btn">登录</button>
+            <button type="submit" class="btn" id="login-submit">登录</button>
         </form>
     </div>
+    <script>
+        const i18n = {
+            zh: {
+                docTitle: 'MacHead - 登录',
+                title: 'MacHead 远程控制台',
+                subtitle: '请输入安全密码以进入面板',
+                label: '控制台密码',
+                placeholder: '请输入密码',
+                submit: '登录',
+                toggleBtn: '🌐 EN'
+            },
+            en: {
+                docTitle: 'MacHead - Sign In',
+                title: 'MacHead Remote Console',
+                subtitle: 'Enter your security password to access the panel',
+                label: 'Console Password',
+                placeholder: 'Enter password',
+                submit: 'Sign In',
+                toggleBtn: '🌐 中文'
+            }
+        };
+        function getLang() {
+            const saved = localStorage.getItem('mh_web_lang');
+            if (saved === 'zh' || saved === 'en') return saved;
+            return (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+        }
+        function applyLang(lang) {
+            const t = i18n[lang] || i18n.zh;
+            document.title = t.docTitle;
+            document.getElementById('login-title').innerText = t.title;
+            document.getElementById('login-subtitle').innerText = t.subtitle;
+            document.getElementById('password-label').innerText = t.label;
+            document.getElementById('password').placeholder = t.placeholder;
+            document.getElementById('login-submit').innerText = t.submit;
+            document.getElementById('lang-btn').innerText = t.toggleBtn;
+            const errEl = document.getElementById('error-msg');
+            if (errEl) {
+                const localizedErr = errEl.getAttribute('data-' + lang);
+                if (localizedErr) errEl.innerText = localizedErr;
+            }
+        }
+        function toggleLang() {
+            const next = getLang() === 'zh' ? 'en' : 'zh';
+            localStorage.setItem('mh_web_lang', next);
+            applyLang(next);
+        }
+        applyLang(getLang());
+    </script>
 </body>
 </html>
