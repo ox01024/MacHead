@@ -385,6 +385,7 @@ struct PreferencesView: View {
                     }
                 }
                 .listStyle(.sidebar)
+                .id(l10n.effectiveLanguageCode)
                 if #available(macOS 13.0, *) {
                     sidebarList.scrollContentBackground(.hidden)
                 } else {
