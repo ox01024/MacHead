@@ -1,7 +1,7 @@
 {
-  "version": "0.1.28",
-  "build": 32,
-  "pubDate": "2026-10-29",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.28-macos-universal.dmg",
-  "releaseNotes": "1. 修复拔线恢复：针对老版本 macOS 与 Intel 双显卡机型，重构内置屏活动状态判定与强制恢复链路，彻底解决外接屏拔线或休眠唤醒后内屏无法恢复点亮的问题 (#15)。 2. 启动自适应就绪：重构开机自启动逻辑，引入自适应外接屏就绪监听队列（最多等待 8 秒与实时回调响应），解决启动后未能自动开启无头模式的问题。 3. 安全恢复防误杀：增加外接屏断开双重复核机制，杜绝屏幕切主屏或瞬态重排时误触发安全恢复；严格隔离外屏 ID 1，防范快照污染。 4. 全面支持中英双语国际化：客户端偏好设置、菜单栏控制台、网页远程控制面板及落地页实现端到端原生中英双语无缝切换 (#17)。"
+  "version": "0.1.29",
+  "build": 33,
+  "pubDate": "2026-11-04",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.29-macos-universal.dmg",
+  "releaseNotes": "1. 升级 machead CLI 状态与子命令（status / sleep prevent / sleep allow / --short）对齐官网交互；2. 修复通过软链接调用 CLI 时 UserDefaults 配置域解析失效问题；3. 修复偏好设置动态切换语言时侧边栏未刷新问题"
 }
