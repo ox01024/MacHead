@@ -297,7 +297,7 @@ final class BatteryManager: ObservableObject {
         }
     }
 
-    private func updateBatteryInfo() {
+    func updateBatteryInfo() {
         guard let snapshot = IOPSCopyPowerSourcesInfo()?.takeRetainedValue(),
               let sources = IOPSCopyPowerSourcesList(snapshot)?.takeRetainedValue() as? [CFTypeRef] else {
             return

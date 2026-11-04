@@ -64,9 +64,12 @@
 在偏好设置中开启「machead 命令行工具」后，可直接在终端（含 SSH）控制：
 
 ```bash
-machead --status    # 查询当前状态 (headless / normal / offline)
-machead --enable    # 开启无头模式
-machead --disable   # 恢复正常模式
+machead status           # 查看完整运行状态（模式、Web 控制台、防休眠、电源电量、防误触状态）
+machead status --short   # 输出精简状态单词 (headless / normal / offline)
+machead enable           # 开启无头模式
+machead disable          # 恢复正常模式
+machead sleep prevent    # 开启合盖与空闲防休眠电源断言
+machead sleep allow      # 释放防休眠电源断言
 ```
 
 **远程 Web 控制台**

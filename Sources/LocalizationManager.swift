@@ -29,10 +29,17 @@ public final class LocalizationManager: ObservableObject {
     public static let shared = LocalizationManager()
     public static let defaultsKey = "AppLanguage"
 
+    private static var appDefaults: UserDefaults {
+        if Bundle.main.bundleIdentifier == "com.waffle.MacHead" {
+            return .standard
+        }
+        return UserDefaults(suiteName: "com.waffle.MacHead") ?? .standard
+    }
+
     @Published public var selectedLanguage: AppLanguage {
         didSet {
             guard oldValue != selectedLanguage else { return }
-            UserDefaults.standard.set(selectedLanguage.rawValue, forKey: Self.defaultsKey)
+            Self.appDefaults.set(selectedLanguage.rawValue, forKey: Self.defaultsKey)
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .appLanguageChanged, object: self.effectiveLanguageCode)
             }
@@ -40,7 +47,7 @@ public final class LocalizationManager: ObservableObject {
     }
 
     private init() {
-        let saved = UserDefaults.standard.string(forKey: Self.defaultsKey) ?? AppLanguage.system.rawValue
+        let saved = Self.appDefaults.string(forKey: Self.defaultsKey) ?? AppLanguage.system.rawValue
         self.selectedLanguage = AppLanguage(rawValue: saved) ?? .system
     }
 

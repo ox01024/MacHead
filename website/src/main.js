@@ -158,7 +158,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function runCommandSimulation(cmdKey) {
         if (!cmdOutputs[cmdKey]) return;
-        const fullCmd = `machead ${cmdKey}`;
+        const displayArg = cmdKey === 'sleep-prevent' ? 'sleep prevent' : cmdKey;
+        const fullCmd = `machead ${displayArg}`;
         simulateTyping(fullCmd, () => {
             const outputDiv = document.createElement('div');
             outputDiv.className = 'terminal-output';
