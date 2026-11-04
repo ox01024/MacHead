@@ -132,9 +132,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             suspensionBehavior: .deliverImmediately
         )
 
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(handleCLISleepPrevent),
+            name: NSNotification.Name("com.waffle.MacHead.CLI.sleepPrevent"),
+            object: nil,
+            suspensionBehavior: .deliverImmediately
+        )
+
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(handleCLISleepAllow),
+            name: NSNotification.Name("com.waffle.MacHead.CLI.sleepAllow"),
+            object: nil,
+            suspensionBehavior: .deliverImmediately
+        )
+
         // CLI 软链接为 opt-in 组件：仅在偏好设置中开启后维护，默认零包外写入；
         // 异步执行，提权弹窗不得阻塞启动流程
         DispatchQueue.main.async { CLIToolInstaller.setupIfEnabled() }
+
+        // 启动时对齐持久化状态，防止上次异常退出遗留脏标记
+        UserDefaults.standard.set(false, forKey: "HeadlessModeEnabled")
+        UserDefaults.standard.set(0, forKey: "ActiveSleepAssertionID")
+        controller.evaluatePowerAssertion()
 
         // Auto-enable headless mode on launch if enabled in preferences
         let autoEnable = UserDefaults.standard.bool(forKey: "AutoEnableHeadlessOnLaunch")
@@ -339,6 +360,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSLog("MacHead: 收到来自 CLI 的启用命令，正在启用 Headless 模式...")
         if !controller.isHeadlessModeEnabled {
             controller.enableHeadlessMode()
+        } else {
+            controller.evaluatePowerAssertion()
         }
     }
 
@@ -349,12 +372,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
     }
 
+    @objc private func handleCLISleepPrevent() {
+        NSLog("MacHead: 收到来自 CLI 的防休眠命令，正在开启合盖防休眠断言...")
+        UserDefaults.standard.set(true, forKey: "PreventIdleSleep")
+        UserDefaults.standard.set(true, forKey: "KeepRunningOnLidClose")
+        controller.evaluatePowerAssertion()
+        NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+    }
+
+    @objc private func handleCLISleepAllow() {
+        NSLog("MacHead: 收到来自 CLI 的释放防休眠命令，正在关闭合盖防休眠断言...")
+        UserDefaults.standard.set(false, forKey: "KeepRunningOnLidClose")
+        if controller.isHeadlessModeEnabled {
+            UserDefaults.standard.set(false, forKey: "PreventIdleSleep")
+        }
+        controller.evaluatePowerAssertion()
+        NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         IntegrationManager.shared.stopAllServices()
         WebServer.shared.stop()
         if controller.isHeadlessModeEnabled {
             controller.disableHeadlessMode()
         }
+        controller.updateSleepAssertion(enabled: false)
     }
 
     @objc private func quitApp() {

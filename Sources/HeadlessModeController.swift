@@ -254,8 +254,8 @@ final class HeadlessModeController {
         // 1.5. 恢复内置麦克风的静音状态
         MediaDeviceManager.shared.unmuteBuiltInMicrophone()
         
-        // 2. 释放所有电源断言
-        updateSleepAssertion(enabled: false)
+        // 2. 重新评估电源断言状态（若未开启合盖常驻，则释放电源断言）
+        evaluatePowerAssertion()
         
         // 4. 移除唤醒监听
         NSWorkspace.shared.notificationCenter.removeObserver(
@@ -287,20 +287,22 @@ final class HeadlessModeController {
     
     /// 动态管理空闲与合盖睡眠断言
     func updateSleepAssertion(enabled: Bool) {
+        guard !isTestMode else { return }
         let keepRunningOnLidClose = UserDefaults.standard.bool(forKey: "KeepRunningOnLidClose")
         let targetType = keepRunningOnLidClose ? (kIOPMAssertionTypePreventSystemSleep as String) : (kIOPMAssertionTypePreventUserIdleSystemSleep as String)
-        
+
         if enabled {
-            guard isHeadlessModeEnabled else { return }
-            
+            guard isHeadlessModeEnabled || keepRunningOnLidClose else { return }
+
             // 如果已有断言且类型不符，先释放
             if sleepAssertionID != 0 && activeAssertionType != targetType {
                 IOPMAssertionRelease(sleepAssertionID)
                 NSLog("MacHead: 释放旧类型电源断言，ID: %d", sleepAssertionID)
                 sleepAssertionID = 0
                 activeAssertionType = ""
+                UserDefaults.standard.set(0, forKey: "ActiveSleepAssertionID")
             }
-            
+
             if sleepAssertionID == 0 {
                 let reason = "MacHead: Headless mode active" as CFString
                 let result = IOPMAssertionCreateWithName(
@@ -314,6 +316,7 @@ final class HeadlessModeController {
                 } else {
                     NSLog("MacHead: 成功创建电源断言 (%@)，ID: %d", targetType, sleepAssertionID)
                     activeAssertionType = targetType
+                    UserDefaults.standard.set(Int(sleepAssertionID), forKey: "ActiveSleepAssertionID")
                 }
             }
         } else {
@@ -322,19 +325,24 @@ final class HeadlessModeController {
                 NSLog("MacHead: 释放电源断言，ID: %d", sleepAssertionID)
                 sleepAssertionID = 0
                 activeAssertionType = ""
+                UserDefaults.standard.set(0, forKey: "ActiveSleepAssertionID")
             }
         }
     }
-    
+
     /// 重新评估电源断言状态
     func evaluatePowerAssertion() {
-        guard isHeadlessModeEnabled else { return }
-        
-        let preventIdleSleep = UserDefaults.standard.bool(forKey: "PreventIdleSleep")
+        let keepRunningOnLidClose = UserDefaults.standard.bool(forKey: "KeepRunningOnLidClose")
+        guard isHeadlessModeEnabled || keepRunningOnLidClose else {
+            updateSleepAssertion(enabled: false)
+            return
+        }
+
+        let preventIdleSleep = UserDefaults.standard.object(forKey: "PreventIdleSleep") as? Bool ?? true
         let isBatteryLow = BatteryManager.shared.isBatteryProtectionActive
-        
-        // 只有在允许防止睡眠且电池不处于低电量保护状态时，才持有断言
-        let shouldHoldAssertion = preventIdleSleep && !isBatteryLow
+
+        // 只有在允许防止睡眠（或开启合盖保持运行）且电池不处于低电量保护状态时，才持有断言
+        let shouldHoldAssertion = (preventIdleSleep || keepRunningOnLidClose) && !isBatteryLow
         updateSleepAssertion(enabled: shouldHoldAssertion)
     }
     
