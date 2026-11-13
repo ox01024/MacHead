@@ -1,11 +1,25 @@
 import Foundation
 
+public enum KumaPushStatus: Equatable {
+    case stopped
+    case pending
+    case success
+    case failure(String)
+}
+
 public final class UptimeKumaService {
     public static let shared = UptimeKumaService()
-    
+    public static let statusChanged = Notification.Name("com.waffle.MacHead.kumaPushStatusChanged")
+
     private var timer: Timer?
     private var isServiceRunning = false
-    
+
+    public private(set) var status: KumaPushStatus = .stopped {
+        didSet {
+            NotificationCenter.default.post(name: UptimeKumaService.statusChanged, object: self.status)
+        }
+    }
+
     private init() {}
     
     public func start() {
@@ -23,6 +37,7 @@ public final class UptimeKumaService {
         let timeInterval = interval > 0 ? interval : 60.0 // Default to 60s
         
         isServiceRunning = true
+        status = .pending
         
         // Start the timer
         timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true) { [weak self] _ in
@@ -40,6 +55,7 @@ public final class UptimeKumaService {
         timer?.invalidate()
         timer = nil
         isServiceRunning = false
+        status = .stopped
         print("UptimeKumaService: Heartbeat service stopped")
     }
     
@@ -80,14 +96,16 @@ public final class UptimeKumaService {
         request.httpMethod = "GET"
         request.timeoutInterval = 10.0
         
-        let task = URLSession.shared.dataTask(with: request) { _, response, error in
+        let task = URLSession.shared.dataTask(with: request) { [weak self] _, response, error in
             if let error = error {
                 print("UptimeKumaService: Heartbeat push failed - \(error.localizedDescription)")
+                self?.status = .failure(error.localizedDescription)
             } else if let httpResponse = response as? HTTPURLResponse {
                 if httpResponse.statusCode == 200 {
-                    // Success
+                    self?.status = .success
                 } else {
                     print("UptimeKumaService: Heartbeat push returned status \(httpResponse.statusCode)")
+                    self?.status = .failure("HTTP \(httpResponse.statusCode)")
                 }
             }
         }

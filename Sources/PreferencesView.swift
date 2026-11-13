@@ -188,6 +188,32 @@ struct PreferencesView: View {
     @State private var kumaEnabled = UserDefaults.standard.bool(forKey: "kumaEnabled")
     @State private var kumaPushUrl = UserDefaults.standard.string(forKey: "kumaPushUrl") ?? ""
     @State private var kumaInterval = UserDefaults.standard.double(forKey: "kumaInterval") == 0 ? 60.0 : UserDefaults.standard.double(forKey: "kumaInterval")
+    @State private var kumaStatus: KumaPushStatus = UptimeKumaService.shared.status
+
+    private var kumaStatusColor: Color {
+        switch kumaStatus {
+        case .success: return .green
+        case .pending: return .orange
+        case .failure: return .red
+        case .stopped: return .gray
+        }
+    }
+
+    private var kumaStatusBadgeText: String {
+        switch kumaStatus {
+        case .success: return L("推送正常", "Pushing OK")
+        case .pending: return L("推送中...", "Pushing...")
+        case .failure: return L("推送失败", "Push failed")
+        case .stopped: return L("已停用", "Disabled")
+        }
+    }
+
+    private var kumaStatusDetail: String? {
+        if case .failure(let message) = kumaStatus {
+            return message
+        }
+        return nil
+    }
 
     @State private var frpEnabled = UserDefaults.standard.bool(forKey: "frpEnabled")
     @State private var frpMode = UserDefaults.standard.string(forKey: "frpMode") ?? "quick"
@@ -1268,6 +1294,23 @@ struct PreferencesView: View {
                             SettingsCard(title: L("Uptime Kuma 心跳打卡", "Uptime Kuma Heartbeat")) {
                                 SettingsRow(L("启用 Uptime Kuma 推送", "Enable Uptime Kuma Push")) {
                                     HStack(spacing: 12) {
+                                        if kumaEnabled {
+                                            HStack(spacing: 4) {
+                                                Circle()
+                                                    .fill(kumaStatusColor)
+                                                    .frame(width: 6, height: 6)
+                                                Text(kumaStatusBadgeText)
+                                                    .font(.caption2)
+                                                    .fontWeight(.medium)
+                                                    .foregroundColor(kumaStatusColor)
+                                            }
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 3)
+                                            .background(kumaStatusColor.opacity(0.12))
+                                            .cornerRadius(5)
+                                            .help(kumaStatusDetail ?? kumaStatusBadgeText)
+                                        }
+
                                         Toggle("", isOn: Binding(
                                             get: { self.kumaEnabled },
                                             set: { newValue in
@@ -2992,6 +3035,18 @@ struct PreferencesView: View {
                         Text(L("\(Int(kumaInterval)) 秒", "\(Int(kumaInterval))s"))
                             .fontWeight(.bold)
                     }
+
+                    if let detail = kumaStatusDetail {
+                        HStack {
+                            Text(L("上次推送:", "Last push:"))
+                                .foregroundColor(.secondary)
+                                .frame(width: 80, alignment: .leading)
+                            Text(detail)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .lineLimit(2)
+                        }
+                    }
                 }
                 .padding(.vertical, 8)
 
@@ -3006,7 +3061,7 @@ struct PreferencesView: View {
                 }
             }
             .padding(20)
-            .frame(width: 380, height: 200)
+            .frame(width: 380, height: 230)
         }
         .onAppear {
             updateConnectedDisplays()
@@ -3022,6 +3077,11 @@ struct PreferencesView: View {
             updateBatteryState()
         }
         
+                .onReceive(NotificationCenter.default.publisher(for: UptimeKumaService.statusChanged)) { notif in
+                    if let status = notif.object as? KumaPushStatus {
+                        self.kumaStatus = status
+                    }
+                }
                 .onReceive(NotificationCenter.default.publisher(for: .devTunnelStatusChanged)) { notif in
             if let status = notif.object as? DevTunnelStatus {
                 self.devTunnelStatus = status
