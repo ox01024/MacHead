@@ -1,7 +1,7 @@
 {
-  "version": "0.1.29",
-  "build": 33,
-  "pubDate": "2026-11-04",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.29-macos-universal.dmg",
-  "releaseNotes": "1. 升级 machead CLI 状态与子命令（status / sleep prevent / sleep allow / --short）对齐官网交互；2. 修复通过软链接调用 CLI 时 UserDefaults 配置域解析失效问题；3. 修复偏好设置动态切换语言时侧边栏未刷新问题"
+  "version": "0.1.30",
+  "build": 34,
+  "pubDate": "2026-11-13",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.30-macos-universal.dmg",
+  "releaseNotes": "v0.1.30 1. 修复 Uptime Kuma 心跳推送到 http:// 自建地址(裸 IP / Tailscale IP)时被 macOS ATS 拦截无法推送的问题 2. 设置页新增 Uptime Kuma 推送状态徽章,推送失败时在配置弹窗显示完整错误原因"
 }
