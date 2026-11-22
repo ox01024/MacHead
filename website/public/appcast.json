@@ -1,7 +1,7 @@
 {
-  "version": "0.1.30",
-  "build": 34,
-  "pubDate": "2026-11-13",
-  "url": "https://releases.headlessmac.com/MacHead-v0.1.30-macos-universal.dmg",
-  "releaseNotes": "v0.1.30 1. 修复 Uptime Kuma 心跳推送到 http:// 自建地址(裸 IP / Tailscale IP)时被 macOS ATS 拦截无法推送的问题 2. 设置页新增 Uptime Kuma 推送状态徽章,推送失败时在配置弹窗显示完整错误原因"
+  "version": "0.1.31",
+  "build": 35,
+  "pubDate": "2026-11-22",
+  "url": "https://releases.headlessmac.com/MacHead-v0.1.31-macos-universal.dmg",
+  "releaseNotes": "修复合盖无外接屏时远程桌面（UU 远程 / RustDesk / ToDesk 等）画面反复闪烁与锁屏死循环：纯无头模式自动创建虚拟显示器，系统全程有屏，远控采集稳定 (fixes #23)"
 }
