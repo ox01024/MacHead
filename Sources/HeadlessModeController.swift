@@ -79,6 +79,13 @@ private func displayReconfigurationCallback(
 
     // 无头模式下内屏被系统意外点亮（插拔/唤醒）：延迟片刻让系统稳定后重新切断
     if controller.isHeadlessModeEnabled {
+        // 纯无头（无外接屏）时保活虚拟显示器；真外接屏接入后撤掉虚拟屏（issue #23）。
+        // 必须在执行时实时复核无头状态与外接屏列表：移除虚拟屏本身也会触发本回调，
+        // 若沿用捕获的旧快照，会在退出无头后误将虚拟屏复活
+        DispatchQueue.main.async {
+            guard controller.isHeadlessModeEnabled else { return }
+            controller.syncVirtualDisplay(externals: controller.currentExternalDisplays())
+        }
         if controller.isBuiltInActive() {
             NSLog("MacHead: 无头模式下检测到内屏处于活动状态，重新切断内屏以维持 Headless...")
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -200,9 +207,13 @@ final class HeadlessModeController {
         wasEnableHeadlessModeCalled = true
         cancelLaunchAdaptiveReady()
         isDisplayMonitoringStarted = true
+        let externals = currentExternalDisplays()
+        // 纯无头（无外接屏）时先创建虚拟显示器再切断内屏，系统全程至少持有一块屏：
+        // 避免 WindowServer 因「无屏 + 合盖」对远控唤醒只给临时宽限（DMGrace ~10s），
+        // 到期强制熄屏触发「断电 → 锁屏 → ScreenCaptureKit 断流 → 再唤醒」闪烁循环（issue #23）
+        syncVirtualDisplay(externals: externals)
         guard !isHeadlessModeEnabled, !isTestMode else { return }
         isHeadlessModeEnabled = true
-        let externals = currentExternalDisplays()
         activeExternalDisplays = externals
         if !externals.isEmpty {
             lastKnownExternalDisplays = externals
@@ -243,6 +254,8 @@ final class HeadlessModeController {
         wakeStabilizationWorkItem?.cancel()
         wakeStabilizationWorkItem = nil
         isWakeStabilizing = false
+        // 先移除虚拟显示器（若存在），其上的窗口将迁回随后恢复的内屏
+        VirtualDisplayManager.shared.destroy()
         guard isHeadlessModeEnabled, !isTestMode else { return }
         isHeadlessModeEnabled = false
         UserDefaults.standard.set(false, forKey: "HeadlessModeEnabled")
@@ -347,7 +360,17 @@ final class HeadlessModeController {
     }
     
     // MARK: - 显示器变化守护
-    
+
+    /// 同步虚拟显示器生命周期：无外接屏时保活（纯无头场景），有外接屏时移除。
+    /// 由 enable/disable、显示器重配置回调与 systemDidWake 复核共用。
+    func syncVirtualDisplay(externals: Set<CGDirectDisplayID>) {
+        if externals.isEmpty {
+            VirtualDisplayManager.shared.ensure()
+        } else {
+            VirtualDisplayManager.shared.destroy()
+        }
+    }
+
     func registerDisplayCallback() {
         guard !isCallbackRegistered else { return }
         let userInfo = Unmanaged.passUnretained(self).toOpaque()
@@ -386,6 +409,8 @@ final class HeadlessModeController {
                   externals.description, self.lastKnownExternalDisplays.description)
 
             if externals.isEmpty {
+                // 纯无头：保活虚拟显示器（系统休眠可能将其移除），防止无屏状态复发闪烁循环
+                self.syncVirtualDisplay(externals: externals)
                 // 如果休眠前曾有外接显示器，但唤醒稳定期过后所有外接屏均已断开（例如休眠期间被拔线）：
                 // 自动退出无头模式以恢复内屏
                 if !self.lastKnownExternalDisplays.isEmpty && UserDefaults.standard.bool(forKey: "AutoExitHeadlessOnDisconnect") {
@@ -396,6 +421,7 @@ final class HeadlessModeController {
                 // 外接显示器仍在：更新记录，并在内屏被系统点亮时重新切断
                 self.activeExternalDisplays = externals
                 self.lastKnownExternalDisplays = externals
+                self.syncVirtualDisplay(externals: externals)
                 self.maintainBuiltInDisconnect()
             }
         }
@@ -904,6 +930,58 @@ final class HeadlessModeController {
         drainMainQueue(seconds: 0.1)
         precondition(controller.wasTriggerSafeRecoveryCalled, "FAIL: Safe recovery should be triggered on unplug after launch!")
         print("Test 24: PASS")
+
+        // Test 25: Pure headless enable creates virtual display, disable destroys it (issue #23)
+        print("Test 25: Pure headless enable creates virtual display, disable destroys it...")
+        resetHooks()
+        controller.isHeadlessModeEnabled = false
+        controller.mockExternalDisplays = []
+        VirtualDisplayManager.shared.wasCreateCalled = false
+        VirtualDisplayManager.shared.wasDestroyCalled = false
+        controller.enableHeadlessMode()
+        precondition(VirtualDisplayManager.shared.wasCreateCalled, "FAIL: Virtual display was not created in pure headless mode!")
+        controller.disableHeadlessMode()
+        precondition(VirtualDisplayManager.shared.wasDestroyCalled, "FAIL: Virtual display was not destroyed on disable!")
+        precondition(VirtualDisplayManager.shared.displayID == nil, "FAIL: Virtual display ID should be cleared after disable!")
+        print("Test 25: PASS")
+
+        // Test 26: Headless enable with external display present does NOT create virtual display
+        print("Test 26: Headless enable with external display does not create virtual display...")
+        VirtualDisplayManager.shared.wasCreateCalled = false
+        controller.isHeadlessModeEnabled = false
+        controller.mockExternalDisplays = [101]
+        controller.enableHeadlessMode()
+        precondition(!VirtualDisplayManager.shared.wasCreateCalled, "FAIL: Virtual display should not be created when external display is present!")
+        controller.disableHeadlessMode()
+        print("Test 26: PASS")
+
+        // Test 27: Pure headless wake re-ensures virtual display after sleep teardown (issue #23)
+        print("Test 27: Pure headless wake re-ensures virtual display...")
+        VirtualDisplayManager.shared.wasCreateCalled = false
+        controller.isHeadlessModeEnabled = true
+        controller.isDisplayMonitoringStarted = true
+        controller.activeExternalDisplays = []
+        controller.lastKnownExternalDisplays = []
+        controller.mockExternalDisplays = []
+        VirtualDisplayManager.shared.destroy() // Simulate system removing it during sleep
+        VirtualDisplayManager.shared.wasCreateCalled = false
+        controller.systemDidWake()
+        drainMainQueue(seconds: 1.4)
+        precondition(VirtualDisplayManager.shared.wasCreateCalled, "FAIL: Virtual display was not re-ensured on pure headless wake!")
+        print("Test 27: PASS")
+
+        // Test 28: External display connect while headless destroys virtual display
+        print("Test 28: External display connect in headless mode destroys virtual display...")
+        resetHooks()
+        VirtualDisplayManager.shared.wasDestroyCalled = false
+        controller.isHeadlessModeEnabled = true
+        controller.isDisplayMonitoringStarted = true
+        controller.mockExternalDisplays = [101]
+        displayReconfigurationCallback(displayID: 101, flags: [],
+                                       userInfo: Unmanaged.passUnretained(controller).toOpaque())
+        drainMainQueue(seconds: 0.1)
+        precondition(VirtualDisplayManager.shared.wasDestroyCalled, "FAIL: Virtual display was not destroyed when external display connected!")
+        print("Test 28: PASS")
 
         print("All Tests Passed Successfully! 🎉")
     }

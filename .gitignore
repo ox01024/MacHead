@@ -26,3 +26,6 @@ build/
 
 # 本地素材:仅用于 GitHub Settings → General → Social image 手动上传,不入库
 social-preview.png
+
+# 本地调研参考项目克隆(CLAUDE.md 工作流),不入库
+references/
