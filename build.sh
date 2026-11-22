@@ -27,6 +27,7 @@ swiftc \
   -target arm64-apple-macos12.0 \
   -sdk "${SDK_PATH}" \
   -O \
+  -import-objc-header Sources/VirtualDisplayBridge.h \
   -o "${MACOS_DIR}/${APP_NAME}_arm64" \
   -framework SwiftUI \
   -framework Cocoa \
@@ -41,6 +42,7 @@ swiftc \
   -target x86_64-apple-macos12.0 \
   -sdk "${SDK_PATH}" \
   -O \
+  -import-objc-header Sources/VirtualDisplayBridge.h \
   -o "${MACOS_DIR}/${APP_NAME}_x86_64" \
   -framework SwiftUI \
   -framework Cocoa \
