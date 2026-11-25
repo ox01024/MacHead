@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             "DisableKeyboardAndTrackpadInHeadlessMode": false,
             "AutoExitHeadlessOnDisconnect": true,
             "AutoRestoreHeadlessOnConnect": true,
+            "AutoSyncHeadlessWithLid": false,
             "nezhaEnabled": false,
             "nezhaServer": "",
             "nezhaSecret": "",
@@ -91,6 +92,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Start monitoring display plug/unplug events globally
         controller.registerDisplayCallback()
+
+        // Start monitoring lid open/close events globally
+        controller.startLidStateMonitoring()
 
         // Start all active integrations (Nezha, ServerStatus, Uptime Kuma, SMC)
         IntegrationManager.shared.startAllServices()
@@ -393,6 +397,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         IntegrationManager.shared.stopAllServices()
         WebServer.shared.stop()
+        controller.stopLidStateMonitoring()
         if controller.isHeadlessModeEnabled {
             controller.disableHeadlessMode()
         }

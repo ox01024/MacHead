@@ -909,6 +909,17 @@
 
                         <div class="control-row">
                             <div>
+                                <div class="control-label" data-i18n="ctrlSyncLidTitle">合盖自动无头 · 开盖恢复内屏</div>
+                                <div class="control-desc" data-i18n="ctrlSyncLidDesc">合盖时自动进入无头模式，开盖且无外接屏拦截时自动恢复内屏显示。</div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="sync-lid-toggle" onchange="toggleSetting('sync-lid')">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="control-row">
+                            <div>
                                 <div class="control-label" data-i18n="ctrlChargeLimitTitle">防鼓包充电上限 (Charge Limit)</div>
                                 <div class="control-desc" id="charge-limit-desc">达到设定上限后暂停充电，延缓电池高压与发热老化（老系统/全机型通用）。</div>
                             </div>
@@ -982,6 +993,8 @@
                         ctrlExitDiscDesc: '检测到所有外接显示器断开时，自动恢复内置屏幕防黑屏。',
                         ctrlRestoreConnTitle: '接入外接显示器时自动恢复',
                         ctrlRestoreConnDesc: '有外接显示器重新接入时，自动重入 Headless 并屏蔽内置屏。',
+                        ctrlSyncLidTitle: '合盖自动无头 · 开盖恢复内屏',
+                        ctrlSyncLidDesc: '合盖时自动进入无头模式，开盖且无外接屏拦截时自动恢复内屏显示。',
                         ctrlChargeLimitTitle: '防鼓包充电上限 (Charge Limit)',
                         peakResetTitle: '双击重置',
                         peakRxResetTitle: '双击重置下载峰值',
@@ -1037,6 +1050,8 @@
                         ctrlExitDiscDesc: 'Restore the built-in display automatically when all external displays disconnect.',
                         ctrlRestoreConnTitle: 'Auto-Restore on External Display Connect',
                         ctrlRestoreConnDesc: 'Re-enter Headless Mode automatically when an external display is reconnected.',
+                        ctrlSyncLidTitle: 'Auto-Switch Headless Mode with Lid',
+                        ctrlSyncLidDesc: 'Enable headless mode when lid closes; restore built-in display when lid opens.',
                         ctrlChargeLimitTitle: 'Battery Swelling Protection (Charge Limit)',
                         peakResetTitle: 'Double-click to reset',
                         peakRxResetTitle: 'Double-click to reset download peak',
@@ -1339,6 +1354,8 @@
                     document.getElementById('microphone-toggle').checked = data.microphoneMuted;
                     document.getElementById('exit-disconnect-toggle').checked = data.autoExitHeadlessOnDisconnect;
                     document.getElementById('restore-connect-toggle').checked = data.autoRestoreHeadlessOnConnect;
+                    const syncLidToggle = document.getElementById('sync-lid-toggle');
+                    if (syncLidToggle) syncLidToggle.checked = !!data.autoSyncHeadlessWithLid;
 
                     const limitToggle = document.getElementById('charge-limit-toggle');
                     if (limitToggle) limitToggle.checked = data.customLimitEnabled;
@@ -1719,6 +1736,7 @@
                         case 'microphone': url = '/api/toggle-microphone'; break;
                         case 'exit-disconnect': url = '/api/toggle-exit-on-disconnect'; break;
                         case 'restore-connect': url = '/api/toggle-restore-on-connect'; break;
+                        case 'sync-lid': url = '/api/toggle-sync-with-lid'; break;
                         case 'charge-limit': url = '/api/toggle-charge-limit'; break;
                     }
 
