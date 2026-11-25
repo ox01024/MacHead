@@ -93,9 +93,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Start monitoring display plug/unplug events globally
         controller.registerDisplayCallback()
 
-        // Start monitoring lid open/close events globally
-        controller.startLidStateMonitoring()
-
         // Start all active integrations (Nezha, ServerStatus, Uptime Kuma, SMC)
         IntegrationManager.shared.startAllServices()
 
@@ -169,6 +166,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 self?.updateIcon()
             }
         }
+
+        // Start lid monitoring after initial state reset, statusItem setup, and launch queue
+        controller.startLidStateMonitoring()
 
         // Silent background check for updates 3 seconds after launch & send telemetry heartbeat
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
