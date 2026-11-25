@@ -7,6 +7,20 @@ extension Notification.Name {
     static let headlessModeStateChanged = Notification.Name("com.waffle.MacHead.headlessModeStateChanged")
 }
 
+/// 全局/文件级的 IOPMrootDomain 兴趣通知回调，用于零轮询感知合盖/开盖事件
+private func lidStateInterestCallback(
+    refcon: UnsafeMutableRawPointer?,
+    service: io_service_t,
+    messageType: UInt32,
+    messageArgument: UnsafeMutableRawPointer?
+) {
+    guard let refcon = refcon else { return }
+    let controller = Unmanaged<HeadlessModeController>.fromOpaque(refcon).takeUnretainedValue()
+    DispatchQueue.main.async {
+        controller.handleLidStateChange()
+    }
+}
+
 /// 全局/文件级的显示器重配置回调函数，符合 C 语言函数指针的调用约定
 private func displayReconfigurationCallback(
     displayID: CGDirectDisplayID,
@@ -71,6 +85,12 @@ private func displayReconfigurationCallback(
                     NSLog("MacHead: 经复核外接显示器依然在线，忽略瞬态空列表")
                     return
                 }
+                // 若开启「合盖自动无头」且当前仍处于合盖状态，拔掉外接屏后切为纯无头虚拟屏继续保活，不能退出无头模式
+                if UserDefaults.standard.bool(forKey: "AutoSyncHeadlessWithLid") && controller.isLidClosed() {
+                    NSLog("MacHead: 外接显示器已断开但机器仍处于合盖状态，维持无头模式与虚拟显示器")
+                    controller.syncVirtualDisplay(externals: [])
+                    return
+                }
                 controller.triggerSafeRecovery()
             }
         }
@@ -124,6 +144,12 @@ final class HeadlessModeController {
     fileprivate(set) var isWaitingForLaunchReady = false
     private var launchReadyWorkItem: DispatchWorkItem?
     private var launchAdaptiveCompletion: (() -> Void)?
+
+    /// 合盖/开盖（IOPMrootDomain AppleClamshellState）监听状态
+    private var lidNotifyPort: IONotificationPortRef?
+    private var lidNotification: io_object_t = 0
+    private var lidRunLoopSource: CFRunLoopSource?
+    fileprivate(set) var lastKnownLidClosed: Bool? = nil
     
     // MARK: - Test Hooks
     /// 测试模式：动作函数只记录 was*Called 标志位，不触碰真实显示器/麦克风/电源断言/遥测
@@ -140,6 +166,8 @@ final class HeadlessModeController {
         get { mockBuiltInActive }
         set { mockBuiltInActive = newValue }
     }
+    /// nil = 读取真实 IOPMrootDomain AppleClamshellState；否则用该值替代（供测试模拟合盖/开盖）
+    var mockLidClosed: Bool? = nil
     
     private init() {}
 
@@ -294,6 +322,11 @@ final class HeadlessModeController {
             NSLog("MacHead: 复核发现外接显示器仍在，取消安全恢复")
             return
         }
+        if UserDefaults.standard.bool(forKey: "AutoSyncHeadlessWithLid") && isLidClosed() {
+            NSLog("MacHead: 检测到外接屏断开但仍处于合盖状态，保持无头模式并维持虚拟显示器")
+            syncVirtualDisplay(externals: [])
+            return
+        }
         NSLog("MacHead: 检测到外接屏断开，直接退出无头模式以恢复内屏")
         disableHeadlessMode(forceReconnect: true)
     }
@@ -359,6 +392,131 @@ final class HeadlessModeController {
         updateSleepAssertion(enabled: shouldHoldAssertion)
     }
     
+    // MARK: - 合盖/开盖自动切换无头模式
+
+    /// 读取当前合盖状态（测试模式下可由 mockLidClosed 覆盖；无盖桌面机型返回 false）
+    func isLidClosed() -> Bool {
+        if let mock = mockLidClosed {
+            return mock
+        }
+        if isTestMode {
+            return false
+        }
+        let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
+        guard service != 0 else { return false }
+        defer { IOObjectRelease(service) }
+        if let prop = IORegistryEntryCreateCFProperty(
+            service,
+            "AppleClamshellState" as CFString,
+            kCFAllocatorDefault,
+            0
+        )?.takeRetainedValue() as? Bool {
+            return prop
+        }
+        return false
+    }
+
+    /// 注册 IOPMrootDomain 兴趣通知，零轮询响应笔记本合盖/开盖状态变化
+    func startLidStateMonitoring() {
+        let initialClosed = isLidClosed()
+        lastKnownLidClosed = initialClosed
+
+        if !isTestMode && lidNotifyPort == nil {
+            let rootDomain = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPMrootDomain"))
+            if rootDomain != 0 {
+                defer { IOObjectRelease(rootDomain) }
+                if let port = IONotificationPortCreate(kIOMainPortDefault) {
+                    let source = IONotificationPortGetRunLoopSource(port).takeUnretainedValue()
+                    CFRunLoopAddSource(CFRunLoopGetMain(), source, .defaultMode)
+                    let userInfo = Unmanaged.passUnretained(self).toOpaque()
+                    var notification: io_object_t = 0
+                    let kr = IOServiceAddInterestNotification(
+                        port,
+                        rootDomain,
+                        kIOGeneralInterest,
+                        lidStateInterestCallback,
+                        userInfo,
+                        &notification
+                    )
+                    if kr == KERN_SUCCESS {
+                        lidNotifyPort = port
+                        lidNotification = notification
+                        lidRunLoopSource = source
+                        NSLog("MacHead: 成功注册合盖/开盖状态监听 (初始合盖: %d)", initialClosed ? 1 : 0)
+                    } else {
+                        CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .defaultMode)
+                        IONotificationPortDestroy(port)
+                        NSLog("MacHead: 注册合盖/开盖状态监听失败: %d", kr)
+                    }
+                }
+            }
+        }
+
+        if UserDefaults.standard.bool(forKey: "AutoSyncHeadlessWithLid"),
+           initialClosed,
+           !isHeadlessModeEnabled,
+           !isWaitingForLaunchReady {
+            NSLog("MacHead: 启动时检测到处于合盖状态且开启了「合盖自动无头」，自动开启无头模式...")
+            enableHeadlessMode()
+        }
+    }
+
+    /// 注销合盖/开盖状态监听
+    func stopLidStateMonitoring() {
+        if lidNotification != 0 {
+            IOObjectRelease(lidNotification)
+            lidNotification = 0
+        }
+        if let source = lidRunLoopSource {
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .defaultMode)
+            lidRunLoopSource = nil
+        }
+        if let port = lidNotifyPort {
+            IONotificationPortDestroy(port)
+            lidNotifyPort = nil
+        }
+    }
+
+    /// 响应合盖/开盖状态变化（仅在状态边沿跳变时触发，避免干扰用户在同状态下手动切换）
+    func handleLidStateChange(isClosed: Bool? = nil) {
+        let currentClosed = isClosed ?? isLidClosed()
+        let previousClosed = lastKnownLidClosed
+        lastKnownLidClosed = currentClosed
+
+        guard UserDefaults.standard.bool(forKey: "AutoSyncHeadlessWithLid") else { return }
+        guard previousClosed != currentClosed else { return }
+
+        applyLidSyncPolicy(isClosed: currentClosed, trigger: currentClosed ? "检测到笔记本合盖" : "检测到笔记本开盖")
+    }
+
+    /// 用户在偏好设置或 Web 面板切换「合盖自动无头 · 开盖恢复内屏」时立即对齐当前状态
+    func evaluateLidSyncOnSettingChange(enabled: Bool) {
+        let currentClosed = isLidClosed()
+        lastKnownLidClosed = currentClosed
+        guard enabled else { return }
+
+        applyLidSyncPolicy(isClosed: currentClosed, trigger: "已启用「合盖自动无头」")
+    }
+
+    private func applyLidSyncPolicy(isClosed: Bool, trigger: String) {
+        if isClosed {
+            guard !isHeadlessModeEnabled else { return }
+            NSLog("MacHead: %@，自动进入无头模式...", trigger)
+            enableHeadlessMode()
+            return
+        }
+
+        guard isHeadlessModeEnabled else { return }
+        let externals = currentExternalDisplays()
+        let keepForExternal = !externals.isEmpty && UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect")
+        if keepForExternal {
+            NSLog("MacHead: %@，但外接显示器仍连接且开启了「接入外屏自动进入无头」，保持无头模式", trigger)
+        } else {
+            NSLog("MacHead: %@，自动退出无头模式恢复内屏显示...", trigger)
+            disableHeadlessMode(forceReconnect: true)
+        }
+    }
+
     // MARK: - 显示器变化守护
 
     /// 同步虚拟显示器生命周期：无外接屏时保活（纯无头场景），有外接屏时移除。
@@ -412,10 +570,14 @@ final class HeadlessModeController {
                 // 纯无头：保活虚拟显示器（系统休眠可能将其移除），防止无屏状态复发闪烁循环
                 self.syncVirtualDisplay(externals: externals)
                 // 如果休眠前曾有外接显示器，但唤醒稳定期过后所有外接屏均已断开（例如休眠期间被拔线）：
-                // 自动退出无头模式以恢复内屏
+                // 自动退出无头模式以恢复内屏（若开启合盖联动且仍处于合盖状态则保持无头）
                 if !self.lastKnownExternalDisplays.isEmpty && UserDefaults.standard.bool(forKey: "AutoExitHeadlessOnDisconnect") {
-                    NSLog("MacHead: 唤醒后检测到所有外接显示器已断开，直接退出无头模式以恢复内屏！")
-                    self.triggerSafeRecovery()
+                    if UserDefaults.standard.bool(forKey: "AutoSyncHeadlessWithLid") && self.isLidClosed() {
+                        NSLog("MacHead: 唤醒后外接显示器已断开但机器仍处于合盖状态，保持无头模式")
+                    } else {
+                        NSLog("MacHead: 唤醒后检测到所有外接显示器已断开，直接退出无头模式以恢复内屏！")
+                        self.triggerSafeRecovery()
+                    }
                 }
             } else {
                 // 外接显示器仍在：更新记录，并在内屏被系统点亮时重新切断
@@ -424,6 +586,7 @@ final class HeadlessModeController {
                 self.syncVirtualDisplay(externals: externals)
                 self.maintainBuiltInDisconnect()
             }
+            self.handleLidStateChange()
         }
 
         wakeStabilizationWorkItem = workItem
@@ -542,6 +705,8 @@ final class HeadlessModeController {
         let originalActiveExternals = controller.activeExternalDisplays
         let originalLastKnownExternals = controller.lastKnownExternalDisplays
         let originalIsWakeStabilizing = controller.isWakeStabilizing
+        let originalLastKnownLidClosed = controller.lastKnownLidClosed
+        let originalAutoSyncWithLid = UserDefaults.standard.bool(forKey: "AutoSyncHeadlessWithLid")
 
         defer {
             // Restore original state
@@ -551,9 +716,12 @@ final class HeadlessModeController {
             controller.activeExternalDisplays = originalActiveExternals
             controller.lastKnownExternalDisplays = originalLastKnownExternals
             controller.isWakeStabilizing = originalIsWakeStabilizing
+            controller.lastKnownLidClosed = originalLastKnownLidClosed
+            UserDefaults.standard.set(originalAutoSyncWithLid, forKey: "AutoSyncHeadlessWithLid")
             controller.mockExternalDisplays = nil
             controller.mockBuiltInActive = nil
             controller.mockBuiltInDisplayID = nil
+            controller.mockLidClosed = nil
             controller.isTestMode = false
         }
 
@@ -982,6 +1150,102 @@ final class HeadlessModeController {
         drainMainQueue(seconds: 0.1)
         precondition(VirtualDisplayManager.shared.wasDestroyCalled, "FAIL: Virtual display was not destroyed when external display connected!")
         print("Test 28: PASS")
+
+        // Test 29: Lid closes (false -> true) with AutoSyncHeadlessWithLid enabled enters headless mode
+        print("Test 29: Lid closes with AutoSyncHeadlessWithLid enabled enters headless mode...")
+        resetHooks()
+        UserDefaults.standard.set(true, forKey: "AutoSyncHeadlessWithLid")
+        controller.isHeadlessModeEnabled = false
+        controller.mockExternalDisplays = []
+        controller.lastKnownLidClosed = false
+        controller.mockLidClosed = true
+        controller.handleLidStateChange()
+        precondition(controller.wasEnableHeadlessModeCalled, "FAIL: enableHeadlessMode was not called when lid closed!")
+        precondition(controller.lastKnownLidClosed == true, "FAIL: lastKnownLidClosed should update to true!")
+        print("Test 29: PASS")
+
+        // Test 30: Lid opens (true -> false) in pure headless mode exits headless mode
+        print("Test 30: Lid opens in pure headless mode exits headless mode...")
+        resetHooks()
+        UserDefaults.standard.set(true, forKey: "AutoSyncHeadlessWithLid")
+        controller.isHeadlessModeEnabled = true
+        controller.mockExternalDisplays = []
+        controller.lastKnownLidClosed = true
+        controller.mockLidClosed = false
+        controller.handleLidStateChange()
+        precondition(controller.wasDisableHeadlessModeCalled, "FAIL: disableHeadlessMode was not called when lid opened!")
+        precondition(controller.lastKnownLidClosed == false, "FAIL: lastKnownLidClosed should update to false!")
+        print("Test 30: PASS")
+
+        // Test 31: Lid opens with external display respects AutoRestoreHeadlessOnConnect
+        print("Test 31: Lid opens with external display respects AutoRestoreHeadlessOnConnect...")
+        let originalAutoRestoreForLid = UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect")
+        defer { UserDefaults.standard.set(originalAutoRestoreForLid, forKey: "AutoRestoreHeadlessOnConnect") }
+        resetHooks()
+        UserDefaults.standard.set(true, forKey: "AutoSyncHeadlessWithLid")
+        UserDefaults.standard.set(true, forKey: "AutoRestoreHeadlessOnConnect")
+        controller.isHeadlessModeEnabled = true
+        controller.mockExternalDisplays = [101]
+        controller.lastKnownLidClosed = true
+        controller.mockLidClosed = false
+        controller.handleLidStateChange()
+        precondition(!controller.wasDisableHeadlessModeCalled, "FAIL: Headless mode should stay enabled when external display is present and AutoRestoreHeadlessOnConnect is true!")
+
+        resetHooks()
+        UserDefaults.standard.set(false, forKey: "AutoRestoreHeadlessOnConnect")
+        controller.lastKnownLidClosed = true
+        controller.mockLidClosed = false
+        controller.handleLidStateChange()
+        precondition(controller.wasDisableHeadlessModeCalled, "FAIL: Headless mode should disable on lid open when AutoRestoreHeadlessOnConnect is false!")
+        print("Test 31: PASS")
+
+        // Test 32: Manual override while lid state does not transition (true -> true / false -> false) is respected
+        print("Test 32: Unchanged lid state does not override manual toggle...")
+        resetHooks()
+        UserDefaults.standard.set(true, forKey: "AutoSyncHeadlessWithLid")
+        controller.isHeadlessModeEnabled = false
+        controller.lastKnownLidClosed = true
+        controller.mockLidClosed = true
+        controller.handleLidStateChange()
+        precondition(!controller.wasEnableHeadlessModeCalled, "FAIL: Should not re-enable headless without a lid close transition!")
+
+        resetHooks()
+        controller.isHeadlessModeEnabled = true
+        controller.lastKnownLidClosed = false
+        controller.mockLidClosed = false
+        controller.handleLidStateChange()
+        precondition(!controller.wasDisableHeadlessModeCalled, "FAIL: Should not disable headless without a lid open transition!")
+        print("Test 32: PASS")
+
+        // Test 33: Unplugging external display while lid is closed + AutoSyncHeadlessWithLid stays in pure headless
+        print("Test 33: External display unplug while lid closed suppresses safe recovery...")
+        resetHooks()
+        UserDefaults.standard.set(true, forKey: "AutoSyncHeadlessWithLid")
+        UserDefaults.standard.set(true, forKey: "AutoExitHeadlessOnDisconnect")
+        VirtualDisplayManager.shared.wasCreateCalled = false
+        controller.isHeadlessModeEnabled = true
+        controller.isDisplayMonitoringStarted = true
+        controller.mockLidClosed = true
+        controller.activeExternalDisplays = [101]
+        controller.lastKnownExternalDisplays = [101]
+        controller.mockExternalDisplays = []
+        displayReconfigurationCallback(displayID: 101, flags: [],
+                                       userInfo: Unmanaged.passUnretained(controller).toOpaque())
+        drainMainQueue(seconds: 0.1)
+        precondition(!controller.wasTriggerSafeRecoveryCalled, "FAIL: triggerSafeRecovery should be suppressed while lid is closed with AutoSyncHeadlessWithLid!")
+        precondition(VirtualDisplayManager.shared.wasCreateCalled, "FAIL: Virtual display should be kept alive when external display unplugs while lid is closed!")
+        print("Test 33: PASS")
+
+        // Test 34: Feature disabled ignores lid transitions
+        print("Test 34: Feature disabled ignores lid transitions...")
+        resetHooks()
+        UserDefaults.standard.set(false, forKey: "AutoSyncHeadlessWithLid")
+        controller.isHeadlessModeEnabled = false
+        controller.lastKnownLidClosed = false
+        controller.mockLidClosed = true
+        controller.handleLidStateChange()
+        precondition(!controller.wasEnableHeadlessModeCalled, "FAIL: Should not enable headless when AutoSyncHeadlessWithLid is false!")
+        print("Test 34: PASS")
 
         print("All Tests Passed Successfully! 🎉")
     }

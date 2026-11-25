@@ -127,6 +127,7 @@ struct PreferencesView: View {
     @AppStorage("KeepRunningOnLidClose") private var keepRunningOnLidClose = false
     @AppStorage("AutoExitHeadlessOnDisconnect") private var autoExitOnDisconnect = true
     @AppStorage("AutoRestoreHeadlessOnConnect") private var autoRestoreOnConnect = true
+    @AppStorage("AutoSyncHeadlessWithLid") private var autoSyncWithLid = false
     @State private var launchAtLogin = LaunchAtLoginHelper.shared.isEnabled
     @AppStorage(CLIToolInstaller.defaultsKey) private var cliToolEnabled = false
     @AppStorage("telemetryEnabled") private var telemetryEnabled = true
@@ -1579,6 +1580,26 @@ struct PreferencesView: View {
                                     Toggle("", isOn: $autoRestoreOnConnect)
                                         .toggleStyle(.switch)
                                         .labelsHidden()
+                                }
+
+                                Divider().padding(.horizontal, 16)
+
+                                SettingsRow(
+                                    L("合盖自动无头 · 开盖恢复内屏", "Auto-Switch Headless Mode with Lid"),
+                                    subtitle: L(
+                                        "合盖时自动进入无头模式（启用虚拟屏防睡），开盖无外接屏拦截时自动点亮内屏",
+                                        "Enable headless mode when lid closes; restore built-in display when lid opens"
+                                    )
+                                ) {
+                                    Toggle("", isOn: Binding(
+                                        get: { self.autoSyncWithLid },
+                                        set: { newValue in
+                                            self.autoSyncWithLid = newValue
+                                            HeadlessModeController.shared.evaluateLidSyncOnSettingChange(enabled: newValue)
+                                        }
+                                    ))
+                                    .toggleStyle(.switch)
+                                    .labelsHidden()
                                 }
                             }
 

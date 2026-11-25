@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             "DisableKeyboardAndTrackpadInHeadlessMode": false,
             "AutoExitHeadlessOnDisconnect": true,
             "AutoRestoreHeadlessOnConnect": true,
+            "AutoSyncHeadlessWithLid": false,
             "nezhaEnabled": false,
             "nezhaServer": "",
             "nezhaSecret": "",
@@ -165,6 +166,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 self?.updateIcon()
             }
         }
+
+        // Start lid monitoring after initial state reset, statusItem setup, and launch queue
+        controller.startLidStateMonitoring()
 
         // Silent background check for updates 3 seconds after launch & send telemetry heartbeat
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
@@ -393,6 +397,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         IntegrationManager.shared.stopAllServices()
         WebServer.shared.stop()
+        controller.stopLidStateMonitoring()
         if controller.isHeadlessModeEnabled {
             controller.disableHeadlessMode()
         }

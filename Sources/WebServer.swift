@@ -358,6 +358,15 @@ final class WebServer {
                 NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
                 self.sendResponse(json: self.getStatusJSON(), connection: connection)
             }
+        } else if method == "POST" && path == "/api/toggle-sync-with-lid" {
+            DispatchQueue.main.async {
+                let key = "AutoSyncHeadlessWithLid"
+                let val = !UserDefaults.standard.bool(forKey: key)
+                UserDefaults.standard.set(val, forKey: key)
+                HeadlessModeController.shared.evaluateLidSyncOnSettingChange(enabled: val)
+                NotificationCenter.default.post(name: .headlessModeStateChanged, object: nil)
+                self.sendResponse(json: self.getStatusJSON(), connection: connection)
+            }
         } else if method == "POST" && path == "/api/toggle-charge-limit" {
             DispatchQueue.main.async {
                 BatteryManager.shared.customLimitEnabled.toggle()
@@ -555,6 +564,7 @@ final class WebServer {
           "vramAllocatedGB": \(gpuMem.allocated),
           "autoExitHeadlessOnDisconnect": \(UserDefaults.standard.bool(forKey: "AutoExitHeadlessOnDisconnect")),
           "autoRestoreHeadlessOnConnect": \(UserDefaults.standard.bool(forKey: "AutoRestoreHeadlessOnConnect")),
+          "autoSyncHeadlessWithLid": \(UserDefaults.standard.bool(forKey: "AutoSyncHeadlessWithLid")),
           "diskUsedGB": \(disk.usedGB),
           "diskTotalGB": \(disk.totalGB),
           "diskPercent": \(disk.percent),
